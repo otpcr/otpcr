@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+# pylint: disable=C0413,W0611
+
+
+"cli"
+
+
+import getpass
+import os
+import readline
+import sys
+import termios
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from otpcr.client  import Client, Commands, Config, Event
+from otpcr.client  import command, forever, modnames, parse, wrap
+from otpcr.modules import face
+from otpcr.object  import Default, construct, fmt
+from otpcr.runtime import errors
+
+
+Cfg = Config()
+
+
+class CLI(Client):
+
+    "CLI"
+
+    def raw(self, txt):
+        print(txt)
+
+
+def srv(event):
+    "create service file (pipx)."
+    if event.args:
+        name = event.args[0]
+    else:
+        name  = getpass.getuser()
+    progname = Config.name
+    txt = """[Unit]
+Description=%s
+After=network-online.target
+
+[Service]
+Type=simple
+User=%s
+Group=%s
+ExecStart=/home/%s/.local/bin/%ss
+
+[Install]
+WantedBy=multi-user.target"""
+    event.reply(txt % (progname.upper(), name, name, name, progname))
+
+
+def wrapped():
+    "wrap main."
+    wrap(main)
+    errors(print)
+
+
+def main():
+    "main"
+    Commands.add(srv)
+    parse(Cfg, " ".join(sys.argv[1:]))
+    if Cfg.txt:
+        clt = CLI()
+        evt = Event()
+        evt.orig = repr(clt)
+        parse(evt, Cfg.otxt)
+        command(clt, evt)
+
+
+if __name__ == "__main__":
+    wrapped()

@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain
+
+
+"run all scripts"
+
+
+import os
+import sys
+
+
+NAME = "otpcr"
+
+
+def cprint(txt):
+    "check for verbose"
+    if "-v" in sys.argv:
+        print("")
+        print(txt.upper())
+        print("")
+        sys.stdout.flush()
+
+
+def popen(txt):
+    "run text in popen."
+    for line in os.popen(txt).readlines():
+        if "-v" in sys.argv:
+            print(line.rstrip())
+            sys.stdout.flush()
+
+
+cprint("cleaning")
+popen("bin/clean")
+cprint("checking")
+popen("bin/check")
+cprint("testing")
+popen('pytest')
+cprint("linting")
+popen("bin/lint")
+cprint("tinder")
+popen("bin/tinder")
+cprint("cleanup")
+popen('bin/clean -f')
+cprint("status")
+popen('git status')
+#cprint("build")
+#popen('python3 setup.py sdist')
+#cprint("twine")
+#popen('twine check dist/*')

@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+# pylint: disable=C0413,W0212,W0401,W0614,W0622,W0718
+
+
+"tinder"
+
+
+import os
+import profile
+import shutil
+import sys
+import termios
+import time
+import _thread
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from otpcr.errors  import errors, later
+from otpcr.main    import Client, Commands, Config, Event
+from otpcr.main    import enable, laps, parse
+from otpcr.modules import face
+from otpcr.object  import Object
+from otpcr.persist import Workdir, skel
+from otpcr.runtime import launch
+
+
+Cfg = Config()
+Cfg.debug  = True
+Cfg.name = "tinder"
+Cfg.silent = False
+Cfg.skip = ["debug",]
+
+
+face.rss.DEBUG = True
+
+
+LAP = 1
+NRS = 1
+NRCOMMAND = 1
+PERCALL   = 1
+STARTTIME = time.time()
+
+
+events = []
+paylock = _thread.allocate_lock()
+
+
+param = Object()
+param.cmd = [""]
+param.dpl = ["hnrss title,url"]
+param.fnd = ["log", "todo", "rss", "config"]
+param.imp = ["tests/feeds.opml"]
+param.log = ["bla"]
+param.mod = [""]
+param.mre = [""]
+param.nme = ["hnrss hackernews"]
+param.pwd = ["bla mekker"]
+param.rem = ["hnrss"]
+param.req = [""]
+param.res = [""]
+param.rss = ["http://hnrss.org/newest",]
+param.tdo = ["mekker"]
+param.ver = [""]
+
+
+class CLI(Client):
+
+    "command line interface."
+
+    def raw(self, txt):
+        if "v" in Cfg.opts:
+            print(txt)
+
+
+def consume(evts):
+    "wait for events."
+    for evt in evts:
+        if "_thr" in evt and evt._thr:
+            evt._thr.join()
+
+
+def payload(clt):
+    "do payload."
+    cmdz = Commands.cmds
+    with paylock:
+        nmr = 0
+        for cmdd in cmdz:
+            for ex in getattr(param, cmdd, [""]):
+                evt = Event()
+                evt.orig = repr(clt)
+                evt.txt = cmdd + " " + ex
+                evt.type = "command"
+                clt.put(evt)
+                events.append(evt)
+                nmr += 1
+        return nmr
+
+
+def wrapped(function):
+    "reset terminal."
+    old2 = None
+    try:
+        old2 = termios.tcgetattr(sys.stdin.fileno())
+    except termios.error:
+        pass
+    try:
+        function()
+    except (KeyboardInterrupt, EOFError):
+        print("")
+    except Exception as ex:
+        later(ex)
+    finally:
+        if old2:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old2)
+
+
+def mainer():
+    "main"
+    clt = CLI()
+    clt.start()
+    for _nr in range(nrs):
+        launch(payload, clt)
+    clt.wait()
+    consume(events)
+    errors(print)
+    if "v" in Cfg.opts:
+        endtime = time.time()
+        lap = laps(endtime-STARTTIME)
+        percall = (endtime-STARTTIME)/(nrs*NRCOMMAND)
+        print(f"{lap} {nrs} {NRCOMMAND} {percall}")
+
+
+if __name__ == "__main__":
+    Workdir.wdr = ".test"
+    parse(Cfg, " ".join(sys.argv[1:]))
+    if "v" in Cfg.opts:
+        enable(print)
+    if "f" in Cfg.opts:
+        if os.path.exists(Workdir.wdr):
+            shutil.rmtree(Workdir.wdr)
+    skel()
+    nrs = Cfg.index or 1
+    NRCOMMAND = len(Commands.cmds) or 1
+    if "p" in Cfg.opts:
+        profile.runctx(mainer.__code__, globals(), locals())
+    else:
+        wrapped(mainer)
+    os._exit(0)
