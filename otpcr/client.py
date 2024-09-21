@@ -87,7 +87,9 @@ class Config(Default):
         self.name = name or Config.name
         self.wdr = Config.wdr
         self.pidfile = Config.pidfile
-        Workdir.wdr = self.wdr
+
+
+Workdir.wdr = Config.wdr
 
 
 "event"
@@ -118,6 +120,9 @@ class Logging:
 
     filter = []
     out = None
+
+
+Logging.filter = ["PING", "PONG", "PRIVMSG"]
 
 
 def debug(txt):
@@ -308,9 +313,6 @@ def __dir__():
         'Comamnds', 
         'Config',
         'Event',
-        'Logging',
-        'debug',
-        'enable'
         'forever',
         'initer',
         'laps',

@@ -20,7 +20,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from ..client  import Commands, Config, debug, laps, spl
+from ..client  import Commands, Config, laps, spl
 from ..object  import Default, Object, construct, fmt, update
 from ..persist import find, fntime, last, sync
 from ..runtime import Broker, Repeater, launch
@@ -30,7 +30,6 @@ def init():
     "start fetcher."
     fetcher = Fetcher()
     fetcher.start()
-    debug(f'RSS {fmt(fetcher,skip="seen,seenfn")}')
     return fetcher
 
 

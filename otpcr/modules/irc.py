@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0201,W0718
+# pylint: disable=R,W0105,W0201,W0718,E1102
 
 
 "internet relay chat"
@@ -16,7 +16,7 @@ import time
 import _thread
 
 
-from ..client  import Client, Commands, Event, Logging, command, debug
+from ..client  import Client, Commands, Event, Logging, debug, command
 from ..object  import Default, Object, edit, fmt, keys
 from ..persist import last, sync
 from ..runtime import Broker, later, launch
@@ -28,12 +28,14 @@ saylock        = _thread.allocate_lock()
 
 
 def init():
-    "initialize a irc bot."
+    "initialize."
     irc = IRC()
     irc.start()
     irc.events.ready.wait()
-    debug(f'IRC {fmt(irc.cfg, skip="password")}')
     return irc
+
+
+"configuration"
 
 
 class Config(Default):
@@ -66,6 +68,9 @@ class Config(Default):
         self.username = self.username or Config.username
 
 
+"textwrap"
+
+
 class TextWrap(textwrap.TextWrapper):
 
     "TextWrap"
@@ -81,6 +86,9 @@ class TextWrap(textwrap.TextWrapper):
 
 
 wrapper = TextWrap()
+
+
+"output cache"
 
 
 class Output:
@@ -151,6 +159,9 @@ class Output:
         if chan in Output.cache:
             return len(getattr(Output.cache, chan, []))
         return 0
+
+
+"IRC"
 
 
 class IRC(Client, Output):
@@ -515,6 +526,9 @@ class IRC(Client, Output):
         self.events.ready.wait()
 
 
+"callbacks"
+
+
 def cb_auth(bot, evt):
     "auth callback."
     bot.docommand(f'AUTHENTICATE {bot.cfg.password}')
@@ -596,6 +610,9 @@ def cb_quit(bot, evt):
     debug(f"quit from {bot.cfg.server}")
     if evt.orig and evt.orig in bot.zelf:
         bot.stop()
+
+
+"commands"
 
 
 def cfg(event):
