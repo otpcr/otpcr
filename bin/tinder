@@ -18,13 +18,12 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.errors  import errors, later
-from otpcr.main    import Client, Commands, Config, Event
-from otpcr.main    import enable, laps, parse
+from otpcr.client  import Client, Commands, Config, Event
+from otpcr.client  import enable, laps, parse
 from otpcr.modules import face
 from otpcr.object  import Object
 from otpcr.persist import Workdir, skel
-from otpcr.runtime import launch
+from otpcr.runtime import errors, later, launch
 
 
 Cfg = Config()
