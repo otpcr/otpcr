@@ -26,11 +26,10 @@ from otpcr.persist import Workdir, skel
 from otpcr.runtime import errors, later, launch
 
 
-Cfg = Config()
-Cfg.debug  = True
-Cfg.name = "tinder"
-Cfg.silent = False
-Cfg.skip = ["debug",]
+Config.debug  = True
+Config.name = "tinder"
+Config.silent = False
+Config.skip = ["debug",]
 
 
 face.rss.DEBUG = True
@@ -70,7 +69,7 @@ class CLI(Client):
     "command line interface."
 
     def raw(self, txt):
-        if "v" in Cfg.opts:
+        if "v" in Config.opts:
             print(txt)
 
 
@@ -125,7 +124,7 @@ def mainer():
     clt.wait()
     consume(events)
     errors(print)
-    if "v" in Cfg.opts:
+    if "v" in Config.opts:
         endtime = time.time()
         lap = laps(endtime-STARTTIME)
         percall = (endtime-STARTTIME)/(nrs*NRCOMMAND)
@@ -134,16 +133,16 @@ def mainer():
 
 if __name__ == "__main__":
     Workdir.wdr = ".test"
-    parse(Cfg, " ".join(sys.argv[1:]))
-    if "v" in Cfg.opts:
+    parse(Config, " ".join(sys.argv[1:]))
+    if "v" in Config.opts:
         enable(print)
-    if "f" in Cfg.opts:
+    if "f" in Config.opts:
         if os.path.exists(Workdir.wdr):
             shutil.rmtree(Workdir.wdr)
     skel()
-    nrs = Cfg.index or 1
+    nrs = Config.index or 1
     NRCOMMAND = len(Commands.cmds) or 1
-    if "p" in Cfg.opts:
+    if "p" in Config.opts:
         profile.runctx(mainer.__code__, globals(), locals())
     else:
         wrapped(mainer)
