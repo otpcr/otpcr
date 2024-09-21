@@ -17,7 +17,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "otpcr"
-version = "47"
+version = "48"
 authors = [
     {name = "Bart Thate", email = "rssbotd@gmail.com" },
 ]
@@ -60,7 +60,7 @@ packages = [
 
 [tool.setuptools.data-files]
 "share/doc/otpcr/" = [
-    'MANUAL.rst',
+    'files/MANUAL.rst',
     'README.rst'
 ]
 "share/doc/otpcr/docs" = [
