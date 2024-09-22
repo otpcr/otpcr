@@ -5,7 +5,7 @@
 # ruff: noqa: E402, E501
 
 
-"Office of the Prosecutor's Communication 117 of 2019"
+"Office of the Prosecutor Communication 117 of 2019"
 
 
 NAME = "otpcr"
@@ -62,7 +62,7 @@ extensions = [
 # -- Options for HTML output -------------------------------------------------
 
 
-html_title = "Office of the Prosecutor's Communication 117 of 2019"
+html_title = "Office of the Prosecutor Communication 117 of 2019"
 html_style = 'otpcr.css'
 html_static_path = ["_static", "_static/otpcr.css", "files/sitemap.xml"]
 html_css_files = ["otpcr.css",]
