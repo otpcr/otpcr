@@ -22,20 +22,14 @@ from otpcr.modules import face
 from otpcr.runtime import errors 
 
 
-if os.path.exists('mods'):
-    from mods import face as MODS
-else:
-    MODS = None
-
-
 def main():
     "main"
     daemon()
-    modstr = ",".join(modnames(face, MODS))
+    modstr = ",".join(modnames(face))
     user = getpass.getuser()
     privileges(user)
     pidfile(Config.pidfile)
-    for mod in scanner(modstr, face, MODS):
+    for mod in scanner(modstr, face):
         if "init" in dir(mod):
             mod.init()
     forever()

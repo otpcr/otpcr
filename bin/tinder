@@ -18,18 +18,27 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.client  import Client, Commands, Config, Event
-from otpcr.client  import enable, laps, parse
+from otpcr.config  import Config
+from otpcr.client  import Client
+from otpcr.command import Commands, Event, parse, scanner
+from otpcr.main    import modnames, wrap
 from otpcr.modules import face
-from otpcr.object  import Object
+from otpcr.object  import Default, Object
 from otpcr.persist import Workdir, skel
-from otpcr.runtime import errors, later, launch
+from otpcr.runtime import STARTTIME, errors, later, launch
+from otpcr.utils   import laps
 
 
 Config.debug  = True
 Config.name = "tinder"
 Config.silent = False
 Config.skip = ["debug",]
+
+
+if os.path.exists("mods"):
+    from mods import face as MODS
+else:
+    MODS = None
 
 
 face.rss.DEBUG = True
@@ -73,6 +82,12 @@ class CLI(Client):
             print(txt)
 
 
+def banner():
+    "show banner."
+    tme = time.ctime(time.time()).replace("  ", " ")
+    print(f"{Config.name.upper()} since {tme}")
+
+
 def consume(evts):
     "wait for events."
     for evt in evts:
@@ -82,10 +97,9 @@ def consume(evts):
 
 def payload(clt):
     "do payload."
-    cmdz = Commands.cmds
     with paylock:
         nmr = 0
-        for cmdd in cmdz:
+        for cmdd in Commands.cmds:
             for ex in getattr(param, cmdd, [""]):
                 evt = Event()
                 evt.orig = repr(clt)
@@ -97,33 +111,24 @@ def payload(clt):
         return nmr
 
 
-def wrapped(function):
-    "reset terminal."
-    old2 = None
-    try:
-        old2 = termios.tcgetattr(sys.stdin.fileno())
-    except termios.error:
-        pass
-    try:
-        function()
-    except (KeyboardInterrupt, EOFError):
-        print("")
-    except Exception as ex:
-        later(ex)
-    finally:
-        if old2:
-            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old2)
-
-
 def mainer():
     "main"
+    NRCOMMAND = len(Commands.cmds) or 1
+    if "v" in Config.opts:
+        banner()
+    Config.mod = ",".join(modnames(face, MODS))
+    scanner(Config.mod, face, MODS)
+    if "f" in Config.opts:
+        if os.path.exists(Workdir.wdr):
+            shutil.rmtree(Workdir.wdr)
+    skel()
     clt = CLI()
     clt.start()
+    nrs = Config.index or 1
     for _nr in range(nrs):
         launch(payload, clt)
     clt.wait()
     consume(events)
-    errors(print)
     if "v" in Config.opts:
         endtime = time.time()
         lap = laps(endtime-STARTTIME)
@@ -134,16 +139,9 @@ def mainer():
 if __name__ == "__main__":
     Workdir.wdr = ".test"
     parse(Config, " ".join(sys.argv[1:]))
-    if "v" in Config.opts:
-        enable(print)
-    if "f" in Config.opts:
-        if os.path.exists(Workdir.wdr):
-            shutil.rmtree(Workdir.wdr)
-    skel()
-    nrs = Config.index or 1
-    NRCOMMAND = len(Commands.cmds) or 1
     if "p" in Config.opts:
         profile.runctx(mainer.__code__, globals(), locals())
     else:
-        wrapped(mainer)
+        wrap(mainer, print)
+    errors(print)
     os._exit(0)

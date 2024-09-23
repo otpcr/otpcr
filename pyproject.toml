@@ -65,6 +65,7 @@ packages = [
 ]
 "share/doc/otpcr/docs" = [
     'docs/googlea6568bcc05c8d50b.html',
+    'docs/about.rst',
     'docs/ack.png',
     'docs/ack3.png',
     'docs/bevestigd.jpg',
@@ -82,8 +83,10 @@ packages = [
     'docs/index.rst',
     'docs/informed.jpg',
     'docs/kamer2.png',
+    'docs/manual.rst',
     'docs/OTP111.png',
     'docs/OTP222.png',
+    'docs/reconsider.rst',
     'docs/robots.txt',
     'docs/since.png',
     'docs/skull3.png',
