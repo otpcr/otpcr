@@ -27,11 +27,6 @@ PACKAGE = [
     '__package__',
     '__path__',
     '__spec__',
-    'client',
-    'modules',
-    'object',
-    'persist',
-    'runtime'
 ]
 
 
