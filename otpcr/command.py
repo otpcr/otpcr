@@ -8,8 +8,8 @@
 import inspect
 
 
-from .object import Default
-from .utils  import spl
+from .object  import Default
+from .utils   import spl
 
 
 class Event(Default):
@@ -41,19 +41,17 @@ class Commands:
         Commands.cmds[func.__name__] = func
 
 
-def command(bot, evt, txt=""):
+def command(bot, evt):
     "check for and run a command."
-    parse(evt, txt or evt.txt)
+    parse(evt)
     func = Commands.cmds.get(evt.cmd, None)
     if func:
         func(evt)
         bot.display(evt)
 
 
-def parse(obj, txt):
+def parse(obj):
     "parse a string for a command."
-    if txt is None:
-        txt = ""
     args = []
     obj.args    = []
     obj.cmd     = ""
@@ -64,7 +62,7 @@ def parse(obj, txt):
     obj.opts    = obj.opts or""
     obj.result  = []
     obj.sets    = obj.sets or Default()
-    obj.txt     = txt or obj.txt or ""
+    obj.txt     = obj.txt or ""
     obj.otxt    = obj.txt
     _nr = -1
     for spli in obj.otxt.split():

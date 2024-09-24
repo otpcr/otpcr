@@ -44,7 +44,8 @@ def main():
     cli = CLI()
     evt = Event()
     evt.orig = repr(cli)
-    command(cli, evt, cfg.otxt)
+    evt.txt = cfg.txt
+    command(cli, evt)
 
 
 if __name__ == "__main__":

@@ -58,7 +58,8 @@ class Console(Client):
 def main():
     "main"
     readline.redisplay()
-    parse(cfg, " ".join(sys.argv[1:]))
+    cfg.txt = " ".join(sys.argv[1:])
+    parse(cfg)
     modstr = ",".join(modnames(face, MODS))
     user = getpass.getuser()
     if "v" in cfg.opts:

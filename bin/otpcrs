@@ -10,9 +10,6 @@ import os
 import sys
 
 
-sys.path.insert(0, os.getcwd())
-
-
 from otpcr.config  import Config
 from otpcr.command import parse, scanner
 from otpcr.main    import forever, modnames, pidfile, privileges, wrap
@@ -20,15 +17,19 @@ from otpcr.modules import face
 from otpcr.runtime import errors
 
 
+cfg = Config()
+
+
 def main():
     "main"
     modstr = ",".join(modnames(face))
-    user = getpass.getuser()
-    privileges(user)
-    pidfile(Config.pidfile)
-    for mod in scanner(modstr, face):
-        if "init" in dir(mod):
-            mod.init()
+    privileges(getpass.getuser())
+    pidfile(cfg.pidfile)
+    for mod, thr in init(modstr, face, MODS):
+        if "v" in cfg.opts:
+            mod.VERBOSE = print
+        if "w" in cfg.opts:
+            thr.join()
     forever()
 
 

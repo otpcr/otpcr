@@ -22,6 +22,9 @@ from otpcr.modules import face
 from otpcr.runtime import errors 
 
 
+cfg = Config()
+
+
 def main():
     "main"
     daemon()
@@ -29,9 +32,11 @@ def main():
     user = getpass.getuser()
     privileges(user)
     pidfile(Config.pidfile)
-    for mod in scanner(modstr, face):
-        if "init" in dir(mod):
-            mod.init()
+    for mod, thr in init(modstr, face, MODS):
+        if "v" in cfg.opts:
+            mod.VERBOSE = print
+        if "w" in cfg.opts:
+            thr.join()
     forever()
 
 
