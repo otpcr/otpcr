@@ -20,7 +20,7 @@ sys.path.insert(0, os.getcwd())
 
 from otpcr.config  import Config
 from otpcr.client  import Client
-from otpcr.command import Commands, Event, parse, scanner
+from otpcr.command import Commands, Event, parse
 from otpcr.main    import modnames, wrap
 from otpcr.modules import face
 from otpcr.object  import Default, Object
@@ -29,10 +29,11 @@ from otpcr.runtime import STARTTIME, errors, later, launch
 from otpcr.utils   import laps
 
 
-Config.debug  = True
-Config.name = "tinder"
-Config.silent = False
-Config.skip = ["debug",]
+cfg = Config()
+cfg.debug  = True
+cfg.name = "tinder"
+cfg.silent = False
+cfg.skip = ["debug",]
 
 
 if os.path.exists("mods"):
@@ -78,14 +79,14 @@ class CLI(Client):
     "command line interface."
 
     def raw(self, txt):
-        if "v" in Config.opts:
+        if "v" in cfg.opts:
             print(txt)
 
 
 def banner():
     "show banner."
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{Config.name.upper()} since {tme}")
+    print(f"{cfg.name.upper()} since {tme}")
 
 
 def consume(evts):
@@ -114,22 +115,21 @@ def payload(clt):
 def mainer():
     "main"
     NRCOMMAND = len(Commands.cmds) or 1
-    if "v" in Config.opts:
+    if "v" in cfg.opts:
         banner()
-    Config.mod = ",".join(modnames(face, MODS))
-    scanner(Config.mod, face, MODS)
-    if "f" in Config.opts:
+    cfg.mod = ",".join(modnames(face, MODS))
+    if "f" in cfg.opts:
         if os.path.exists(Workdir.wdr):
             shutil.rmtree(Workdir.wdr)
     skel()
     clt = CLI()
     clt.start()
-    nrs = Config.index or 1
+    nrs = cfg.index or 1
     for _nr in range(nrs):
         launch(payload, clt)
     clt.wait()
     consume(events)
-    if "v" in Config.opts:
+    if "v" in cfg.opts:
         endtime = time.time()
         lap = laps(endtime-STARTTIME)
         percall = (endtime-STARTTIME)/(nrs*NRCOMMAND)
@@ -138,10 +138,9 @@ def mainer():
 
 if __name__ == "__main__":
     Workdir.wdr = ".test"
-    parse(Config, " ".join(sys.argv[1:]))
-    if "p" in Config.opts:
+    parse(cfg, " ".join(sys.argv[1:]))
+    if "p" in cfg.opts:
         profile.runctx(mainer.__code__, globals(), locals())
     else:
         wrap(mainer, print)
     errors(print)
-    os._exit(0)

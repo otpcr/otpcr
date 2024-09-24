@@ -45,8 +45,10 @@ def command(bot, evt):
         bot.display(evt)
 
 
-def parse(obj):
+def parse(obj, txt=None):
     "parse a string for a command."
+    if txt == None:
+        txt = ""
     args = []
     obj.args    = []
     obj.cmd     = ""
@@ -57,7 +59,7 @@ def parse(obj):
     obj.opts    = obj.opts or""
     obj.result  = []
     obj.sets    = obj.sets or Default()
-    obj.txt     = obj.txt or ""
+    obj.txt     = txt or obj.txt or ""
     obj.otxt    = obj.txt
     _nr = -1
     for spli in obj.otxt.split():
