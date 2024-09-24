@@ -52,7 +52,6 @@ PERCALL   = 1
 STARTTIME = time.time()
 
 
-events = []
 paylock = _thread.allocate_lock()
 
 
@@ -89,13 +88,6 @@ def banner():
     print(f"{cfg.name.upper()} since {tme}")
 
 
-def consume(evts):
-    "wait for events."
-    for evt in evts:
-        if "_thr" in evt and evt._thr:
-            evt._thr.join()
-
-
 def payload(clt):
     "do payload."
     with paylock:
@@ -107,7 +99,6 @@ def payload(clt):
                 evt.txt = cmdd + " " + ex
                 evt.type = "command"
                 clt.put(evt)
-                events.append(evt)
                 nmr += 1
         return nmr
 
@@ -118,17 +109,19 @@ def mainer():
     if "v" in cfg.opts:
         banner()
     cfg.mod = ",".join(modnames(face, MODS))
-    if "f" in cfg.opts:
+    if "v" in cfg.opts:
         if os.path.exists(Workdir.wdr):
             shutil.rmtree(Workdir.wdr)
     skel()
     clt = CLI()
     clt.start()
     nrs = cfg.index or 1
+    thrs = []
     for _nr in range(nrs):
-        launch(payload, clt)
+        thrs.append(launch(payload, clt, daemon=True))
     clt.wait()
-    consume(events)
+    for thr in thrs:
+        thr.join()
     if "v" in cfg.opts:
         endtime = time.time()
         lap = laps(endtime-STARTTIME)
@@ -139,8 +132,5 @@ def mainer():
 if __name__ == "__main__":
     Workdir.wdr = ".test"
     parse(cfg, " ".join(sys.argv[1:]))
-    if "p" in cfg.opts:
-        profile.runctx(mainer.__code__, globals(), locals())
-    else:
-        wrap(mainer, print)
+    wrap(mainer, print)
     errors(print)

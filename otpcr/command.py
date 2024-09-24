@@ -5,6 +5,9 @@
 "command"
 
 
+import threading
+
+
 from .object  import Default
 
 
@@ -14,14 +17,21 @@ class Event(Default):
 
     def __init__(self):
         Default.__init__(self)
+        self._ready = threading.Event()
         self.orig   = ""
         self.result = []
         self.txt    = ""
         self.type = "event"
 
+    def ready(self):
+        self._ready.set()
+
     def reply(self, txt):
         "add text to the result."
         self.result.append(txt)
+
+    def wait(self):
+        self._ready.wait()
 
 
 class Commands:
@@ -43,11 +53,11 @@ def command(bot, evt):
     if func:
         func(evt)
         bot.display(evt)
-
+    evt.ready()
 
 def parse(obj, txt=None):
     "parse a string for a command."
-    if txt == None:
+    if txt is None:
         txt = ""
     args = []
     obj.args    = []
