@@ -72,7 +72,6 @@ class Logging:
     "Logging"
 
     filter = []
-    out = None
 
 
 Logging.filter = ["PING", "PONG", "PRIVMSG"]

@@ -34,8 +34,7 @@ class CLI(Client):
 
 def main():
     "main"
-    readline.redisplay()
-    parse(cfg, " ".join(sys.argv[1:]))
+    parse(cfg, " ".join(sys.argv[1:])
     if not cfg.txt:
         return None
     privileges(getpass.getuser())

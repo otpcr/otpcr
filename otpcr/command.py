@@ -5,11 +5,7 @@
 "command"
 
 
-import inspect
-
-
 from .object  import Default
-from .utils   import spl
 
 
 class Event(Default):
@@ -18,7 +14,6 @@ class Event(Default):
 
     def __init__(self):
         Default.__init__(self)
-        self._thr   = None
         self.orig   = ""
         self.result = []
         self.txt    = ""

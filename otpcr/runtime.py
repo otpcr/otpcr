@@ -110,10 +110,10 @@ class Thread(threading.Thread):
 
     def __init__(self, func, thrname, *args, daemon=True, **kwargs):
         super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
-        self._result   = None
         self.name      = thrname or (func and named(func)) or named(self).split(".")[-1]
         self.out       = None
         self.queue     = queue.Queue()
+        self.result    = None
         self.sleep     = None
         self.starttime = time.time()
         self.queue.put_nowait((func, args))
@@ -134,13 +134,13 @@ class Thread(threading.Thread):
     def join(self, timeout=None):
         "join this thread."
         super().join(timeout)
-        return self._result
+        return self.result
 
     def run(self):
         "run this thread's payload."
         try:
             func, args = self.queue.get()
-            self._result = func(*args)
+            self.result = func(*args)
         except (KeyboardInterrupt, EOFError):
             _thread.interrupt_main()
         except Exception as ex:
@@ -194,8 +194,7 @@ class Repeater(Timer):
 
 def launch(func, *args, **kwargs):
     "launch a thread."
-    nme = kwargs.get("name", named(func))
-    thread = Thread(func, nme, *args, **kwargs)
+    thread = Thread(func, kwargs.get("name", named(func)), *args, **kwargs)
     thread.start()
     return thread
 
