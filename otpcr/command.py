@@ -8,7 +8,7 @@
 import inspect
 
 
-from .object   import Default
+from .object import Default
 from .utils  import spl
 
 
@@ -34,14 +34,11 @@ class Commands:
     "Commands"
 
     cmds     = {}
-    modnames = {}
 
     @staticmethod
     def add(func):
         "add command."
         Commands.cmds[func.__name__] = func
-        if func.__module__ != "__main__":
-            Commands.modnames[func.__name__] = func.__module__
 
 
 def command(bot, evt, txt=""):
@@ -60,15 +57,15 @@ def parse(obj, txt):
     args = []
     obj.args    = []
     obj.cmd     = ""
-    obj.gets    = Default()
+    obj.gets    = obj.gets or Default()
     obj.hasmods = False
     obj.index   = None
-    obj.mod     = ""
-    obj.opts    = ""
+    obj.mod     = obj.mod or ""
+    obj.opts    = obj.opts or""
     obj.result  = []
-    obj.sets    = Default()
-    obj.txt     = txt
-    obj.otxt    = txt
+    obj.sets    = obj.sets or Default()
+    obj.txt     = txt or obj.txt or ""
+    obj.otxt    = obj.txt
     _nr = -1
     for spli in obj.otxt.split():
         if spli.startswith("-"):
@@ -110,36 +107,9 @@ def parse(obj, txt):
     return obj
 
 
-def scan(mod):
-    "Scan module for commands."
-    for key, cmnd in inspect.getmembers(mod, inspect.isfunction):
-        if key.startswith('cb'):
-            continue
-        names = cmnd.__code__.co_varnames
-        if 'event' in names:
-            Commands.add(cmnd)
-
-
-def scanner(modstr, *pkgs, disable=None):
-    "scan modules for commands and classes"
-    mods = []
-    for mod in spl(modstr):
-        if disable and mod in spl(disable):
-            continue
-        for pkg in pkgs:
-            modi = getattr(pkg, mod, None)
-            if not modi:
-                continue
-            scan(modi)
-            mods.append(modi)
-            break
-    return mods
-
-
 def __dir__():
     return (
         'Commands',
-        'EVent',
-        'command',
-        'scan'
+        'Event',
+        'command'
     )

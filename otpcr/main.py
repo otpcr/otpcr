@@ -55,9 +55,8 @@ def forever():
             _thread.interrupt_main()
 
 
-def initter(modstr, *pkgs, disable=None):
+def init(modstr, *pkgs, disable=None):
     "scan modules for commands and classes"
-    thrs = []
     for mod in spl(modstr):
         if disable and mod in spl(disable):
             continue
@@ -66,9 +65,9 @@ def initter(modstr, *pkgs, disable=None):
             if not modi:
                 continue
             if "init" in dir(modi):
-                thrs.append(launch(modi.init))
+                thr = launch(modi.init)
+                yield modi, thr
             break
-    return thrs
 
 
 def modnames(*args):
@@ -119,7 +118,7 @@ def __dir__():
         'banner',
         'daemon',
         'forever',
-        'initter',
+        'init',
         'laps',
         'modnames',
         'pidfile',

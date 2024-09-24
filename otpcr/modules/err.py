@@ -4,6 +4,7 @@
 "show errors"
 
 
+from ..command import Commands
 from ..runtime import Errors
 
 
@@ -18,3 +19,6 @@ def err(event):
         event.reply("no errors")
         return
     event.reply(f"found {nmr} errors.")
+
+
+Commands.add(err)
