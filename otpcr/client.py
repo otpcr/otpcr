@@ -16,7 +16,7 @@ class Client(Reactor):
 
     def __init__(self):
         Reactor.__init__(self)
-        Broker.add(self, repr(self))
+        Broker.add(self)
         self.register("command", command)
 
     def display(self, evt):

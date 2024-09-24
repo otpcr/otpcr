@@ -12,9 +12,9 @@ class Broker:
     objs = {}
 
     @staticmethod
-    def add(obj, key):
+    def add(obj):
         "add object."
-        Broker.objs[key] = obj
+        Broker.objs[repr(obj)] = obj
 
     @staticmethod
     def all(kind=None):

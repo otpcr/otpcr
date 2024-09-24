@@ -16,7 +16,8 @@ import time
 import _thread
 
 
-from ..client  import Broker, Client, command
+from ..broker  import Broker
+from ..client  import Client, command
 from ..command import Event
 from ..object  import Default, Object, edit, fmt, keys
 from ..persist import last, sync
@@ -207,7 +208,6 @@ class IRC(Client, Output):
         self.register('PRIVMSG', cb_privmsg)
         self.register('QUIT', cb_quit)
         self.register("366", cb_ready)
-        Broker.add(self, repr(self))
 
     def announce(self, txt):
         "announce on all channels."
