@@ -5,7 +5,7 @@ O T P C R
 **NAME**
 
 
-``OTPCR`` - The Office of the Prosecutor's Communication Record 117 of the year 2019
+``OTPCR`` - Office of the Prosecutor Communication 117 of the year 2019
 
 
 **SYNOPSIS**
@@ -207,7 +207,7 @@ here is a list of available commands
 **SOURCE**
 
 
-source is at ``https://github.com/rssbotd/otpcr``
+source is at ``https://github.com/otpcr/otpcr``
 
 
 **FILES**
@@ -224,7 +224,7 @@ source is at ``https://github.com/rssbotd/otpcr``
 
 **AUTHOR**
 
-Bart Thate ``<rssbotd@gmail.com>``
+Bart Thate ``<record11719@gmail.com>``
 
 
 **COPYRIGHT**

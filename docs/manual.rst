@@ -12,7 +12,7 @@
 **NAME**
 
 
-    ``OTPCR`` - Office of the Prosecutor Communication Record 117 of 2019
+    ``OTPCR`` - Office of the Prosecutor Communication 117 of the year 2019
 
 
 **SYNOPSIS**
@@ -25,8 +25,6 @@
 
 
 **DESCRIPTION**
-
-
 
 
     ``OTPCR`` holds evidence that king
@@ -183,10 +181,9 @@
 
 **AUTHOR**
 
-    | Bart Thate <``rssbotd@gmail.com``>
+    | Bart Thate <``record11719@gmail.com``>
 
 
 **COPYRIGHT**
 
     | ``OTPCR`` is Public Domain.
-

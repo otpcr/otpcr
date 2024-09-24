@@ -5,11 +5,11 @@
 # ruff: noqa: E402, E501
 
 
-"Office of the Prosecutor Communication 117 of 2019"
+"Office of the Prosecutor Communication 117 of the year 2019"
 
 
 NAME = "otpcr"
-VERSION = "44"
+VERSION = "49"
 
 
 import os
@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.join(curdir))
 
 
 project = NAME
-author = 'Bart Thate <rssbotd@gmail.com>'
+author = 'Bart Thate <record11719@gmail.com>'
 project_copyright = "Public Domain"
 master_doc = 'index'
 version = '%s' % VERSION
@@ -62,7 +62,7 @@ extensions = [
 # -- Options for HTML output -------------------------------------------------
 
 
-html_title = "Office of the Prosecutor Communication 117 of 2019"
+html_title = "Office of the Prosecutor Communication 117 of the year 2019"
 html_style = 'otpcr.css'
 html_static_path = ["_static", "_static/otpcr.css", "files/sitemap.xml"]
 html_css_files = ["otpcr.css",]

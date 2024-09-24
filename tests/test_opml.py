@@ -56,10 +56,10 @@ TXT = """<opml version="1.0">
 TXT2 = """
 <opml version="1.0">
     <head>
-        <title>rssbot opml</title>
+        <title>OPML</title>
     </head>
     <body>
-        <outline title="rssbot opml" text="24/7 feed fetcher">
+        <outline title="OPML" text="24/7 feed fetcher">
             <outline name="url1" display_list="title,link,author" xmlUrl="http://hnrss.org/newest"/>
         </outline>
     </body>
