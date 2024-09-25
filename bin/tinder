@@ -77,7 +77,7 @@ class CLI(Client):
     "command line interface."
 
     def raw(self, txt):
-        if "v" in cfg.opts:
+        if "-v" in sys.argv[1:]:
             print(txt)
 
 
@@ -112,12 +112,10 @@ def payload(clt):
 def mainer():
     "main"
     NRCOMMAND = len(Commands.cmds) or 1
-    if "v" in cfg.opts:
-        banner()
+    banner()
     cfg.mod = ",".join(modnames(face, MODS))
-    if "v" in cfg.opts:
-        if os.path.exists(Workdir.wdr):
-            shutil.rmtree(Workdir.wdr)
+    if os.path.exists(Workdir.wdr):
+        shutil.rmtree(Workdir.wdr)
     skel()
     clt = CLI()
     clt.start()
@@ -125,20 +123,23 @@ def mainer():
     thrs = []
     for _nr in range(nrs):
         thrs.append(launch(payload, clt))
-    consume(events)
+    #consume(events)
     clt.wait()
     for thr in thrs:
         thr.join()
-    if "v" in cfg.opts:
-        endtime = time.time()
-        lap = laps(endtime-STARTTIME)
-        percall = (endtime-STARTTIME)/(nrs*NRCOMMAND)
-        print(f"{lap} {nrs} {NRCOMMAND} {percall}")
+    endtime = time.time()
+    lap = laps(endtime-STARTTIME)
+    percall = (endtime-STARTTIME)/(nrs*NRCOMMAND)
+    print(f"{lap} {nrs} {NRCOMMAND} {percall}")
 
 
 if __name__ == "__main__":
     Workdir.wdr = ".test"
-    parse(cfg, " ".join(sys.argv[1:]))
-    wrap(mainer, print)
+    for arg in sys.argv[1:]:
+        try:
+            cfg.index = int(arg[1:])
+            break
+        except (IndexError, ValueError):
+            pass
+    mainer()
     errors(print)
-    os._exit(0)

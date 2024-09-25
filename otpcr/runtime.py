@@ -16,6 +16,10 @@ import _thread
 STARTTIME = time.time()
 
 
+launchlock = _thread.allocate_lock()
+threadlock = _thread.allocate_lock()
+
+
 class Errors:
 
     "Errors"
@@ -98,7 +102,6 @@ class Reactor:
         while not self.stopped.is_set():
             if not self.queue.qsize():
                 break
-            time.sleep(0.1)
 
 
 class Thread(threading.Thread):
@@ -106,14 +109,15 @@ class Thread(threading.Thread):
     "Thread"
 
     def __init__(self, func, thrname, *args, daemon=True, **kwargs):
-        super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
-        self.name      = thrname or (func and named(func)) or named(self).split(".")[-1]
-        self.out       = None
-        self.queue     = queue.Queue()
-        self.result    = None
-        self.sleep     = None
-        self.starttime = time.time()
-        self.queue.put_nowait((func, args))
+        with threadlock:
+            super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
+            self.name      = thrname
+            self.out       = None
+            self.queue     = queue.Queue()
+            self.result    = None
+            self.sleep     = None
+            self.starttime = time.time()
+            self.queue.put_nowait((func, args))
 
     def __contains__(self, key):
         return key in self.__dict__
@@ -191,9 +195,11 @@ class Repeater(Timer):
 
 def launch(func, *args, **kwargs):
     "launch a thread."
-    thread = Thread(func, kwargs.get("name", named(func)), *args, **kwargs)
-    thread.start()
-    return thread
+    with launchlock:
+        name = kwargs.get("name", named(func))
+        thread = Thread(func, name, *args, **kwargs)
+        thread.start()
+        return thread
 
 
 def named(obj):

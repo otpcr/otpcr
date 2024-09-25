@@ -24,6 +24,7 @@ class Event(Default):
         self.type = "event"
 
     def ready(self):
+        "flag event as ready."
         self._ready.set()
 
     def reply(self, txt):
@@ -31,6 +32,7 @@ class Event(Default):
         self.result.append(txt)
 
     def wait(self):
+        "wait for results."
         self._ready.wait()
 
 
@@ -53,7 +55,8 @@ def command(bot, evt):
     if func:
         func(evt)
         bot.display(evt)
-    evt.ready()
+    #evt.ready()
+
 
 def parse(obj, txt=None):
     "parse a string for a command."
