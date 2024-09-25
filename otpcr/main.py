@@ -16,7 +16,6 @@ import _thread
 
 from .config  import Config
 from .runtime import later, launch
-from .utils   import spl
 
 
 def banner(outer):
@@ -95,6 +94,15 @@ def privileges(username):
     os.setuid(pwnam.pw_uid)
 
 
+def spl(txt):
+    "split comma separated string into a list."
+    try:
+        res = txt.split(',')
+    except (TypeError, ValueError):
+        res = txt
+    return [x for x in res if x]
+
+
 def wrap(func, outer):
     "reset console."
     old3 = None
@@ -119,7 +127,6 @@ def __dir__():
         'daemon',
         'forever',
         'init',
-        'laps',
         'modnames',
         'pidfile',
         'privileges',

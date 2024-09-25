@@ -10,8 +10,7 @@ import time
 
 from ..command import Commands
 from ..object  import Object
-from ..persist import find, sync, fntime
-from ..utils   import laps
+from ..persist import find, laps, sync, fntime
 
 
 class Log(Object):

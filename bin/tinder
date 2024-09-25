@@ -24,9 +24,8 @@ from otpcr.command import Commands, Event, parse
 from otpcr.main    import modnames, wrap
 from otpcr.modules import face
 from otpcr.object  import Default, Object
-from otpcr.persist import Workdir, skel
+from otpcr.persist import Workdir, laps, skel
 from otpcr.runtime import STARTTIME, errors, later, launch
-from otpcr.utils   import laps
 
 
 cfg = Config()
@@ -48,10 +47,10 @@ face.rss.DEBUG = True
 LAP = 1
 NRS = 1
 NRCOMMAND = 1
-PERCALL   = 1
+PERCALL = 1
 STARTTIME = time.time()
 
-
+events = []
 paylock = _thread.allocate_lock()
 
 
@@ -88,6 +87,12 @@ def banner():
     print(f"{cfg.name.upper()} since {tme}")
 
 
+def consume(evts):
+    "wait for all events to finish."
+    for evt in evts:
+        evt.wait()
+
+
 def payload(clt):
     "do payload."
     with paylock:
@@ -99,6 +104,7 @@ def payload(clt):
                 evt.txt = cmdd + " " + ex
                 evt.type = "command"
                 clt.put(evt)
+                events.append(evt)
                 nmr += 1
         return nmr
 
@@ -118,7 +124,8 @@ def mainer():
     nrs = cfg.index or 1
     thrs = []
     for _nr in range(nrs):
-        thrs.append(launch(payload, clt, daemon=True))
+        thrs.append(launch(payload, clt))
+    consume(events)
     clt.wait()
     for thr in thrs:
         thr.join()
@@ -134,3 +141,4 @@ if __name__ == "__main__":
     parse(cfg, " ".join(sys.argv[1:]))
     wrap(mainer, print)
     errors(print)
+    os._exit(0)

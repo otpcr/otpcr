@@ -23,9 +23,8 @@ from urllib.parse import quote_plus, urlencode
 from ..broker  import Broker
 from ..command import Commands
 from ..object  import Default, Object, construct, fmt, update
-from ..persist import find, fntime, last, sync
+from ..persist import find, fntime, laps, last, sync
 from ..runtime import Repeater, launch
-from ..utils   import laps
 
 
 def init():

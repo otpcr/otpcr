@@ -8,8 +8,8 @@ import time
 
 
 from ..command import Commands
+from ..persist import laps
 from ..runtime import STARTTIME
-from ..utils   import laps
 
 
 def upt(event):

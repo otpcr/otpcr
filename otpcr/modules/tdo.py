@@ -10,8 +10,7 @@ import time
 
 from ..command import Commands
 from ..object  import Object
-from ..persist import find, fntime, sync
-from ..utils   import laps
+from ..persist import find, fntime, laps, sync
 
 
 class NoDate(Exception):

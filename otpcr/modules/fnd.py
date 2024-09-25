@@ -9,8 +9,7 @@ import time
 
 from ..command import Commands
 from ..object  import fmt
-from ..persist import find, fntime, long, skel, store
-from ..utils   import laps
+from ..persist import find, fntime, laps, long, skel, store
 
 
 def fnd(event):
