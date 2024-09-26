@@ -2,37 +2,45 @@
 # This file is placed in the Public Domain.
 
 
-"service"
+"Office of the Prosecutor Communication 117 of the year 2019."
 
 
 import getpass
 import os
+import pathlib
+import pwd
 import sys
 
 
-from otpcr.config  import Config
-from otpcr.command import parse, scanner
-from otpcr.main    import forever, modnames, pidfile, privileges, wrap
 from otpcr.modules import face
-from otpcr.runtime import errors
+from otpcr.persist import Workdir
+from otpcr.runtime import errors, forever, init, wrap
 
 
-cfg = Config()
+def pidfile(pid):
+    "write the pid to a file."
+    if os.path.exists(pid):
+        os.unlink(pid)
+    path = pathlib.Path(pid)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(pid, "w", encoding="utf-8") as fds:
+        fds.write(str(os.getpid()))
+
+
+def privileges(username):
+    "drop privileges."
+    pwnam = pwd.getpwnam(username)
+    os.setgid(pwnam.pw_gid)
+    os.setuid(pwnam.pw_uid)
 
 
 def main():
     "main"
-    modstr = ",".join(modnames(face))
     privileges(getpass.getuser())
-    pidfile(cfg.pidfile)
-    for mod, thr in init(modstr, face, MODS):
-        if "v" in cfg.opts:
-            mod.VERBOSE = print
-        if "w" in cfg.opts:
-            thr.join()
+    pidfile(Workdir.pidfile)
+    init(face)
     forever()
 
 
 if __name__ == "__main__":
     wrap(main, print)
-    errors(print)

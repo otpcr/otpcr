@@ -16,12 +16,10 @@ import time
 import _thread
 
 
-from ..broker  import Broker
-from ..client  import Client
-from ..command import Commands, Event, command
+from ..command import Commands, command
 from ..object  import Default, Object, edit, fmt, keys
 from ..persist import last, sync
-from ..runtime import later, launch
+from ..runtime import Broker, Client, Event, later, launch
 
 
 NAME = Client.__module__.split(".", maxsplit=2)[-2]
@@ -72,6 +70,7 @@ class Logging:
     "Logging"
 
     filter = []
+    out = None
 
 
 Logging.filter = ["PING", "PONG", "PRIVMSG"]

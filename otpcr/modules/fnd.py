@@ -7,16 +7,16 @@
 import time
 
 
-from ..command import Commands
-from ..object  import fmt
-from ..persist import find, fntime, laps, long, skel, store
+from otpcr.command import Commands
+from otpcr.object  import fmt
+from otpcr.persist import find, fntime, laps, long, skel, store, types
 
 
 def fnd(event):
     "locate objects."
     skel()
     if not event.rest:
-        res = sorted([x.split('.')[-1].lower() for x in store()])
+        res = sorted([x.split('.')[-1].lower() for x in types()])
         if res:
             event.reply(",".join(res))
         return
@@ -33,9 +33,6 @@ def fnd(event):
         nmr += 1
     if not nmr:
         event.reply("no result")
-
-
-fnd.target = "cli"
 
 
 Commands.add(fnd)

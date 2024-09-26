@@ -5,6 +5,12 @@
 "debug"
 
 
+from ..command import Commands
+
+
 def dbg(event):
     "raise exception"
     raise Exception("yo!")
+
+
+Commands.add(dbg)

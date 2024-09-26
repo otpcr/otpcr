@@ -3,7 +3,7 @@
 # pylint: disable=R,C0413
 
 
-"main program"
+"Office of the Prosecutor Communication 117 of the year 2019."
 
 
 import getpass
@@ -12,15 +12,10 @@ import readline
 import sys
 
 
-from otpcr.config  import Config
-from otpcr.client  import Client
-from otpcr.command import Event, command, parse
-from otpcr.main    import banner, modnames, privileges, wrap
+from otpcr.command import command, parse
 from otpcr.modules import face
-from otpcr.runtime import errors
-
-
-cfg = Config()
+from otpcr.object  import Default
+from otpcr.runtime import Client, Event, errors
 
 
 class CLI(Client):
@@ -34,12 +29,8 @@ class CLI(Client):
 
 def main():
     "main"
+    cfg = Default()
     parse(cfg, " ".join(sys.argv[1:]))
-    if not cfg.txt:
-        return None
-    privileges(getpass.getuser())
-    if "v" in cfg.opts:
-        banner(print)
     cli = CLI()
     evt = Event()
     evt.orig = repr(cli)
@@ -48,5 +39,5 @@ def main():
 
 
 if __name__ == "__main__":
-    wrap(main, print)
+    main()
     errors(print)

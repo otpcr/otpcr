@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"availalbe commands."
+"commands."
 
 
 from ..command import Commands

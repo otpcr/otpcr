@@ -18,27 +18,19 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.config  import Config
-from otpcr.client  import Client
-from otpcr.command import Commands, Event, parse
-from otpcr.main    import modnames, wrap
-from otpcr.modules import face
+from otpcr.command import Commands, command, parse
 from otpcr.object  import Default, Object
+from otpcr.modules import face
 from otpcr.persist import Workdir, laps, skel
-from otpcr.runtime import STARTTIME, errors, later, launch
+from otpcr.runtime import STARTTIME, Client, Event, errors, later, launch
 
 
-cfg = Config()
-cfg.debug  = True
-cfg.name = "tinder"
-cfg.silent = False
-cfg.skip = ["debug",]
+cfg = Default()
 
 
 if os.path.exists("mods"):
     from mods import face as MODS
-else:
-    MODS = None
+    MODS.rss.DEBUG = True
 
 
 face.rss.DEBUG = True
@@ -47,8 +39,9 @@ face.rss.DEBUG = True
 LAP = 1
 NRS = 1
 NRCOMMAND = 1
-PERCALL = 1
+PERCALL   = 1
 STARTTIME = time.time()
+
 
 events = []
 paylock = _thread.allocate_lock()
@@ -76,20 +69,23 @@ class CLI(Client):
 
     "command line interface."
 
+    def __init__(self):
+        Client.__init__(self)
+        self.register("command", command)
+
     def raw(self, txt):
-        if "-v" in sys.argv[1:]:
+        if "v" in cfg.opts:
             print(txt)
 
 
 def banner():
     "show banner."
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{cfg.name.upper()} since {tme}")
+    print(f"{Workdir.name.upper()} since {tme}")
 
 
-def consume(evts):
-    "wait for all events to finish."
-    for evt in evts:
+def consume(events):
+    for evt in events:
         evt.wait()
 
 
@@ -100,46 +96,57 @@ def payload(clt):
         for cmdd in Commands.cmds:
             for ex in getattr(param, cmdd, [""]):
                 evt = Event()
-                evt.orig = repr(clt)
                 evt.txt = cmdd + " " + ex
-                evt.type = "command"
                 clt.put(evt)
                 events.append(evt)
                 nmr += 1
         return nmr
 
 
-def mainer():
+def wrap(func):
+    "reset console."
+    old = None
+    try:
+        old = termios.tcgetattr(sys.stdin.fileno())
+    except termios.error:
+        pass
+    try:
+        func()
+    except (KeyboardInterrupt, EOFError):
+        print("")
+    except Exception as ex:
+        later(ex)
+    finally:
+        if old:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
+
+
+def main():
     "main"
+    Workdir.wdr = ".test"
+    parse(cfg, " ".join(sys.argv[1:]))
     NRCOMMAND = len(Commands.cmds) or 1
-    banner()
-    cfg.mod = ",".join(modnames(face, MODS))
-    if os.path.exists(Workdir.wdr):
-        shutil.rmtree(Workdir.wdr)
+    if "v" in cfg.opts:
+        banner()
+    if "f" in cfg.opts:
+        if os.path.exists(Workdir.wdr):
+            shutil.rmtree(Workdir.wdr)
     skel()
     clt = CLI()
     clt.start()
     nrs = cfg.index or 1
-    thrs = []
     for _nr in range(nrs):
-        thrs.append(launch(payload, clt))
-    #consume(events)
+        launch(payload, clt)
+    consume(events)
     clt.wait()
-    for thr in thrs:
-        thr.join()
-    endtime = time.time()
-    lap = laps(endtime-STARTTIME)
-    percall = (endtime-STARTTIME)/(nrs*NRCOMMAND)
-    print(f"{lap} {nrs} {NRCOMMAND} {percall}")
+    if "v" in cfg.opts:
+        endtime = time.time()
+        lap = laps(endtime-STARTTIME)
+        percall = (endtime-STARTTIME)/(nrs*NRCOMMAND)
+        print(",".join(Commands.cmds))
+        print(f"{lap} {nrs} {NRCOMMAND} {percall}")
 
 
 if __name__ == "__main__":
-    Workdir.wdr = ".test"
-    for arg in sys.argv[1:]:
-        try:
-            cfg.index = int(arg[1:])
-            break
-        except (IndexError, ValueError):
-            pass
-    mainer()
+    wrap(main)
     errors(print)

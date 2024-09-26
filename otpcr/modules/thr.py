@@ -8,10 +8,10 @@ import threading
 import time
 
 
-from ..command import Commands
-from ..object  import Object, update
-from ..persist import laps
-from ..runtime import STARTTIME
+from otpcr.command import Commands
+from otpcr.object  import Object, update
+from otpcr.persist import laps
+from otpcr.runtime import STARTTIME
 
 
 def thr(event):
