@@ -3,7 +3,7 @@
 # pylint: disable=R,C0413
 
 
-"Office of the Prosecutor Communication 117 of the year 2019."
+"cli"
 
 
 import getpass
@@ -12,10 +12,13 @@ import readline
 import sys
 
 
-from otpcr.command import command, parse
+from otpcr.command import Commands, command, parse
 from otpcr.modules import face
 from otpcr.object  import Default
 from otpcr.runtime import Client, Event, errors
+
+
+NAME = Default.__module__.split(".", maxsplit=2)[-2]
 
 
 class CLI(Client):
@@ -27,8 +30,30 @@ class CLI(Client):
         print(txt)
 
 
+def srv(event):
+    "create service file (pipx)."
+    if event.args:
+        name = event.args[0]
+    else:
+        name  = getpass.getuser()
+    txt = """[Unit]
+Description=%s
+After=network-online.target
+
+[Service]
+Type=simple
+User=%s
+Group=%s
+ExecStart=/home/%s/.local/bin/%ss
+
+[Install]
+WantedBy=multi-user.target"""
+    event.reply(txt % (NAME.upper(), name, name, name, NAME))
+
+
 def main():
     "main"
+    Commands.add(srv)
     cfg = Default()
     parse(cfg, " ".join(sys.argv[1:]))
     cli = CLI()

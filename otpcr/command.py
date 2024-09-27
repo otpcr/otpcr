@@ -6,14 +6,13 @@
 
 
 from .object  import Default
-from .runtime import later
 
 
 class Commands:
 
     "Commands"
 
-    cmds     = {}
+    cmds = {}
 
     @staticmethod
     def add(func):
@@ -27,11 +26,8 @@ def command(bot, evt):
     evt.orig = repr(bot)
     func = Commands.cmds.get(evt.cmd, None)
     if func:
-        try:
-            func(evt)
-            bot.display(evt)
-        except Exception as ex:
-            later(ex)
+        func(evt)
+        bot.display(evt)
     evt.ready()
 
 
@@ -95,5 +91,6 @@ def parse(obj, txt=None):
 def __dir__():
     return (
         'Commands',
-        'command'
+        'command',
+        'parse'
     )

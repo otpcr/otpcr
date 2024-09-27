@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0201,W0718,E1102
+# pylint: disable=R,W0105,W0201,W0718,E1102
 
 
 "internet relay chat"
@@ -70,7 +70,6 @@ class Logging:
     "Logging"
 
     filter = []
-    out = None
 
 
 Logging.filter = ["PING", "PONG", "PRIVMSG"]
@@ -539,6 +538,9 @@ class IRC(Client, Output):
         self.events.ready.wait()
 
 
+"callbacks"
+
+
 def cb_auth(bot, evt):
     "auth callback."
     bot.docommand(f'AUTHENTICATE {bot.cfg.password}')
@@ -620,6 +622,9 @@ def cb_quit(bot, evt):
     debug(f"quit from {bot.cfg.server}")
     if evt.orig and evt.orig in bot.zelf:
         bot.stop()
+
+
+"commands"
 
 
 def cfg(event):
