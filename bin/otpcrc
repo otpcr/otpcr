@@ -5,7 +5,6 @@
 "console"
 
 
-import getpass
 import os
 import readline
 import sys
@@ -13,10 +12,10 @@ import termios
 import time
 
 
-from otpcr.command import Commands, command, parse
+from otpcr.command import command, parse
 from otpcr.modules import face
 from otpcr.object  import Default
-from otpcr.runtime import Client, Event, errors, forever, init, later, launch
+from otpcr.runtime import Client, Event, errors, forever, init, later
 
 
 MODS = None
@@ -24,7 +23,7 @@ NAME = Default.__module__.split(".", maxsplit=2)[-2]
 
 
 if os.path.exists('mods'):
-    from mods import face as MODS
+    from mods import face as MODS # pylint: disable=E0401
 
 
 class Console(Client):
@@ -59,24 +58,25 @@ def banner():
 
 def wrap(func, outer):
     "reset console."
-    old3 = None
+    old2 = None
     try:
-        old3 = termios.tcgetattr(sys.stdin.fileno())
+        old2 = termios.tcgetattr(sys.stdin.fileno())
     except termios.error:
         pass
     try:
         func()
     except (KeyboardInterrupt, EOFError):
         outer("")
-    except Exception as ex:
+    except Exception as ex: # pylint: disable=W0718
         later(ex)
     finally:
-        if old3:
-            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
+        if old2:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old2)
 
 
 def main():
     "main"
+    readline.redisplay()
     cfg = Default()
     parse(cfg, " ".join(sys.argv[1:]))
     if "v" in cfg.opts:

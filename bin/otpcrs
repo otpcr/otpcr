@@ -9,7 +9,6 @@ import getpass
 import os
 import pathlib
 import pwd
-import sys
 
 
 from otpcr.modules import face
@@ -17,22 +16,22 @@ from otpcr.persist import Workdir
 from otpcr.runtime import errors, forever, init, wrap
 
 
-from otpcr import NAME
+from otpcr import NAME as PROGNAME
 
 
 def pidfile(name):
     "write the pid to a file."
-    pidfile = os.path.join(Workdir.wdr, f"{name}.pid")
-    if os.path.exists(pidfile):
-        os.unlink(pidfile)
-    path = pathlib.Path(pidfile)
+    filename = os.path.join(Workdir.wdr, f"{name}.pid")
+    if os.path.exists(filename):
+        os.unlink(filename)
+    path = pathlib.Path(filename)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(pidfile, "w", encoding="utf-8") as fds:
+    with open(filename, "w", encoding="utf-8") as fds:
         fds.write(str(os.getpid()))
 
 
 def privileges(username):
-    "drop privileges."
+    "privileges."
     pwnam = pwd.getpwnam(username)
     os.setgid(pwnam.pw_gid)
     os.setuid(pwnam.pw_uid)
@@ -41,7 +40,7 @@ def privileges(username):
 def main():
     "main"
     privileges(getpass.getuser())
-    pidfile(NAME)
+    pidfile(PROGNAME)
     init(face)
     forever()
 
