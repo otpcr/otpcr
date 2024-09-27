@@ -17,7 +17,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "otpcr"
-version = "48"
+version = "49"
 authors = [
     {name = "Bart Thate", email = "record11719@gmail.com" },
 ]
