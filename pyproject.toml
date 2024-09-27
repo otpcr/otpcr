@@ -1,18 +1,9 @@
 # This file is placed in the Public Domain.
 
 
-title = "OTPCR"
-
-
-# system
-
-
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
-
-
-# project
 
 
 [project]
@@ -42,9 +33,6 @@ classifiers=[
 "source" = "https://github.com/otpcr/otpcr"
 
 
-# setuptools
-
-
 [tool.setuptools]
 script-files = [
    'bin/otpcr',
@@ -56,9 +44,6 @@ packages = [
    'otpcr',
    'otpcr.modules'
 ]
-
-
-# documentation
 
 
 [tool.setuptools.data-files]
