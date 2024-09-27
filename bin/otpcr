@@ -13,7 +13,7 @@ import sys
 from otpcr.command import Commands, command, parse
 from otpcr.modules import face # pylint: disable=W0611
 from otpcr.object  import Default
-from otcpr.runtime import Client, Event, errors
+from otpcr.runtime import Client, Event, errors
 
 
 NAME = Default.__module__.split(".", maxsplit=2)[-2]
