@@ -1,11 +1,13 @@
+#!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=R
+# pylint: disable=R,W0105,C0413,W0611,W0718
 
 
 "command"
 
 
-from .object  import Default
+from .object  import Obj
+from .runtime import later
 
 
 class Commands:
@@ -26,8 +28,11 @@ def command(bot, evt):
     evt.orig = repr(bot)
     func = Commands.cmds.get(evt.cmd, None)
     if func:
-        func(evt)
-        bot.display(evt)
+        try:
+            func(evt)
+            bot.display(evt)
+        except Exception as ex:
+            later(ex)
     evt.ready()
 
 
@@ -38,13 +43,13 @@ def parse(obj, txt=None):
     args = []
     obj.args    = []
     obj.cmd     = ""
-    obj.gets    = Default()
+    obj.gets    = Obj()
     obj.hasmods = False
     obj.index   = None
     obj.mod     = ""
     obj.opts    = ""
     obj.result  = []
-    obj.sets    = Default()
+    obj.sets    = Obj()
     obj.txt     = txt or ""
     obj.otxt    = obj.txt
     _nr = -1
@@ -86,6 +91,9 @@ def parse(obj, txt=None):
     else:
         obj.txt = obj.cmd or ""
     return obj
+
+
+"interface"
 
 
 def __dir__():

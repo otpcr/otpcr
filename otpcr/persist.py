@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R
+# pylint: disable=R,W0105,W0719
 
 
 "persistence"
@@ -13,7 +13,7 @@ import time
 import _thread
 
 
-from .object import Default, dump, fqn, load, match, search, update
+from .object  import Obj, dump, load, search, update
 
 
 lock     = _thread.allocate_lock()
@@ -21,16 +21,12 @@ disklock = _thread.allocate_lock()
 p        = os.path.join
 
 
-class ReadError(Exception):
-    "error reading json file."
-
-
 class Workdir:
 
     "Workdir"
 
     fqns = []
-    name = Default.__module__.split(".", maxsplit=2)[-2]
+    name = Obj.__module__.split(".", maxsplit=2)[-2]
     wdr = os.path.expanduser(f"~/.{name}")
 
 
@@ -43,6 +39,11 @@ def long(name):
             res = names
             break
     return res
+
+
+def pidname():
+    "return pidfile path."
+    return p(Workdir.wdr, f"{Workdir.name}.pid")
 
 
 def skel():
@@ -71,15 +72,13 @@ def whitelist(clz):
     Workdir.fqns.append(fqn(clz))
 
 
+"utilities"
+
+
 def cdir(pth):
     "create directory."
     path = pathlib.Path(pth)
     path.parent.mkdir(parents=True, exist_ok=True)
-
-
-def ident(obj):
-    "return an id for an object."
-    return p(fqn(obj), *str(datetime.datetime.now()).split())
 
 
 def find(mtc, selector=None, index=None, deleted=False, matching=False):
@@ -87,13 +86,11 @@ def find(mtc, selector=None, index=None, deleted=False, matching=False):
     clz = long(mtc)
     nrs = -1
     for fnm in sorted(fns(clz), key=fntime):
-        obj = Default()
+        obj = Obj()
         fetch(obj, fnm)
         if not deleted and '__deleted__' in obj and obj.__deleted__:
             continue
-        if matching and not match(obj, selector):
-            continue
-        if selector and not search(obj, selector):
+        if selector and not search(obj, selector, matching):
             continue
         nrs += 1
         if index is not None and nrs != int(index):
@@ -168,9 +165,22 @@ def laps(seconds, short=True):
     return txt
 
 
+def pidfile(filename):
+    "write the pid to a file."
+    if os.path.exists(filename):
+        os.unlink(filename)
+    path2 = pathlib.Path(filename)
+    path2.parent.mkdir(parents=True, exist_ok=True)
+    with open(filename, "w", encoding="utf-8") as fds:
+        fds.write(str(os.getpid()))
+
+
 def strip(pth, nmr=3):
     "reduce to path with directory."
     return os.sep.join(pth.split(os.sep)[-nmr:])
+
+
+"methods"
 
 
 def fetch(obj, pth):
@@ -179,6 +189,19 @@ def fetch(obj, pth):
         pth2 = store(pth)
         read(obj, pth2)
         return os.sep.join(pth.split(os.sep)[-3:])
+
+
+def fqn(obj):
+    "return full qualified name of an object."
+    kin = str(type(obj)).split()[-1][1:-2]
+    if kin == "type":
+        kin = f"{obj.__module__}.{obj.__name__}"
+    return kin
+
+
+def ident(obj):
+    "return an id for an object."
+    return p(fqn(obj), *str(datetime.datetime.now()).split())
 
 
 def last(obj, selector=None):
@@ -204,7 +227,7 @@ def read(obj, pth):
             try:
                 update(obj, load(ofile))
             except json.decoder.JSONDecodeError as ex:
-                raise ReadError(pth) from ex
+                raise Exception(pth) from ex
 
 
 def sync(obj, pth=None):
@@ -225,21 +248,21 @@ def write(obj, pth):
             dump(obj, ofile, indent=4)
 
 
+"interface"
+
+
 def __dir__():
     return (
-        'ReadError',
         'Workdir',
         'find',
-        'fns',
         'fetch',
         'last',
         'laps',
-        'long',
+        'pidfile',
+        'pidname',
         'read',
         'skel',
-        'store',
         'sync',
         'types',
-        'whitelist',
         'write'
     )

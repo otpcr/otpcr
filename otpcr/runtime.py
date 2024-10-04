@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0718
+# pylint: disable=R,W0105,W0212,W0718,E1102
 
 
 "runtime"
@@ -13,32 +13,25 @@ import types
 import _thread
 
 
+"defines"
+
+
+NAME = __file__.rsplit("/", maxsplit=2)[-2]
 STARTTIME = time.time()
 
 
-class Broker:
+"config"
 
-    "Broker"
 
-    objs = {}
+class Config:
 
-    @staticmethod
-    def add(obj):
-        "add object."
-        Broker.objs[repr(obj)] = obj
+    "Config"
 
-    @staticmethod
-    def all(kind=None):
-        "return all objects."
-        if kind is not None:
-            for key in [x for x in Broker.objs if kind in x]:
-                yield Broker.get(key)
-        return Broker.objs.values()
+    def __getattr__(self, key):
+        return self.__dict__.get(key, "")
 
-    @staticmethod
-    def get(orig):
-        "return object by matching repr."
-        return Broker.objs.get(orig)
+
+"errors"
 
 
 class Errors:
@@ -57,66 +50,123 @@ def fmat(exc):
                               )
 
 
-def errors(outer):
-    "display errors."
-    for exc in Errors.errors:
-        for line in exc:
-            outer(line.strip())
-
-
-def later(exc, evt=None):
+def later(exc):
     "add an exception"
     excp = exc.with_traceback(exc.__traceback__)
     fmt = fmat(excp)
     if fmt not in Errors.errors:
         Errors.errors.append(fmt)
-    if evt:
-        evt.ready()
 
 
-def laters(func):
+"broker"
 
-    "later decorator."
 
-    def ltr(*args, **kwargs):
-        "wrap function."
+class Broker:
+
+    "Broker"
+
+    objs = {}
+
+    @staticmethod
+    def add(obj):
+        "add object."
+        Broker.objs[repr(obj)] = obj
+
+    @staticmethod
+    def announce(txt, kind=None):
+        "announce text on brokered objects."
+        for obj in Broker.all(kind):
+            if "announce" in dir(obj):
+                obj.announce(txt)
+
+    @staticmethod
+    def all(kind=None):
+        "return all objects."
+        result = []
+        if kind is not None:
+            for key in [x for x in Broker.objs if kind in x]:
+                result.append(Broker.get(key))
+        else:
+            result.extend(list(Broker.objs.values()))
+        return result
+
+    @staticmethod
+    def get(orig):
+        "return object by matching repr."
+        return Broker.objs.get(orig)
+
+
+"thread"
+
+
+class Thread(threading.Thread):
+
+    "Thread"
+
+    def __init__(self, func, thrname, *args, daemon=True, **kwargs):
+        super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
+        self.name      = thrname
+        self.queue     = queue.Queue()
+        self.result    = None
+        self.starttime = time.time()
+        self.queue.put_nowait((func, args))
+
+    def __contains__(self, key):
+        return key in self.__dict__
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        yield from dir(self)
+
+    def size(self):
+        "return qsize"
+        return self.queue.qsize()
+
+    def join(self, timeout=None):
+        "join this thread."
+        super().join(timeout)
+        return self.result
+
+    def run(self):
+        "run this thread's payload."
         try:
-            return func(*args, **kwargs)
+            func, args = self.queue.get()
+            self.result = func(*args)
         except (KeyboardInterrupt, EOFError):
             _thread.interrupt_main()
         except Exception as ex:
             later(ex)
-            ready(args)
-
-    return ltr
 
 
-class Event:
+def launch(func, *args, **kwargs):
+    "launch a thread."
+    name = kwargs.get("name", named(func))
+    thread = Thread(func, name, *args, **kwargs)
+    thread.start()
+    return thread
 
-    "Event"
 
-    def __init__(self):
-        self._ready = threading.Event()
-        self.channel = ""
-        self.orig   = ""
-        self.result = []
-        self.txt    = ""
-        self.type = "command"
+def named(obj):
+    "return a full qualified name of an object/function/module."
+    if isinstance(obj, types.ModuleType):
+        return obj.__name__
+    typ = type(obj)
+    if '__builtins__' in dir(typ):
+        return obj.__name__
+    if '__self__' in dir(obj):
+        return f'{obj.__self__.__class__.__name__}.{obj.__name__}'
+    if '__class__' in dir(obj) and '__name__' in dir(obj):
+        return f'{obj.__class__.__name__}.{obj.__name__}'
+    if '__class__' in dir(obj):
+        return f"{obj.__class__.__module__}.{obj.__class__.__name__}"
+    if '__name__' in dir(obj):
+        return f'{obj.__class__.__name__}.{obj.__name__}'
+    return None
 
-    def __getattr__(self, key):
-        return self.__dict__.get(key, "")
 
-    def ready(self):
-        "flag event as ready."
-        self._ready.set()
-
-    def reply(self, txt):
-        "add text to the result."
-        self.result.append(txt)
-
-    def wait(self):
-        "wait for results."
-        self._ready.wait()
+"reactor"
 
 
 class Reactor:
@@ -132,7 +182,7 @@ class Reactor:
         "call callback based on event type."
         func = self.cbs.get(evt.type, None)
         if func:
-            launch(func, self, evt)
+            evt._thr = launch(func, self, evt, name=evt.txt and evt.txt.split()[0])
 
     def loop(self):
         "proces events until interrupted."
@@ -140,10 +190,8 @@ class Reactor:
             try:
                 evt = self.poll()
                 self.callback(evt)
-            except( KeyboardInterrupt, EOFError):
-                return
-            except Exception as ex:
-                later(ex)
+            except (KeyboardInterrupt, EOFError):
+                _thread.interrupt_main()
 
     def poll(self):
         "function to return event."
@@ -164,12 +212,6 @@ class Reactor:
     def stop(self):
         "stop the event loop."
         self.stopped.set()
-
-    def wait(self):
-        "wait till empty queue."
-        while not self.stopped.is_set():
-            if not self.queue.qsize():
-                break
 
 
 class Client(Reactor):
@@ -194,53 +236,53 @@ class Client(Reactor):
         raise NotImplementedError
 
 
-class Thread(threading.Thread):
+class Event:
 
-    "Thread"
+    "Event"
 
-    def __init__(self, func, thrname, *args, daemon=True, **kwargs):
-        super().__init__(None, self.run, thrname, (), {}, daemon=daemon)
-        self.name      = thrname
-        self.queue     = queue.Queue()
-        self.result    = None
-        self.sleep     = None
-        self.starttime = time.time()
-        self.queue.put_nowait((func, args))
+    def __init__(self):
+        self._ready  = threading.Event()
+        self._thr    = None
+        self.channel = ""
+        self.orig    = ""
+        self.result  = []
+        self.txt     = ""
+        self.type    = "event"
 
-    def __contains__(self, key):
-        return key in self.__dict__
+    def __getattr__(self, key):
+        return self.__dict__.get(key, "")
 
-    def __iter__(self):
-        return self
+    def __str__(self):
+        return str(self.__dict__)
 
-    def __next__(self):
-        yield from dir(self)
+    def ready(self):
+        "flag event as ready."
+        self._ready.set()
 
-    def size(self):
-        "return qsize"
-        return self.queue.qsize()
+    def reply(self, txt):
+        "add text to the result."
+        self.result.append(txt)
 
-    def join(self, timeout=None):
-        "join this thread."
-        super().join(timeout)
-        return self.result
+    def wait(self):
+        "wait for results."
+        self._ready.wait()
+        if self._thr:
+            self._thr.join()
 
-    @laters
-    def run(self):
-        "run this thread's payload."
-        func, args = self.queue.get()
-        self.result = func(*args)
+
+"timers"
 
 
 class Timer:
 
     "Timer"
 
-    def __init__(self, sleep, func, *args, thrname=None):
+    def __init__(self, sleep, func, *args, thrname=None, **kwargs):
         self.args  = args
         self.func  = func
+        self.kwargs = kwargs
         self.sleep = sleep
-        self.name  = thrname or named(func)
+        self.name  = thrname or kwargs.get("name", named(func))
         self.state = {}
         self.timer = None
 
@@ -253,7 +295,6 @@ class Timer:
         "start timer."
         timer = threading.Timer(self.sleep, self.run)
         timer.name   = self.name
-        timer.daemon = True
         timer.sleep  = self.sleep
         timer.state  = self.state
         timer.func   = self.func
@@ -277,6 +318,9 @@ class Repeater(Timer):
         super().run()
 
 
+"utilities"
+
+
 def forever():
     "it doesn't stop, until ctrl-c"
     while True:
@@ -287,84 +331,47 @@ def forever():
 
 
 def init(*pkgs):
-    "scan modules for commands and classes"
+    "run the init function in modules."
     mods = []
     for pkg in pkgs:
-        for modname in modnames(pkg):
+        for modname in dir(pkg):
+            if modname.startswith("__"):
+                continue
             modi = getattr(pkg, modname)
             if "init" not in dir(modi):
                 continue
-            thr = launch(modi.init, name=f"{modi}.init")
+            thr = launch(modi.init)
             mods.append((modi, thr))
     return mods
 
 
-def launch(func, *args, **kwargs):
-    "launch a thread."
-    name = kwargs.get("name", named(func))
-    thread = Thread(func, name, *args, **kwargs)
-    thread.start()
-    return thread
-
-
-def modnames(*args):
-    "return module names."
-    res = []
-    for arg in args:
-        res.extend([x for x in dir(arg) if not x.startswith("__")])
-    return sorted(res)
-
-
-def named(obj):
-    "return a full qualified name of an object/function/module."
-    if isinstance(obj, types.ModuleType):
-        return obj.__name__
-    typ = type(obj)
-    if '__builtins__' in dir(typ):
-        return obj.__name__
-    if '__self__' in dir(obj):
-        return f'{obj.__self__.__class__.__name__}.{obj.__name__}'
-    if '__class__' in dir(obj) and '__name__' in dir(obj):
-        return f'{obj.__class__.__name__}.{obj.__name__}'
-    if '__class__' in dir(obj):
-        return f"{obj.__class__.__module__}.{obj.__class__.__name__}"
-    if '__name__' in dir(obj):
-        return f'{obj.__class__.__name__}.{obj.__name__}'
-    return None
-
-
-def ready(*args):
-    "flag arguments as ready."
-    for arg in args:
-        if "ready" in dir(arg):
-            arg.ready()
-
-
-def wrap(func, outer):
+def wrap(func):
     "reset console."
     try:
         func()
     except (KeyboardInterrupt, EOFError):
-        outer("")
+        pass
     except Exception as ex:
         later(ex)
+
+
+"interface"
 
 
 def __dir__():
     return (
         'Broker',
         'Client',
+        'Config',
         'Errors',
         'Reactor',
         'Repeater',
         'Thread',
         'Timer',
         'forever',
-        'errors',
         'init',
         'later',
         'launch',
-        'modnames',
         'named',
-        'wait'
+        'wrap'
     )

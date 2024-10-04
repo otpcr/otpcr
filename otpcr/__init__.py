@@ -1,8 +1,9 @@
 # This file is placed in the Public Domain.
+# pylint: disable=W0622
+# ruff: noqa: F401
 
 
 "package"
 
 
-NAME    = __file__.rsplit("/", maxsplit=2)[-2]
-__doc__ = NAME.upper()
+__doc__ = __file__.rsplit("/", maxsplit=2)[-2].upper()

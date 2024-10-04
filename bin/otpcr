@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=R,C0413
+# pylint: disable=C0413,W0105,W0611
 
 
 "cli"
@@ -10,13 +10,28 @@ import getpass
 import sys
 
 
-from otpcr.command import Commands, command, parse
-from otpcr.modules import face # pylint: disable=W0611
-from otpcr.object  import Default
-from otpcr.runtime import Client, Event, errors
+from otpcr.command import Commands, command
+from otpcr.runtime import NAME, Client, Event
 
 
-NAME = Default.__module__.split(".", maxsplit=2)[-2]
+"defines"
+
+
+TXT = """[Unit]
+Description=%s
+After=network-online.target
+
+[Service]
+Type=simple
+User=%s
+Group=%s
+ExecStart=/home/%s/.local/bin/%ss
+
+[Install]
+WantedBy=multi-user.target"""
+
+
+"client"
 
 
 class CLI(Client):
@@ -30,37 +45,27 @@ class CLI(Client):
 
 def srv(event):
     "create service file (pipx)."
-    if event.args:
-        name = event.args[0]
-    else:
-        name  = getpass.getuser()
-    txt = """[Unit]
-Description=%s
-After=network-online.target
+    name  = getpass.getuser()
+    event.reply(TXT % (NAME.upper(), name, name, name, NAME))
 
-[Service]
-Type=simple
-User=%s
-Group=%s
-ExecStart=/home/%s/.local/bin/%ss
 
-[Install]
-WantedBy=multi-user.target"""
-    event.reply(txt % (NAME.upper(), name, name, name, NAME))
+Commands.add(srv)
+
+
+"main"
+
+
+from otpcr.modules import face
 
 
 def main():
     "main"
-    Commands.add(srv)
-    cfg = Default()
-    parse(cfg, " ".join(sys.argv[1:]))
     cli = CLI()
     evt = Event()
-    evt.orig = repr(cli)
-    evt.txt = cfg.txt
+    evt.txt = " ".join(sys.argv[1:])
     command(cli, evt)
+    evt.wait()
 
 
 if __name__ == "__main__":
     main()
-    errors(print)

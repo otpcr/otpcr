@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=W0212
+# pylint: disable=C0413,W0105,W0212,W0718
+
 
 "daemon"
 
 
 import getpass
 import os
-import pathlib
 import pwd
 import sys
 
 
-from otpcr.modules import face
-from otpcr.persist import Workdir
-from otpcr.runtime import forever, init
+from otpcr.persist import pidfile, pidname
+from otpcr.runtime import Errors, forever, init, wrap
 
 
-from otpcr import NAME
+"utilities"
 
 
 def daemon(verbose=False):
@@ -41,32 +40,35 @@ def daemon(verbose=False):
     os.nice(10)
 
 
-def pidfile(name):
-    "write the pid to a file."
-    fname = os.path.join(Workdir.wdr, f"{name}.pid")
-    if os.path.exists(fname):
-        os.unlink(fname)
-    path = pathlib.Path(fname)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(fname, "w", encoding="utf-8") as fds:
-        fds.write(str(os.getpid()))
+def errors():
+    "print errors."
+    for error in Errors.errors:
+        for line in error:
+            print(line)
 
 
 def privileges(username):
-    "drop privileges."
+    "privileges."
     pwnam = pwd.getpwnam(username)
     os.setgid(pwnam.pw_gid)
     os.setuid(pwnam.pw_uid)
+
+
+"main"
+
+
+from otpcr.modules import face
 
 
 def main():
     "main"
     daemon()
     privileges(getpass.getuser())
-    pidfile(NAME)
+    pidfile(pidname())
     init(face)
     forever()
 
 
 if __name__ == "__main__":
-    main()
+    wrap(main)
+    errors()

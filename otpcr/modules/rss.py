@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R
+# pylint: disable=R,W0622
 
 
 "rich site syndicate"
@@ -21,25 +21,9 @@ from urllib.parse import quote_plus, urlencode
 
 
 from ..command import Commands
-from ..object  import Default, Object, construct, fmt, update
+from ..object  import Object, Obj, format, update
 from ..persist import find, fntime, laps, last, sync
 from ..runtime import Broker, Repeater, launch
-
-
-def init():
-    "start fetcher."
-    fetcher = Fetcher()
-    fetcher.start()
-    return fetcher
-
-
-def spl(txt):
-    "split comma separated string into a list."
-    try:
-        result = txt.split(',')
-    except (TypeError, ValueError):
-        result = txt
-    return [x for x in result if x]
 
 
 DEBUG = False
@@ -60,23 +44,39 @@ importlock = _thread.allocate_lock()
 skipped = []
 
 
-class Feed(Default):
+def init():
+    "start fetcher."
+    fetcher = Fetcher()
+    fetcher.start()
+    return fetcher
+
+
+def spl(txt):
+    "split comma separated string into a list."
+    try:
+        result = txt.split(',')
+    except (TypeError, ValueError):
+        result = txt
+    return [x for x in result if x]
+
+
+class Feed(Obj):
 
     "Feed"
 
 
-class Rss(Default):
+class Rss(Obj):
 
     "Rss"
 
     def __init__(self):
-        Default.__init__(self)
+        Obj.__init__(self)
         self.display_list = 'title,link,author'
         self.insertid     = None
         self.rss          = ''
 
 
-class Urls(Default):
+class Urls(Obj):
 
     "Seen"
 
@@ -145,9 +145,7 @@ class Fetcher(Object):
             txt = f'[{feedname}] '
         for obj in result:
             txt2 = txt + self.display(obj)
-            for bot in Broker.all("IRC"):
-                if "announce" in dir(bot):
-                    bot.announce(txt2.rstrip())
+            Broker.announce(txt2)
         return counter
 
     def run(self, silent=False):
@@ -209,7 +207,7 @@ class Parser:
         result = []
         for line in Parser.getitems(txt, toke):
             line = line.strip()
-            obj = Default()
+            obj = Obj()
             for itm in spl(items):
                 val = Parser.getitem(line, itm)
                 if val:
@@ -369,7 +367,7 @@ def rss(event):
         for fnm, feed in find('rss'):
             nrs += 1
             elp = laps(time.time()-fntime(fnm))
-            txt = fmt(feed)
+            txt = format(feed)
             event.reply(f'{nrs} {txt} {elp}')
         if not nrs:
             event.reply('no rss feed found.')
@@ -463,7 +461,7 @@ class OPMLParser:
         for attrz in OPMLParser.getattrs(txt, toke):
             if not attrz:
                 continue
-            obj = Default()
+            obj = Obj()
             for itm in spl(itemz):
                 if itm == "link":
                     itm = "href"
@@ -493,7 +491,7 @@ def exp(event):
     nrs = 0
     for _fn, ooo in find("rss"):
         nrs += 1
-        obj = Default()
+        obj = Obj()
         update(obj, ooo)
         name = obj.name or f"url{nrs}"
         txt = f'<outline name="{name}" display_list="{obj.display_list}" xmlUrl="{obj.rss}"/>'
@@ -534,7 +532,7 @@ def imp(event):
                 nrskip += 1
                 continue
             feed = Rss()
-            construct(feed, obj)
+            update(feed, obj)
             feed.rss = obj.xmlUrl
             feed.insertid = insertid
             sync(feed)

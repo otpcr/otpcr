@@ -9,7 +9,9 @@ import time
 
 from ..command import Commands
 from ..persist import laps
-from ..runtime import STARTTIME
+
+
+STARTTIME = time.time()
 
 
 def upt(event):

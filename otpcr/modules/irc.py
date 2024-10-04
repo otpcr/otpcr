@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0105,W0201,W0718,E1102
+# pylint: disable=R,C0103,W0105,W0201,W0613,w0622,W0718,E1102
 
 
 "internet relay chat"
@@ -17,13 +17,26 @@ import _thread
 
 
 from ..command import Commands, command
-from ..object  import Default, Object, edit, fmt, keys
+from ..object  import Object, Obj, edit, keys, format
 from ..persist import last, sync
-from ..runtime import Broker, Client, Event, later, launch
+from ..runtime import NAME, Broker, Event, Reactor, later, launch
 
 
-NAME = Client.__module__.split(".", maxsplit=2)[-2]
-VERBOSE = False
+IGNORE = ["PING", "PONG", "PRIVMSG"]
+
+
+output = None
+
+
+def debug(txt):
+    "log text."
+    for ign in IGNORE:
+        if ign in txt:
+            return
+    if output:
+        output(txt)
+
+
 saylock = _thread.allocate_lock()
 
 
@@ -32,10 +45,11 @@ def init():
     irc = IRC()
     irc.start()
     irc.events.ready.wait()
+    debug(f'{format(Config, skip="edited,password")}')
     return irc
 
 
-class Config(Default):
+class Config(Obj):
 
     "Config"
 
@@ -49,13 +63,12 @@ class Config(Default):
     sasl = False
     server = 'localhost'
     servermodes = ''
-    sleep = 60
+    sleep = 120
     username = NAME
     users = False
-    verbose = False
 
     def __init__(self):
-        Default.__init__(self)
+        Obj.__init__(self)
         self.channel = self.channel or Config.channel
         self.commands = self.commands or Config.commands
         self.nick = self.nick or Config.nick
@@ -63,25 +76,6 @@ class Config(Default):
         self.realname = self.realname or Config.realname
         self.server = self.server or Config.server
         self.username = self.username or Config.username
-
-
-class Logging:
-
-    "Logging"
-
-    filter = []
-
-
-Logging.filter = ["PING", "PONG", "PRIVMSG"]
-
-
-def debug(txt):
-    "print to console."
-    for skp in Logging.filter:
-        if skp in txt:
-            return
-    if VERBOSE:
-        VERBOSE(txt)
 
 
 class TextWrap(textwrap.TextWrapper):
@@ -171,23 +165,23 @@ class Output:
         return 0
 
 
-class IRC(Client, Output):
+class IRC(Reactor, Output):
 
     "IRC"
 
     def __init__(self):
-        Client.__init__(self)
+        Reactor.__init__(self)
         Output.__init__(self)
         self.buffer = []
         self.cfg = Config()
         self.channels = []
-        self.events = Default()
+        self.events = Obj()
         self.events.authed = threading.Event()
         self.events.connected = threading.Event()
         self.events.joined = threading.Event()
         self.events.ready = threading.Event()
         self.sock = None
-        self.state = Default()
+        self.state = Obj()
         self.state.dostop = False
         self.state.error = ""
         self.state.keeprunning = False
@@ -205,6 +199,7 @@ class IRC(Client, Output):
         self.register('PRIVMSG', cb_privmsg)
         self.register('QUIT', cb_quit)
         self.register("366", cb_ready)
+        Broker.add(self)
 
     def announce(self, txt):
         "announce on all channels."
@@ -515,7 +510,7 @@ class IRC(Client, Output):
         self.events.connected.clear()
         self.events.joined.clear()
         launch(Output.out, self)
-        Client.start(self)
+        Reactor.start(self)
         launch(
                self.doconnect,
                self.cfg.server or "localhost",
@@ -531,7 +526,7 @@ class IRC(Client, Output):
         self.disconnect()
         self.dostop.set()
         self.oput(None, None)
-        Client.stop(self)
+        Reactor.stop(self)
 
     def wait(self):
         "wait for ready."
@@ -613,8 +608,8 @@ def cb_privmsg(bot, evt):
             return
         if evt.txt:
             evt.txt = evt.txt[0].lower() + evt.txt[1:]
-        debug(f"command from {evt.origin}: {evt.txt}")
-        command(bot, evt)
+        if evt.txt:
+            command(bot, evt)
 
 
 def cb_quit(bot, evt):
@@ -633,7 +628,7 @@ def cfg(event):
     last(config)
     if not event.sets:
         event.reply(
-                    fmt(
+                    format(
                         config,
                         keys(config),
                         skip='control,password,realname,sleep,username'.split(",")
