@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C0413,W0212,W0401,W0614,W0622,W0718
+# pylint: disable=C0413,W0105,W0718
 
 
 "tinder"
 
 
 import os
-import profile
 import shutil
 import sys
 import termios
@@ -18,22 +17,17 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.command import Commands, command, parse
-from otpcr.object  import Default, Object
+from otpcr.command import NAME, STARTTIME, Commands, Config, command, parse
 from otpcr.modules import face
+from otpcr.object  import Object
 from otpcr.persist import Workdir, laps, skel
-from otpcr.runtime import STARTTIME, Client, Event, errors, later, launch
+from otpcr.runtime import Client, Errors, Event, later, launch
 
 
-cfg = Default()
+"defines"
 
 
-if os.path.exists("mods"):
-    from mods import face as MODS
-    MODS.rss.DEBUG = True
-
-
-face.rss.DEBUG = True
+cfg = Config()
 
 
 LAP = 1
@@ -50,7 +44,7 @@ paylock = _thread.allocate_lock()
 param = Object()
 param.cmd = [""]
 param.dpl = ["hnrss title,url"]
-param.fnd = ["log", "todo", "rss", "config"]
+param.fnd = ["log", "todo", "rss", "config", "urls"]
 param.imp = ["tests/feeds.opml"]
 param.log = ["bla"]
 param.mod = [""]
@@ -58,11 +52,13 @@ param.mre = [""]
 param.nme = ["hnrss hackernews"]
 param.pwd = ["bla mekker"]
 param.rem = ["hnrss"]
-param.req = [""]
 param.res = [""]
-param.rss = ["http://hnrss.org/newest",]
-param.tdo = ["mekker"]
+param.rss = ["http://hnrss.org/newest", ""]
+param.tdo = ["mekker", ""]
 param.ver = [""]
+
+
+"cli"
 
 
 class CLI(Client):
@@ -71,82 +67,110 @@ class CLI(Client):
 
     def __init__(self):
         Client.__init__(self)
-        self.register("command", command)
+        self.register("event", command)
+
+    def callback(self, evt):
+        "wait for result"
+        Client.callback(self, evt)
+        if "w" in cfg.opts:
+            evt.wait()
 
     def raw(self, txt):
+        "check verboise."
         if "v" in cfg.opts:
             print(txt)
+            sys.stdout.flush()
+
+
+"utilities"
 
 
 def banner():
     "show banner."
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{Workdir.name.upper()} since {tme}")
+    print(f"{NAME.upper()} since {tme}")
 
 
-def consume(events):
-    for evt in events:
+def consume(evts):
+    "wait for all events to finish."
+    for evt in evts:
         evt.wait()
+
+
+def errors():
+    "print errors."
+    for erring in Errors.errors:
+        for line in erring:
+            print(line)
 
 
 def payload(clt):
     "do payload."
-    with paylock:
-        nmr = 0
-        for cmdd in Commands.cmds:
-            for ex in getattr(param, cmdd, [""]):
-                evt = Event()
-                evt.txt = cmdd + " " + ex
-                clt.put(evt)
-                events.append(evt)
-                nmr += 1
-        return nmr
+    nmr = 0
+    for cmdd in sorted(Commands.cmds):
+        for ex in getattr(param, cmdd, [""]):
+            evt = Event()
+            evt.txt = cmdd + " " + ex
+            clt.put(evt)
+            events.append(evt)
+            nmr += 1
+    return nmr
 
 
-def wrap(func):
+def wrap(function):
     "reset console."
-    old = None
+    old3 = None
     try:
-        old = termios.tcgetattr(sys.stdin.fileno())
+        old3 = termios.tcgetattr(sys.stdin.fileno())
     except termios.error:
         pass
     try:
-        func()
+        function()
     except (KeyboardInterrupt, EOFError):
-        print("")
+        pass
     except Exception as ex:
         later(ex)
     finally:
-        if old:
-            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
+        if old3:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
+
+
+"main"
+
+
 
 
 def main():
     "main"
     Workdir.wdr = ".test"
+    face.rss.DEBUG = True
     parse(cfg, " ".join(sys.argv[1:]))
-    NRCOMMAND = len(Commands.cmds) or 1
+    nrcommands = len(Commands.cmds) or 1
     if "v" in cfg.opts:
         banner()
-    if "f" in cfg.opts:
+    if "f" not in cfg.opts:
         if os.path.exists(Workdir.wdr):
             shutil.rmtree(Workdir.wdr)
     skel()
     clt = CLI()
     clt.start()
     nrs = cfg.index or 1
+    thrs = []
     for _nr in range(nrs):
-        launch(payload, clt)
+        thrs.append(launch(payload, clt))
+    for thr in thrs:
+        thr.join()
     consume(events)
-    clt.wait()
     if "v" in cfg.opts:
         endtime = time.time()
         lap = laps(endtime-STARTTIME)
-        percall = (endtime-STARTTIME)/(nrs*NRCOMMAND)
+        percall = (endtime-STARTTIME)/(nrs*nrcommands)
         print(",".join(Commands.cmds))
-        print(f"{lap} {nrs} {NRCOMMAND} {percall}")
+        print(f"{lap} {nrs} {nrcommands} {percall}")
+        if not Errors.errors:
+            print("no errors")
 
 
 if __name__ == "__main__":
     wrap(main)
-    errors(print)
+    errors()

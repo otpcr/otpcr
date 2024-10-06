@@ -1,13 +1,72 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=R,W0105,C0413,W0611,W0718
+# pylint: disable=R,W0105,C0413,W0223,W0611,W0718
 
 
 "command"
 
 
+import time
+import _thread
+
+
 from .object  import Obj
-from .runtime import later
+from .runtime import Client, later, launch
+
+
+NAME = __file__.rsplit("/", maxsplit=2)[-2]
+STARTTIME = time.time()
+
+
+class Config(Obj):
+
+    "Config"
+
+
+class Broker:
+
+    "Broker"
+
+    objs = {}
+
+    @staticmethod
+    def add(obj):
+        "add object."
+        Broker.objs[repr(obj)] = obj
+
+    @staticmethod
+    def announce(txt, kind=None):
+        "announce text on brokered objects."
+        for obj in Broker.all(kind):
+            if "announce" in dir(obj):
+                obj.announce(txt)
+
+    @staticmethod
+    def all(kind=None):
+        "return all objects."
+        result = []
+        if kind is not None:
+            for key in [x for x in Broker.objs if kind in x]:
+                result.append(Broker.get(key))
+        else:
+            result.extend(list(Broker.objs.values()))
+        return result
+
+    @staticmethod
+    def get(orig):
+        "return object by matching repr."
+        return Broker.objs.get(orig)
+
+
+
+class CLI(Client):
+
+    "CLI"
+
+    def __init__(self):
+        Client.__init__(self)
+        Broker.add(self)
+        self.register("event", command)
 
 
 class Commands:
@@ -93,12 +152,50 @@ def parse(obj, txt=None):
     return obj
 
 
-"interface"
+
+def forever():
+    "it doesn't stop, until ctrl-c"
+    while True:
+        try:
+            time.sleep(1.0)
+        except (KeyboardInterrupt, EOFError):
+            _thread.interrupt_main()
+
+
+def init(*pkgs):
+    "run the init function in modules."
+    mods = []
+    for pkg in pkgs:
+        for modname in dir(pkg):
+            if modname.startswith("__"):
+                continue
+            modi = getattr(pkg, modname)
+            if "init" not in dir(modi):
+                continue
+            thr = launch(modi.init)
+            mods.append((modi, thr))
+    return mods
+
+
+def wrap(func):
+    "reset console."
+    try:
+        func()
+    except (KeyboardInterrupt, EOFError):
+        pass
+    except Exception as ex:
+        later(ex)
 
 
 def __dir__():
     return (
+        'CLI',
+        'Broker',
         'Commands',
+        'Config',
         'command',
-        'parse'
+        'forever',
+        'init',
+        'parse',
+        'wrap'
     )
