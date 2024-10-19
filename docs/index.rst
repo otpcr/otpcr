@@ -11,20 +11,8 @@
 
 .. raw:: html
 
-    <center><b>OTP-CR-117/19</b></center><br>
+    <center><b>RECONSIDER</b></center><br>
 
-
-.. raw:: html
-
-    <center>
-
-
-``OTP-CR-117/19`` entered the Communications Register of the Office on :ref:`4 march 2019 <writings>`
-
-
-.. raw:: html
-
-    </center>
 
 |
 | **Information and Evidence Unit**
