@@ -11,7 +11,7 @@
 
 .. raw:: html
 
-    <center><b>RECONSIDER</b></center><br>
+    <center><b>RECONSIDER</b></center>
 
 
 |

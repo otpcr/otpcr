@@ -5,7 +5,7 @@
 
 .. raw:: html
 
-    <br>
+    <br><br>
     <center><b>MANUAL</b></center>
 
 
