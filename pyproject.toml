@@ -54,7 +54,6 @@ packages = [
 ]
 "share/doc/otpcr/docs" = [
     'docs/googlea6568bcc05c8d50b.html',
-    'docs/about.rst',
     'docs/ack.png',
     'docs/ack3.png',
     'docs/bevestigd.jpg',

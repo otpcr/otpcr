@@ -85,5 +85,4 @@ p.s.
     writings
     evidence
     guilty
-    about    
     manual

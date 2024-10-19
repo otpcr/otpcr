@@ -9,6 +9,20 @@
     <center><b>MANUAL</b></center><br>
 
 
+.. raw:: html
+
+    <center>
+
+.. image:: skull3.png
+    :width: 90%
+    :target: index.html
+
+.. raw:: html
+
+    </center>
+
+
+
 **NAME**
 
 
@@ -187,3 +201,5 @@
 **COPYRIGHT**
 
     | ``OTPCR`` is Public Domain.
+
+
