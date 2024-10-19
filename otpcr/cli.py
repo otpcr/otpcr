@@ -10,14 +10,9 @@ import os
 import sys
 
 
-sys.path.insert(0, os.getcwd())
-
-
-from nixt.runtime import Event
-
-
 from .command import NAME, CLI, Commands, command
 from .modules import face
+from .runtime import Event
 
 
 class CLIS(CLI):

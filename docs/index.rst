@@ -14,6 +14,18 @@
     <center><b>OTP-CR-117/19</b></center><br>
 
 
+.. raw:: html
+
+    <center>
+
+
+``OTP-CR-117/19`` entered the Communications Register of the Office on :ref:`4 march 2019 <writings>`
+
+
+.. raw:: html
+
+    </center>
+
 |
 | **Information and Evidence Unit**
 | **Office of the Prosecutor**
@@ -69,13 +81,6 @@ were aware that these medicine are poison at the time they voted for this law
 and the day the Wfz law took effect (1-1-2019), i ask the prosecutor to
 prosecute the king for making the commiting of the above mentioned crimes
 (killing, torture and impotent making) possible.
-
-
-p.s.
-
-
-1) Entered in the Communications Register of the Office on :ref:`4 march 2019 <writings>`
-2) Your reference ``OTP-CR-117/19``
 
 
 .. toctree::

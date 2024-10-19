@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # This file is placed in the Public Domain.
 # pylint: disable=C0413,W0105,W0718
 
@@ -13,14 +12,9 @@ import termios
 import time
 
 
-sys.path.insert(0, os.getcwd())
-
-
-from nixt.runtime import Errors, Event, later
-
-
 from .command import NAME, CLI, Config, forever, later, init, parse
 from .modules import face
+from .runtime import Errors, Event, later
 
 
 cfg = Config()
@@ -28,32 +22,25 @@ cfg = Config()
 
 class Console(CLI):
 
-    "Console"
-
     def callback(self, evt):
-        "wait for result."
         CLI.callback(self, evt)
         evt.wait()
 
     def poll(self):
-        "poll console and create event."
         evt = Event()
         evt.txt = input("> ")
         return evt
 
     def raw(self, txt):
-        "print text."
         print(txt)
 
 
 def banner():
-    "show banner."
     tme = time.ctime(time.time()).replace("  ", " ")
     print(f"{NAME.upper()} since {tme}")
 
 
 def errors():
-    "print errors."
     for error in Errors.errors:
         for line in error:
             print(line)
@@ -62,7 +49,6 @@ def errors():
 
 
 def wrap(func):
-    "reset console."
     old2 = None
     try:
         old2 = termios.tcgetattr(sys.stdin.fileno())
@@ -79,13 +65,7 @@ def wrap(func):
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old2)
 
 
-"main"
-
-
-
-
 def main():
-    "main"
     readline.redisplay()
     parse(cfg, " ".join(sys.argv[1:]))
     if "v" in cfg.opts:
@@ -100,6 +80,10 @@ def main():
     forever()
 
 
-if __name__ == "__main__":
+def wrapped():
     wrap(main)
     errors()
+
+
+if __name__ == "__main__":
+    wrapped()

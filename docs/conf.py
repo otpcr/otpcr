@@ -123,7 +123,7 @@ rst_epilog = '''.. raw:: html
     <center>
     <b>
 
-:ref:`home <home>` - :ref:`manual <manual>`  - :ref:`evidence <evidence>` - :ref:`writings <writings>` - :ref:`guilty <guilty>` 
+:ref:`home <home>` - :ref:`manual <manual>`  - :ref:`evidence <evidence>` - :ref:`guilty <guilty>` - :ref:`writings <writings>` 
 
 .. raw:: html
 

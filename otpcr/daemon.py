@@ -14,12 +14,10 @@ import sys
 sys.path.insert(0, os.getcwd())
 
 
-from nixt.persist import pidfile, pidname
-from nixt.runtime import Errors
-
-
 from .command import forever, init, wrap
 from .modules import face
+from .persist import pidfile, pidname
+from .runtime import Errors
 
 
 def daemon(verbose=False):
@@ -66,6 +64,10 @@ def main():
     forever()
 
 
-if __name__ == "__main__":
+def wrapped():
     wrap(main)
     errors()
+
+
+if __name__ == "__main__":
+    wrapped()
