@@ -5,8 +5,8 @@
 
 .. raw:: html
 
-    <br><br>
-    <center><b>MANUAL</b></center><br>
+    <br>
+    <center><b>MANUAL</b></center>
 
 
 .. raw:: html
@@ -63,7 +63,7 @@
 
     Current status is a :ref:`"no basis to proceed"
     <writings>` judgement of the prosecutor which
-    requires a :ref:`"basis to prosecute" <reconsider>`
+    requires a :ref:`"basis to prosecute" <home>`
     to have the king actually arrested.
 
 

@@ -200,7 +200,7 @@ def edit(obj, setter, skip=False):
             setattr(obj, key, val)
 
 
-def format(obj, args=None, skip=None, plain=False):
+def fmt(obj, args=None, skip=None, plain=False):
     "format an object to a printable string."
     if args is None:
         args = keys(obj)

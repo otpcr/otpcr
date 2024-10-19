@@ -21,7 +21,7 @@ from urllib.parse import quote_plus, urlencode
 
 
 from ..command import Commands
-from ..object  import Object, Obj, format, update
+from ..object  import Object, Obj, fmt, update
 from ..persist import find, fntime, laps, last, sync
 from ..runtime import Broker, Repeater, launch
 
@@ -367,7 +367,7 @@ def rss(event):
         for fnm, feed in find('rss'):
             nrs += 1
             elp = laps(time.time()-fntime(fnm))
-            txt = format(feed)
+            txt = fmt(feed)
             event.reply(f'{nrs} {txt} {elp}')
         if not nrs:
             event.reply('no rss feed found.')
