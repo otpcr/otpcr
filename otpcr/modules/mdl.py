@@ -354,7 +354,7 @@ def cbstats(evt):
         nrday = int(DAY/needed)
         delta2 = time.time() - getday()
         thisday = int(delta2/needed)
-        txt = "%s #%s (%s/%s) every %s" % (
+        txt = "%s #%s (%s/%s/%s) every %s" % (
                                            getalias(name).upper(),
                                            nrtimes,
                                            thisday,
