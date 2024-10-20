@@ -274,7 +274,7 @@ oorzaken = Object()
 
 def getalias(txt):
     "return value of alias."
-    result = None
+    result = ""
     for key, value in aliases.items():
         if txt.lower() in key.lower():
             result = value
@@ -354,16 +354,16 @@ def cbstats(evt):
         nrday = int(DAY/needed)
         delta2 = time.time() - getday()
         thisday = int(delta2/needed)
-        txt = "patient #%s died from %s (%s/%s) every %s (%s/year)" % (
-                                                               nrtimes,
-                                                               getalias(name),
-                                                               thisday,
-                                                               nrday,
-                                                               laps(needed),
-                                                               nryear,
-                                                              )
+        txt = "%s #%s (%s/%s) every %s" % (
+                                           getalias(name).upper(),
+                                           nrtimes,
+                                           thisday,
+                                           nrday,
+                                           nryear,
+                                           laps(needed)
+                                          )
         for obj in Cache.typed("IRC"):
-            obj.announce(txt2)
+            obj.announce(txt)
 
 
 def now(event):
@@ -377,17 +377,15 @@ def now(event):
         nryear = int(YEAR/needed)
         nrday = int(DAY/needed)
         thisday = int(DAY % needed)
-        txt += "patient #%s died from %s (%s/%s/%s) every %s" % (
-                                                                 nrtimes,
-                                                                 getalias(name),
-                                                                 thisday,
-                                                                 nrday,
-                                                                 nryear,
-                                                                 laps(needed)
-                                                                )
+        txt += "%s #%s (%s/%s/%s) every %s" % (
+                                               getalias(name).upper(),
+                                               nrtimes,
+                                               thisday,
+                                               nrday,
+                                               nryear,
+                                               laps(needed)
+                                              )
         event.reply(txt)
-    else:
-        event.reply("not needed")
 
 
 def boot():
