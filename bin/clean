@@ -40,10 +40,9 @@ def popen(txt):
 def main():
     popen("rm -fR DEAD* build dist MANIFEST *.egg-info *.whl")
     popen("rm -fR .pytest_cache .test __pycache__ .ruff_cache")
+    if "-f" not in sys.argv:
+        popen("rm -fR env html")
     popen("rm -fR .*~ *~")
-    if "-f" in sys.argv:
-        popen("rm -fR html store env")
-        popen('rm -fR docs/otpcr.*.rst')
     loop(".", "rm -fR *~")
     loop(".", "rm -fR __pycache__")
 
