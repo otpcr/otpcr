@@ -6,21 +6,7 @@
 .. raw:: html
 
     <br><br>
-    <center><b>MANUAL</b></center>
-
-
-.. raw:: html
-
-    <center>
-
-.. image:: skull3.png
-    :width: 90%
-    :target: index.html
-
-.. raw:: html
-
-    </center>
-
+    <center><b>MANUAL</b></center><br>
 
 
 **NAME**
