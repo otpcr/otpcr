@@ -10,15 +10,15 @@ import time
 
 
 from ..main    import Event
-from ..object  import Object, construct, keys, values
+from ..object  import Object, construct, keys
 from ..persist import Cache, laps
 from ..runtime import Repeater, launch
 
 
 DAY = 24*60*60
 YEAR = 365*DAY
-SOURCE = "https://github.com/xobjectz/otpcr"
-STARTDATE = "2019-04-03 00:00:00"
+SOURCE = "https://github.com/otpcr/otpcr"
+STARTDATE = "2019-03-04 00:00:00"
 STARTTIME = time.mktime(time.strptime(STARTDATE, "%Y-%m-%d %H:%M:%S"))
 
 
@@ -234,20 +234,20 @@ aantal = """
 
 aliases = {}
 aliases["Nieuwvormingen"] = "cancer"
-aliases["Hart en vaatstelsel"] = "hart disease"
-aliases["Psychische en gedragsstoornissen"] = "mental illness"
+aliases["Hart en vaatstelsel"] = "hart"
+aliases["Psychische en gedragsstoornissen"] = "mental"
 aliases["Ademhalingsorganen"] = "breathing"
 aliases["Uitwendige doodsoorzaken"] = "externals"
 aliases["Zenuwstelsel en zintuigen"] = "nerves"
-aliases["Afwijkende klinische bevindingen"] = "other diseases NOS"
-aliases["Spijsverteringsorganen"] = "stomach disease"
-aliases["Endocriene, voedings-, stofwisseling"] = "metabolism disease"
-aliases["Urogenitaal stelsel"] = "kidney disease"
-aliases["Infectieuze en parasitaire ziekten"] = "infectious disease"
-aliases["Botspierstelsel en bindweefsel"] = "muscle disease"
-aliases["Bloed, bloedvormende organen"] = "blood disease"
-aliases["Aangeboren afwijkingen"] = "birth defect"
-aliases["Huid en subcutis"] = "skin disease"
+aliases["Afwijkende klinische bevindingen"] = "NOS"
+aliases["Spijsverteringsorganen"] = "stomach"
+aliases["Endocriene, voedings-, stofwisseling"] = "metabolism"
+aliases["Urogenitaal stelsel"] = "kidney"
+aliases["Infectieuze en parasitaire ziekten"] = "infectious"
+aliases["Botspierstelsel en bindweefsel"] = "muscle"
+aliases["Bloed, bloedvormende organen"] = "blood"
+aliases["Aangeboren afwijkingen"] = "birth"
+aliases["Huid en subcutis"] = "skin"
 aliases["Zwangerschap"] = "pregnancy"
 aliases["Suicide"] = "suicide"
 
@@ -340,7 +340,7 @@ def cbnow(_evt):
         txt += f"{getalias(name)} {nrtimes} |"
     txt += " http://genocide.rtfd.io"
     for obj in Cache.typed("IRC"):
-        obj.announce(txt2)
+        obj.announce(txt)
 
 
 def cbstats(evt):
@@ -354,14 +354,15 @@ def cbstats(evt):
         nrday = int(DAY/needed)
         delta2 = time.time() - getday()
         thisday = int(delta2/needed)
-        txt = "%s #%s (%s/%s/%s) every %s" % (
-                                           getalias(name).upper(),
-                                           nrtimes,
-                                           thisday,
-                                           nrday,
-                                           nryear,
-                                           laps(needed)
-                                          )
+        txt = "%s #%s (%s/%s/%s) every %s %s" % (
+            getalias(name).upper(),
+            nrtimes,
+            thisday,
+            nrday,
+            nryear,
+            laps(needed),
+            laps(delta)
+        )
         for obj in Cache.typed("IRC"):
             obj.announce(txt)
 
@@ -372,19 +373,20 @@ def now(event):
     needed = seconds(getnr(name))
     if needed:
         delta = time.time() - STARTTIME
-        txt = laps(delta) + " "
+        txt = ""
         nrtimes = int(delta/needed)
         nryear = int(YEAR/needed)
         nrday = int(DAY/needed)
         thisday = int(DAY % needed)
-        txt += "%s #%s (%s/%s/%s) every %s" % (
-                                               getalias(name).upper(),
-                                               nrtimes,
-                                               thisday,
-                                               nrday,
-                                               nryear,
-                                               laps(needed)
-                                              )
+        txt += "%s #%s (%s/%s/%s) every %s %s" % (
+            getalias(name).upper(),
+            nrtimes,
+            thisday,
+            nrday,
+            nryear,
+            laps(needed),
+            laps(delta)
+        )
         event.reply(txt)
 
 
