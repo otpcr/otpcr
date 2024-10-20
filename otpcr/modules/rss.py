@@ -38,7 +38,9 @@ def init():
 
 class Feed(Object):
 
-    pass
+    def __init__(self):
+        Object.__init__(self)
+        self.link = ""
 
 
 class Rss(Object):

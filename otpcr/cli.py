@@ -20,6 +20,7 @@ from .runtime import Errors, Reactor, later
 
 
 cfg = Config()
+cfg.txt = ""
 
 
 class CLI(Client):

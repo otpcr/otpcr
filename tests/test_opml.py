@@ -10,7 +10,7 @@
 import unittest
 
 
-from otpcr.modules.rss import OPMLParser
+from otpcr.modules.opm import OPMLParser
 
 
 TXT = """<opml version="1.0">

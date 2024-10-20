@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.  pylint:
-# pylint: disable=C,R,W0105,W0719
+# pylint: disable=C,R,W0105,W0719,E1101
 
 
 "persist to disk"
@@ -102,7 +102,7 @@ def find(mtc, selector=None, index=None, deleted=False, matching=False):
         obj = Object()
         fetch(obj, fnm)
         Cache.add(fnm, obj)
-        if not deleted and '__deleted__' in obj and obj.__deleted__:
+        if not deleted and '__deleted__' in dir(obj) and obj.__deleted__:
             continue
         if selector and not search(obj, selector, matching):
             continue

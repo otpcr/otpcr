@@ -22,10 +22,10 @@ classifiers=[
 ]
 
 [project.scripts]
-"otpcr"  = "otpcr.cli:main"
+"otpcr"  = "otpcr.cli:wrapped"
 "otpcrc" = "otpcr.console:wrapped"
-"otpcrd" = "otpcr.daemon:main"
-"otpcrs" = "otpcr.service:main"
+"otpcrd" = "otpcr.daemon:wrapped"
+"otpcrs" = "otpcr.service:wrapped"
 
 [project.urls]
 "home" = "https://pypi.org/project/otpcr"

@@ -10,7 +10,7 @@
 import unittest
 
 
-from otpcr.modules.rss import OPMLParser
+from otpcr.modules.opm import OPMLParser
 
 
 class TestAttrs(unittest.TestCase):

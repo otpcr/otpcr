@@ -5,7 +5,6 @@
 "console"
 
 
-import os
 import readline
 import sys
 import termios
@@ -15,11 +14,11 @@ import time
 from .main    import NAME, Client, Command, Config, forever, scanner
 from .modules import face
 from .object  import Object, parse
-from .persist import modname
 from .runtime import Errors, later
 
 
 Cfg = Config()
+Cfg.opts = Object()
 
 
 class Console(Client):

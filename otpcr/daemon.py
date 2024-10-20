@@ -5,15 +5,13 @@
 "daemon"
 
 
-import getpass
 import os
-import pwd
 import sys
 
 
 from .main    import NAME, forever, privileges, scanner, wrap
 from .modules import face
-from .persist import modname, pidfile, pidname
+from .persist import pidfile, pidname
 from .runtime import Errors
 
 
@@ -43,12 +41,15 @@ def errors():
             print(line)
 
 
+ever = forever
+
+
 def main():
     daemon(True)
     privileges()
     pidfile(pidname(NAME))
     scanner(face, init=True)
-    forever()
+    ever()
 
 
 def wrapped():
