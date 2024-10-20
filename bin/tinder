@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C0413,W0105,W0718
+# pylint: disable=C,W0105,W0201,W0212,W0718
 
 
 "tinder"
@@ -11,20 +11,19 @@ import shutil
 import sys
 import termios
 import time
+import threading
 import _thread
 
 
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.command import NAME, STARTTIME, Commands, Config, command, parse
+from otpcr.main    import NAME, STARTTIME, Client, Commands, Config, Event
+from otpcr.main    import command, scanner
 from otpcr.modules import face
-from otpcr.object  import Object
+from otpcr.object  import Object, parse
 from otpcr.persist import Workdir, laps, skel
-from otpcr.runtime import Client, Errors, Event, later, launch
-
-
-"defines"
+from otpcr.runtime import Errors, Reactor, later, launch
 
 
 cfg = Config()
@@ -34,10 +33,10 @@ LAP = 1
 NRS = 1
 NRCOMMAND = 1
 PERCALL   = 1
-STARTTIME = time.time()
 
 
 events = []
+face.rss.DEBUG = True
 paylock = _thread.allocate_lock()
 
 
@@ -58,54 +57,30 @@ param.tdo = ["mekker", ""]
 param.ver = [""]
 
 
-"cli"
-
-
 class CLI(Client):
 
-    "command line interface."
-
-    def __init__(self):
-        Client.__init__(self)
-        self.register("event", command)
-
-    def callback(self, evt):
-        "wait for result"
-        Client.callback(self, evt)
-        if "w" in cfg.opts:
-            evt.wait()
-
     def raw(self, txt):
-        "check verboise."
         if "v" in cfg.opts:
             print(txt)
-            sys.stdout.flush()
-
-
-"utilities"
 
 
 def banner():
-    "show banner."
     tme = time.ctime(time.time()).replace("  ", " ")
     print(f"{NAME.upper()} since {tme}")
 
 
 def consume(evts):
-    "wait for all events to finish."
     for evt in evts:
         evt.wait()
 
 
 def errors():
-    "print errors."
     for erring in Errors.errors:
         for line in erring:
             print(line)
 
 
 def payload(clt):
-    "do payload."
     nmr = 0
     for cmdd in sorted(Commands.cmds):
         for ex in getattr(param, cmdd, [""]):
@@ -118,7 +93,6 @@ def payload(clt):
 
 
 def wrap(function):
-    "reset console."
     old3 = None
     try:
         old3 = termios.tcgetattr(sys.stdin.fileno())
@@ -135,16 +109,10 @@ def wrap(function):
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
 
 
-"main"
-
-
-
-
 def main():
-    "main"
     Workdir.wdr = ".test"
-    face.rss.DEBUG = True
     parse(cfg, " ".join(sys.argv[1:]))
+    scanner(face)
     nrcommands = len(Commands.cmds) or 1
     if "v" in cfg.opts:
         banner()
@@ -157,7 +125,7 @@ def main():
     nrs = cfg.index or 1
     thrs = []
     for _nr in range(nrs):
-        thrs.append(launch(payload, clt))
+        thrs.append(launch(payload, "payload", clt))
     for thr in thrs:
         thr.join()
     consume(events)

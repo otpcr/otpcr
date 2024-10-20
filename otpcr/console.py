@@ -11,7 +11,7 @@ import termios
 import time
 
 
-from .main    import NAME, Client, Command, Config, forever, scanner
+from .main    import NAME, Client, Config, Event, forever, scanner
 from .modules import face
 from .object  import Object, parse
 from .runtime import Errors, later
@@ -28,7 +28,7 @@ class Console(Client):
         evt.wait()
 
     def poll(self):
-        evt = Command()
+        evt = Event()
         evt.txt = input("> ")
         return evt
 

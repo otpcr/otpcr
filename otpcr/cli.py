@@ -12,7 +12,7 @@ import time
 import _thread
 
 
-from .main    import NAME, Client, Command, Config, command, scanner
+from .main    import NAME, Client, Config, Event, command, scanner
 from .modules import face
 from .object  import Object, parse
 from .persist import Workdir, modname
@@ -39,7 +39,7 @@ def main():
     parse(cfg, " ".join(sys.argv[1:]))
     scanner(face)
     cli = CLI()
-    evt = Command()
+    evt = Event()
     evt.txt = cfg.txt
     command(cli, evt)
     evt.wait()

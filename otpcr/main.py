@@ -66,7 +66,7 @@ class Client(Reactor):
 
     def __init__(self):
         Reactor.__init__(self)
-        self.register("command", command)
+        self.register("event", command)
 
     def display(self, evt):
         for txt in evt.result:
@@ -76,13 +76,13 @@ class Client(Reactor):
         raise NotImplementedError
 
 
-class Command:
+class Event:
 
     def __init__(self):
         self._ready  = threading.Event()
         self._thr    = None
         self.result  = []
-        self.type    = "command"
+        self.type    = "event"
 
     def __getattr__(self, key):
         return self.__dict__.get(key, "")
@@ -149,8 +149,8 @@ def __dir__():
         'NAME',
         'STARTTIME',
         'Commands',
-        'Command',
         'Config',
+        'Event',
         'forever',
         'privileges',
         'scan',
