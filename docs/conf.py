@@ -5,11 +5,11 @@
 # ruff: noqa: E402, E501
 
 
-"Office of the Prosecutor Communication 117 of the year 2019"
+"Office of the Prosecutor Communication 117 of the year 2019."
 
 
 NAME = "otpcr"
-VERSION = "49"
+VERSION = "54"
 
 
 import os
@@ -123,7 +123,7 @@ rst_epilog = '''.. raw:: html
     <center>
     <b>
 
-:ref:`reconsider <home>` - :ref:`evidence <evidence>` - :ref:`guilty <guilty>` - :ref:`writings <writings>` - :ref:`manual <manual>`
+:ref:`about <about>`  - :ref:`reconsider <home>` -  :ref:`evidence <evidence>` - :ref:`guilty <guilty>` - :ref:`writings <writings>`
 
 .. raw:: html
 

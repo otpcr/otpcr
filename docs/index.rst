@@ -74,6 +74,7 @@ prosecute the king for making the commiting of the above mentioned crimes
 .. toctree::
     :hidden:
 
+    about
     reconsider
     writings
     evidence
