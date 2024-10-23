@@ -11,28 +11,29 @@ import shutil
 import sys
 import termios
 import time
-import threading
 import _thread
 
 
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.main    import NAME, STARTTIME, Client, Commands, Config, Event
-from otpcr.main    import command, scanner
+from otpcr.main    import Client, Commands, Config, Event
+from otpcr.main    import parse, scanner
 from otpcr.modules import face
-from otpcr.object  import Object, parse
-from otpcr.persist import Workdir, laps, skel
-from otpcr.runtime import Errors, Reactor, later, launch
+from otpcr.object  import Object
+from otpcr.persist import NAME, Workdir, laps, skel
+from otpcr.runtime import Errors, later, launch
 
 
 cfg = Config()
+cfg.index = 0
 
 
 LAP = 1
 NRS = 1
 NRCOMMAND = 1
 PERCALL   = 1
+STARTTIME = time.time()
 
 
 events = []
@@ -125,7 +126,7 @@ def main():
     nrs = cfg.index or 1
     thrs = []
     for _nr in range(nrs):
-        thrs.append(launch(payload, "payload", clt))
+        thrs.append(launch(payload, clt))
     for thr in thrs:
         thr.join()
     consume(events)
