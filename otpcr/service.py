@@ -2,7 +2,7 @@
 # pylint: disable=C
 
 
-"Nix Em Service"
+"service"
 
 
 from .main    import forever, privileges, scanner, wrap
@@ -26,4 +26,3 @@ def main():
 
 if __name__ == "__main__":
     wrapped()
-

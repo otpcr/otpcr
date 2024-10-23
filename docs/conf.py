@@ -5,7 +5,7 @@
 # ruff: noqa: E402, E501
 
 
-"Office of the Prosecutor Communication 117 of the year 2019."
+"Office of the Prosecutor Communication 117 of the year 2019"
 
 
 NAME = "otpcr"
@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.join(curdir))
 
 
 project = NAME
-author = 'Bart Thate <record11719@gmail.com>'
+author = 'Bart Thate <bthate@dds.nl>'
 project_copyright = "Public Domain"
 master_doc = 'index'
 version = '%s' % VERSION
