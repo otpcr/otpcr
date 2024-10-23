@@ -2,7 +2,7 @@
 # pylint: disable=C0209
 
 
-"Genocide model of the Netherlands since 01-01-2020"
+"Genocide model of the Netherlands since 04-02-2019"
 
 
 import datetime

@@ -9,7 +9,7 @@
 import unittest
 
 
-from otpcr.object import Object, fmt, fqn, items, keys, update, values
+from otpcr.object import Object, items, keys, update, values
 
 
 VALIDJSON = '{"test": "bla"}'
@@ -141,10 +141,6 @@ class TestObject(unittest.TestCase):
         "test module name."
         self.assertEqual(Object().__module__, "otpcr.object")
 
-    def test_fqn(self):
-        "test full qualified domain name."
-        self.assertEqual(fqn(Object()), "otpcr.object.Object")
-
     def test_repr(self):
         "test representation."
         self.assertTrue(update(Object(), {"key": "value"}).__repr__(), {"key": "value"})
@@ -159,11 +155,6 @@ class TestObject(unittest.TestCase):
         "test stringify."
         obj = Object()
         self.assertEqual(str(obj), "{}")
-
-    def test_fmt(self):
-        "test object format."
-        obj = Object()
-        self.assertEqual(fmt(obj), "")
 
     def test_getattr(self):
         "test retrieving of attributes."
