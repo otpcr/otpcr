@@ -16,8 +16,8 @@ import time
 import _thread
 
 
-from ..object  import Object, edit, fmt, keys
-from ..main    import NAME, command
+from ..object  import Object, edit, keys
+from ..main    import NAME, command, fmt
 from ..persist import Cache, ident, last, sync
 from ..runtime import Reactor, later, launch
 
@@ -496,17 +496,16 @@ class IRC(Reactor, Output):
         self.events.ready.clear()
         self.events.connected.clear()
         self.events.joined.clear()
-        launch(Output.out, "output", self)
+        launch(Output.out, self)
         Reactor.start(self)
         launch(
                self.doconnect,
-               "connect",
                self.cfg.server or "localhost",
                self.cfg.nick,
                int(self.cfg.port or '6667')
               )
         if not self.state.keeprunning:
-            launch(self.keep, "keep")
+            launch(self.keep)
 
     def stop(self):
         self.state.stopkeep = True

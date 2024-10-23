@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,W0212,W0718
+# pylint: disable=C,W0611,W0718
 
 
 "console"
@@ -11,14 +11,13 @@ import termios
 import time
 
 
-from .main    import NAME, Client, Config, Event, forever, scanner
+from .main    import Client, Config, Event, forever, parse, scanner
 from .modules import face
-from .object  import Object, parse
+from .persist import NAME
 from .runtime import Errors, later
 
 
-Cfg = Config()
-Cfg.opts = Object()
+cfg = Config()
 
 
 class Console(Client):
@@ -48,9 +47,9 @@ def errors():
 
 
 def wrap(func):
-    old2 = None
+    old = None
     try:
-        old2 = termios.tcgetattr(sys.stdin.fileno())
+        old = termios.tcgetattr(sys.stdin.fileno())
     except termios.error:
         pass
     try:
@@ -60,28 +59,28 @@ def wrap(func):
     except Exception as ex:
         later(ex)
     finally:
-        if old2:
-            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old2)
-
-
-def main():
-    parse(Cfg, " ".join(sys.argv[1:]))
-    if "v" in Cfg.opts:
-        readline.redisplay()
-        banner()
-    for mod, thr in scanner(face, init="i" in Cfg.opts):
-        if "v" in Cfg.opts and "output" in dir(mod):
-            mod.output = print
-        if "w" in Cfg.opts and thr:
-            thr.join()
-    csl = Console()
-    csl.start()
-    forever()
+        if old:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
 
 
 def wrapped():
     wrap(main)
-    errors()
+    if "v" in cfg.opts:
+        errors()
+
+
+def main():
+    parse(cfg, " ".join(sys.argv[1:]))
+    if "v" in cfg.opts:
+        banner()
+    for mod, thr in scanner(face, init="i" in cfg.opts, disable=cfg.sets.dis):
+        if "v" in cfg.opts and "output" in dir(mod):
+            mod.output = print
+        if thr and "w" in cfg.opts:
+            thr.join()
+    csl = Console()
+    csl.start()
+    forever()
 
 
 if __name__ == "__main__":

@@ -1,8 +1,10 @@
 # This file is placed in the Public Domain.
 
+
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
 
 [project]
 name = "otpcr"
@@ -21,11 +23,13 @@ classifiers=[
     'Topic :: Utilities'
 ]
 
+
 [project.scripts]
 "otpcr"  = "otpcr.cli:wrapped"
 "otpcrc" = "otpcr.console:wrapped"
 "otpcrd" = "otpcr.daemon:wrapped"
 "otpcrs" = "otpcr.service:wrapped"
+
 
 [project.urls]
 "home" = "https://pypi.org/project/otpcr"
@@ -38,11 +42,13 @@ packages = [
    'otpcr.modules'
 ]
 
+
 [tool.setuptools.data-files]
 "share/doc/otpcr/" = [
     'README.rst',
 ]
 "share/doc/otpcr/docs" = [
+    'docs/about.rst',
     'docs/googlea6568bcc05c8d50b.html',
     'docs/ack.png',
     'docs/ack3.png',

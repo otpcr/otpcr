@@ -5,10 +5,7 @@
 "create service file"
 
 
-import getpass
-
-
-from ..main import NAME
+from ..persist import NAME
 
 
 TXT = """[Unit]
@@ -26,5 +23,6 @@ WantedBy=multi-user.target"""
 
 
 def srv(event):
+    import getpass
     name  = getpass.getuser()
     event.reply(TXT % (NAME.upper(), name, name, name, NAME))

@@ -1,26 +1,19 @@
-# This file is placed in the Public Domain.
-# pylint: disable=C,W0611,W0718
+# This file is place in the Public Domain.
+# pylint: disable=C
 
 
 "cli"
 
 
-import os
 import sys
-import threading
-import time
-import _thread
 
 
-from .main    import NAME, Client, Config, Event, command, scanner
+from .main    import Client, Config, Event, scanner, command, parse, wrap
 from .modules import face
-from .object  import Object, parse
-from .persist import Workdir, modname
-from .runtime import Errors, Reactor, later
+from .runtime import Errors
 
 
 cfg = Config()
-cfg.txt = ""
 
 
 class CLI(Client):
@@ -35,19 +28,20 @@ def errors():
             print(line)
 
 
+def wrapped():
+    wrap(main)
+    if "v" in cfg.opts:
+        errors()
+
+
 def main():
     parse(cfg, " ".join(sys.argv[1:]))
     scanner(face)
-    cli = CLI()
     evt = Event()
     evt.txt = cfg.txt
-    command(cli, evt)
+    csl = CLI()
+    command(csl, evt)
     evt.wait()
-
-
-def wrapped():
-    main()
-    errors()
 
 
 if __name__ == "__main__":

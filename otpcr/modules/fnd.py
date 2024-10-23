@@ -8,7 +8,7 @@
 import time
 
 
-from ..object  import fmt
+from ..main    import fmt
 from ..persist import find, fntime, laps, long, skel, types
 
 

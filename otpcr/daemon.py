@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,W0212,W0718
+# pylint: disable=C,W0212
 
 
 "daemon"
@@ -9,10 +9,9 @@ import os
 import sys
 
 
-from .main    import NAME, forever, privileges, scanner, wrap
+from .main    import forever, privileges, scanner, wrap
 from .modules import face
-from .persist import pidfile, pidname
-from .runtime import Errors
+from .persist import NAME, pidfile, pidname
 
 
 def daemon(verbose=False):
@@ -35,26 +34,16 @@ def daemon(verbose=False):
     os.nice(10)
 
 
-def errors():
-    for err in Errors.errors:
-        for line in err:
-            print(line)
-
-
-ever = forever
+def wrapped():
+    wrap(main)
 
 
 def main():
-    daemon(True)
+    daemon()
     privileges()
     pidfile(pidname(NAME))
     scanner(face, init=True)
-    ever()
-
-
-def wrapped():
-    wrap(main)
-    errors()
+    forever()
 
 
 if __name__ == "__main__":

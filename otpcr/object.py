@@ -39,6 +39,28 @@ def construct(obj, *args, **kwargs):
         update(obj, kwargs)
 
 
+def edit(obj, setter, skip=False):
+    for key, val in items(setter):
+        if skip and val == "":
+            continue
+        try:
+            setattr(obj, key, int(val))
+            continue
+        except ValueError:
+            pass
+        try:
+            setattr(obj, key, float(val))
+            continue
+        except ValueError:
+            pass
+        if val in ["True", "true"]:
+            setattr(obj, key, True)
+        elif val in ["False", "false"]:
+            setattr(obj, key, False)
+        else:
+            setattr(obj, key, val)
+
+
 def items(obj):
     if isinstance(obj,type({})):
         return obj.items()
@@ -52,6 +74,30 @@ def keys(obj):
     return list(obj.__dict__.keys())
 
 
+def match(obj, txt):
+    for key in keys(obj):
+        if txt in key:
+            yield key
+
+
+def search(obj, selector, matching=None):
+    res = False
+    if not selector:
+        return res
+    for key, value in items(selector):
+        val = getattr(obj, key, None)
+        if not val:
+            continue
+        if matching and value == val:
+            res = True
+        elif str(value).lower() in str(val).lower():
+            res = True
+        else:
+            res = False
+            break
+    return res
+
+
 def update(obj, data):
     if isinstance(data, type({})):
         obj.__dict__.update(data)
@@ -61,9 +107,6 @@ def update(obj, data):
 
 def values(obj):
     return obj.__dict__.values()
-
-
-"decoder"
 
 
 class ObjectDecoder(json.JSONDecoder):
@@ -97,9 +140,6 @@ def loads(string, *args, **kw):
     kw["cls"] = ObjectDecoder
     kw["object_hook"] = hook
     return json.loads(string, *args, **kw)
-
-
-"encoder"
 
 
 class ObjectEncoder(json.JSONEncoder):
@@ -141,167 +181,16 @@ def dumps(*args, **kw):
     return json.dumps(*args, **kw)
 
 
-"methods"
-
-
-def edit(obj, setter, skip=False):
-    for key, val in items(setter):
-        if skip and val == "":
-            continue
-        try:
-            setattr(obj, key, int(val))
-            continue
-        except ValueError:
-            pass
-        try:
-            setattr(obj, key, float(val))
-            continue
-        except ValueError:
-            pass
-        if val in ["True", "true"]:
-            setattr(obj, key, True)
-        elif val in ["False", "false"]:
-            setattr(obj, key, False)
-        else:
-            setattr(obj, key, val)
-
-
-def fmt(obj, args=None, skip=None, plain=False):
-    if args is None:
-        args = keys(obj)
-    if skip is None:
-        skip = []
-    txt = ""
-    for key in args:
-        if key.startswith("__"):
-            continue
-        if key in skip:
-            continue
-        value = getattr(obj, key, None)
-        if value is None:
-            continue
-        if plain:
-            txt += f"{value} "
-        elif isinstance(value, str) and len(value.split()) >= 2:
-            txt += f'{key}="{value}" '
-        else:
-            txt += f'{key}={value} '
-    return txt.strip()
-
-
-def fqn(obj):
-    kin = str(type(obj)).split()[-1][1:-2]
-    if kin == "type":
-        kin = f"{obj.__module__}.{obj.__name__}"
-    return kin
-
-
-def match(obj, txt):
-    for key in keys(obj):
-        if txt in key:
-            yield key
-
-
-def named(obj):
-    typ = type(obj)
-    if '__builtins__' in dir(typ):
-        return obj.__name__
-    if '__self__' in dir(obj):
-        return f'{obj.__self__.__class__.__name__}.{obj.__name__}'
-    if '__class__' in dir(obj) and '__name__' in dir(obj):
-        return f'{obj.__class__.__name__}.{obj.__name__}'
-    if '__class__' in dir(obj):
-        return f"{obj.__class__.__module__}.{obj.__class__.__name__}"
-    if '__name__' in dir(obj):
-        return f'{obj.__class__.__name__}.{obj.__name__}'
-    return None
-
-
-def parse(obj, txt=None):
-    if txt is None:
-        txt = ""
-    args = []
-    obj.args    = []
-    obj.cmd     = ""
-    obj.gets    = Object()
-    obj.hasmods = False
-    obj.index   = None
-    obj.mod     = ""
-    obj.opts    = ""
-    obj.result  = []
-    obj.sets    = Object()
-    obj.txt     = txt or ""
-    obj.otxt    = obj.txt
-    _nr = -1
-    for spli in obj.otxt.split():
-        if spli.startswith("-"):
-            try:
-                obj.index = int(spli[1:])
-            except ValueError:
-                obj.opts += spli[1:]
-            continue
-        if "==" in spli:
-            key, value = spli.split("==", maxsplit=1)
-            val = getattr(obj.gets, key, None)
-            if val:
-                value = val + "," + value
-                setattr(obj.gets, key, value)
-            continue
-        if "=" in spli:
-            key, value = spli.split("=", maxsplit=1)
-            if key == "mod":
-                obj.hasmods = True
-                if obj.mod:
-                    obj.mod += f",{value}"
-                else:
-                    obj.mod = value
-                continue
-            setattr(obj.sets, key, value)
-            continue
-        _nr += 1
-        if _nr == 0:
-            obj.cmd = spli
-            continue
-        args.append(spli)
-    if args:
-        obj.args = args
-        obj.txt  = obj.cmd or ""
-        obj.rest = " ".join(obj.args)
-        obj.txt  = obj.cmd + " " + obj.rest
-    else:
-        obj.txt = obj.cmd or ""
-    return obj
-
-
-def search(obj, selector, matching=None):
-    res = False
-    if not selector:
-        return res
-    for key, value in items(selector):
-        val = getattr(obj, key, None)
-        if not val:
-            continue
-        if matching and value == val:
-            res = True
-        elif str(value).lower() in str(val).lower():
-            res = True
-        else:
-            res = False
-            break
-    return res
-
-
-"interface"
-
-
 def __dir__():
     return (
         'Object',
         'construct',
+        'dumps',
         'edit',
         'fmt',
         'fqn',
         'keys',
+        'loads',
         'items',
         'match',
         'search',

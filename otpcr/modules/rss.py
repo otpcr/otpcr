@@ -19,7 +19,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from ..object  import Object, fmt, update
+from ..main    import fmt
+from ..object  import Object, update
 from ..persist import Cache, find, fntime, laps, last, sync
 from ..runtime import Repeater, launch
 
@@ -124,7 +125,7 @@ class Fetcher(Object):
     def run(self, silent=False):
         thrs = []
         for _fn, feed in find('rss'):
-            thrs.append(launch(self.fetch, "fetch", feed, silent))
+            thrs.append(launch(self.fetch, feed, silent))
         return thrs
 
     def start(self, repeat=True):

@@ -12,7 +12,7 @@ import time
 from ..main    import Event
 from ..object  import Object, construct, keys
 from ..persist import Cache, laps
-from ..runtime import Repeater, launch
+from ..runtime import Repeater
 
 
 DAY = 24*60*60
@@ -25,6 +25,8 @@ STARTTIME = time.mktime(time.strptime(STARTDATE, "%Y-%m-%d %H:%M:%S"))
 def init():
     "start repeaters"
     for key in keys(oorzaken):
+        if "Psych" not in key:
+            continue
         val = getattr(oorzaken, key, None)
         if val and int(val) > 10000:
             evt = Event()
@@ -33,7 +35,6 @@ def init():
             sec = seconds(val)
             repeater = Repeater(sec, cbstats, evt, thrname=aliases.get(key))
             repeater.start()
-    launch(daily, name="daily")
 
 
 oor = """"Totaal onderliggende doodsoorzaken (aantal)";
@@ -288,10 +289,10 @@ def getday():
     return day.timestamp()
 
 
-def getnr(name):
+def getnr(nme):
     "fetch mortality number."
     for k in keys(oorzaken):
-        if name.lower() in k.lower():
+        if nme.lower() in k.lower():
             return int(getattr(oorzaken, k))
     return 0
 
@@ -301,7 +302,6 @@ def seconds(nrs):
     if not nrs:
         return nrs
     return 60*60*24*365 / float(nrs)
-
 
 
 def iswanted(k, line):
@@ -332,12 +332,12 @@ def cbnow(_evt):
     "now callback"
     delta = time.time() - STARTTIME
     txt = laps(delta) + " "
-    for name in sorted(keys(oorzaken), key=lambda x: seconds(getnr(x))):
-        needed = seconds(getnr(name))
+    for nme in sorted(keys(oorzaken), key=lambda x: seconds(getnr(x))):
+        needed = seconds(getnr(nme))
         if needed > 60*60:
             continue
         nrtimes = int(delta/needed)
-        txt += f"{getalias(name)} {nrtimes} |"
+        txt += f"{getalias(nme)} {nrtimes} | "
     txt += " http://genocide.rtfd.io"
     for obj in Cache.typed("IRC"):
         obj.announce(txt)
@@ -345,8 +345,8 @@ def cbnow(_evt):
 
 def cbstats(evt):
     "stats callback."
-    name = evt.rest or "Psych"
-    needed = seconds(getnr(name))
+    nme = evt.rest or "Psych"
+    needed = seconds(getnr(nme))
     if needed:
         delta = time.time() - STARTTIME
         nrtimes = int(delta/needed)
@@ -354,14 +354,14 @@ def cbstats(evt):
         nrday = int(DAY/needed)
         delta2 = time.time() - getday()
         thisday = int(delta2/needed)
-        txt = "%s #%s (%s/%s/%s) every %s %s" % (
-            getalias(name).upper(),
+        txt = "%s %s #%s (%s/%s/%s) every %s" % (
+            laps(delta),
+            getalias(nme).upper(),
             nrtimes,
             thisday,
             nrday,
             nryear,
-            laps(needed),
-            laps(delta)
+            laps(needed)
         )
         for obj in Cache.typed("IRC"):
             obj.announce(txt)
@@ -369,23 +369,22 @@ def cbstats(evt):
 
 def now(event):
     "now command."
-    name = event.rest or "Psych"
-    needed = seconds(getnr(name))
+    nme = event.rest or "Psych"
+    needed = seconds(getnr(nme))
     if needed:
         delta = time.time() - STARTTIME
-        txt = ""
         nrtimes = int(delta/needed)
         nryear = int(YEAR/needed)
         nrday = int(DAY/needed)
         thisday = int(DAY % needed)
-        txt += "%s #%s (%s/%s/%s) every %s %s" % (
-            getalias(name).upper(),
+        txt = "%s %s #%s (%s/%s/%s) every %s" % (
+            laps(delta),
+            getalias(nme).upper(),
             nrtimes,
             thisday,
             nrday,
             nryear,
-            laps(needed),
-            laps(delta)
+            laps(needed)
         )
         event.reply(txt)
 
