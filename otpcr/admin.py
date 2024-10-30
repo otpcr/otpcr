@@ -67,9 +67,12 @@ def main():
     evt.wait()
 
 
+showerrors = errors
+
+
 def wrapped():
     wrap(main)
-    for line in errors():
+    for line in showerrors():
         print(line)
 
 

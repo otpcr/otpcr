@@ -9,9 +9,9 @@ import os
 import sys
 
 
-from .command import NAME, mods, scanner
+from .command import NAME, scanner
 from .modules import face
-from .persist import NAME, Workdir, pidfile, pidname
+from .persist import Workdir, pidfile, pidname
 from .runtime import forever, privileges, errors, wrap
 
 

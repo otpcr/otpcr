@@ -13,7 +13,7 @@ from .command import NAME, scanner, command, parse
 from .modules import face
 from .object  import Config
 from .persist import Workdir
-from .runtime import Client, Errors, Event, errors, wrap
+from .runtime import Client, Event, errors, wrap
 
 
 Workdir.wdr = os.path.expanduser(f"~/.{NAME}")
@@ -34,7 +34,7 @@ class CLI(Client):
 
 def wrapped():
     wrap(main)
-    for error in errors():
+    for line in errors():
         print(line)
 
 

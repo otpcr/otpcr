@@ -8,12 +8,10 @@
 import os
 
 
-from obx.persist import Workdir, pidfile, pidname
-from obx.runtime import errors, forever, privileges, wrap
-
-
 from .command import NAME, scanner
-from .        import face
+from .modules import face
+from .persist import Workdir, pidfile, pidname
+from .runtime import errors, forever, privileges, wrap
 
 
 Workdir.wdr = os.path.expanduser(f"~/.{NAME}")

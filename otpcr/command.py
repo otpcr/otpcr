@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R,W0718
+# pylint: disable=C,R,W0105,W0718
 
 
 "command"
@@ -9,7 +9,6 @@ import inspect
 
 
 from .object  import Obj
-from .persist import Workdir
 from .runtime import later, launch
 
 
