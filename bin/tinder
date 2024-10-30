@@ -17,16 +17,19 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.main    import Client, Commands, Config, Event
-from otpcr.main    import parse, scanner
+from otpcr.command import NAME, Commands, command, parse, scanner
 from otpcr.modules import face
-from otpcr.object  import Object
-from otpcr.persist import NAME, Workdir, laps, skel
-from otpcr.runtime import Errors, later, launch
+from otpcr.object  import Config, Object
+from otpcr.persist import Workdir, laps, skel
+from otpcr.runtime import Client, Errors, Event, later, launch
+
+
+Workdir.wdr = os.path.expanduser(f"~/.{NAME}")
 
 
 cfg = Config()
 cfg.index = 0
+face.rss.DEBUG = True
 
 
 LAP = 1
@@ -37,7 +40,6 @@ STARTTIME = time.time()
 
 
 events = []
-face.rss.DEBUG = True
 paylock = _thread.allocate_lock()
 
 
@@ -59,6 +61,10 @@ param.ver = [""]
 
 
 class CLI(Client):
+
+    def __init__(self):
+        Client.__init__(self)
+        self.register("command", command)
 
     def raw(self, txt):
         if "v" in cfg.opts:
@@ -82,15 +88,17 @@ def errors():
 
 
 def payload(clt):
-    nmr = 0
-    for cmdd in sorted(Commands.cmds):
-        for ex in getattr(param, cmdd, [""]):
-            evt = Event()
-            evt.txt = cmdd + " " + ex
-            clt.put(evt)
-            events.append(evt)
-            nmr += 1
-    return nmr
+    with paylock:
+        nmr = 0
+        for cmdd in sorted(Commands.cmds):
+            for ex in getattr(param, cmdd, [""]):
+                evt = Event()
+                evt.txt = cmdd + " " + ex
+                evt.type = "command"
+                clt.put(evt)
+                events.append(evt)
+                nmr += 1
+        return nmr
 
 
 def wrap(function):
@@ -127,9 +135,10 @@ def main():
     thrs = []
     for _nr in range(nrs):
         thrs.append(launch(payload, clt))
+    consume(events)
     for thr in thrs:
         thr.join()
-    consume(events)
+    #clt.wait()
     if "v" in cfg.opts:
         endtime = time.time()
         lap = laps(endtime-STARTTIME)
@@ -143,3 +152,4 @@ def main():
 if __name__ == "__main__":
     wrap(main)
     errors()
+    sys.exit(0)
