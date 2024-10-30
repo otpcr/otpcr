@@ -19,6 +19,7 @@
 
 
     | ``otpcr  <cmd> [key=val] [key==val]``
+    | ``otpcra``
     | ``otpcrc [-i] [-v]``
     | ``otpcrd`` 
     | ``otpcrs``
