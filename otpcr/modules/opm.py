@@ -13,7 +13,7 @@ import _thread
 
 
 from ..object  import Object, update
-from ..persist import find, sync
+from ..persist import find, write
 
 
 from .rss import Rss
@@ -170,7 +170,7 @@ def imp(event):
             update(feed, obj)
             feed.rss = obj.xmlUrl
             feed.insertid = insertid
-            sync(feed)
+            write(feed)
             nrs += 1
     if nrskip:
         event.reply(f"skipped {nrskip} urls.")

@@ -9,9 +9,13 @@ import os
 import sys
 
 
-from .main    import forever, privileges, scanner, wrap
+from .command import NAME, mods, scanner
 from .modules import face
-from .persist import NAME, pidfile, pidname
+from .persist import NAME, Workdir, pidfile, pidname
+from .runtime import forever, privileges, errors, wrap
+
+
+Workdir.wdr = os.path.expanduser(f"~/.{NAME}")
 
 
 def daemon(verbose=False):
@@ -34,16 +38,19 @@ def daemon(verbose=False):
     os.nice(10)
 
 
-def wrapped():
-    wrap(main)
-
-
 def main():
-    daemon()
+    daemon("-v" in sys.argv)
     privileges()
     pidfile(pidname(NAME))
     scanner(face, init=True)
     forever()
+
+
+def wrapped():
+    wrap(main)
+    if "-v" in sys.argv:
+        for line in errors():
+            print(line)
 
 
 if __name__ == "__main__":

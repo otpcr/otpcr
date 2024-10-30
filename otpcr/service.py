@@ -5,16 +5,21 @@
 "service"
 
 
-from .main    import forever, privileges, scanner, wrap
-from .modules import face
-from .persist import NAME, pidfile, pidname
+import os
+
+
+from obx.persist import Workdir, pidfile, pidname
+from obx.runtime import errors, forever, privileges, wrap
+
+
+from .command import NAME, scanner
+from .        import face
+
+
+Workdir.wdr = os.path.expanduser(f"~/.{NAME}")
 
 
 scan = scanner
-
-
-def wrapped():
-    wrap(main)
 
 
 def main():
@@ -24,5 +29,11 @@ def main():
     forever()
 
 
+def wrapped():
+    wrap(main)
+
+
 if __name__ == "__main__":
     wrapped()
+    for line in errors():
+        print(line)

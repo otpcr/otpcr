@@ -1,7 +1,7 @@
-# This file is placed in the Public Domain.
+# This file is in the Public Domain.
 
 
-"exec"
+"run"
 
 
 from .cli import wrapped

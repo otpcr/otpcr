@@ -1,4 +1,4 @@
-# This file is placed in the Public Domain.  pylint:
+# This file is placed in the Public Domain.
 # pylint: disable=C,R,W0105,W0719,E1101
 
 
@@ -16,36 +16,10 @@ import _thread
 from .object import Object, dump, load, search, update
 
 
-NAME = Object.__module__.split(".", maxsplit=2)[-2]
-
-
 cachelock = _thread.allocate_lock()
 disklock  = _thread.allocate_lock()
 lock      = _thread.allocate_lock()
 p         = os.path.join
-
-
-class Cache:
-
-    objs = {}
-
-    @staticmethod
-    def add(path, obj):
-        with cachelock:
-            Cache.objs[path] = obj
-
-    @staticmethod
-    def get(path):
-        with cachelock:
-            return Cache.objs.get(path)
-
-    @staticmethod
-    def typed(match):
-        with cachelock:
-            for key in Cache.objs:
-                if match not in key:
-                    continue
-                yield Cache.objs.get(key)
 
 
 class Workdir:
@@ -83,6 +57,32 @@ def whitelist(clz):
     Workdir.fqns.append(fqn(clz))
 
 
+"cache"
+
+
+class Cache:
+
+    objs = {}
+
+    @staticmethod
+    def add(path, obj):
+        with cachelock:
+            Cache.objs[path] = obj
+
+    @staticmethod
+    def get(path):
+        with cachelock:
+            return Cache.objs.get(path)
+
+    @staticmethod
+    def typed(match):
+        with cachelock:
+            for key in Cache.objs:
+                if match not in key:
+                    continue
+                yield Cache.objs.get(key)
+
+
 "utilities"
 
 
@@ -100,7 +100,7 @@ def find(mtc, selector=None, index=None, deleted=False, matching=False):
             yield (fnm, obj)
             continue
         obj = Object()
-        fetch(obj, fnm)
+        read(obj, fnm)
         Cache.add(fnm, obj)
         if not deleted and '__deleted__' in dir(obj) and obj.__deleted__:
             continue
@@ -203,10 +203,10 @@ def types():
 "methods"
 
 
-def fetch(obj, pth):
+def read(obj, pth):
     with disklock:
         pth2 = store(pth)
-        read(obj, pth2)
+        fetch(obj, pth2)
         return os.sep.join(pth.split(os.sep)[-3:])
 
 
@@ -236,7 +236,7 @@ def last(obj, selector=None):
     return res
 
 
-def read(obj, pth):
+def fetch(obj, pth):
     with lock:
         with open(pth, 'r', encoding='utf-8') as ofile:
             try:
@@ -245,16 +245,16 @@ def read(obj, pth):
                 raise Exception(pth) from ex
 
 
-def sync(obj, pth=None):
+def write(obj, pth=None):
     if pth is None:
         pth = ident(obj)
     with disklock:
         pth2 = store(pth)
-        write(obj, pth2)
+        sync(obj, pth2)
         return pth
 
 
-def write(obj, pth):
+def sync(obj, pth):
     with lock:
         cdir(pth)
         with open(pth, 'w', encoding='utf-8') as ofile:

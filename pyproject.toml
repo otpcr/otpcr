@@ -25,7 +25,8 @@ classifiers=[
 
 
 [project.scripts]
-"otpcr"  = "otpcr.cli:wrapped"
+"otpcr " = "otpcr.cli:wrapped"
+"otpcra  = "otpcr.admin:wrapped"
 "otpcrc" = "otpcr.console:wrapped"
 "otpcrd" = "otpcr.daemon:wrapped"
 "otpcrs" = "otpcr.service:wrapped"

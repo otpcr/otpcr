@@ -1,8 +1,8 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R,W0105
+# pylint: disable=C,R,W0105,W0622
 
 
-"a clean namespace"
+"OBX"
 
 
 import json
@@ -24,6 +24,20 @@ class Object:
 
     def __str__(self):
         return str(self.__dict__)
+
+
+class Obj(Object):
+
+    def __getattr__(self, key):
+        return self.__dict__.get(key, "")
+
+
+class Config(Obj):
+
+    pass
+
+
+"methods"
 
 
 def construct(obj, *args, **kwargs):
@@ -59,6 +73,30 @@ def edit(obj, setter, skip=False):
             setattr(obj, key, False)
         else:
             setattr(obj, key, val)
+
+
+def format(obj, args=None, skip=None, plain=False):
+    if args is None:
+        args = keys(obj)
+    if skip is None:
+        skip = []
+    txt = ""
+    for key in args:
+        if key.startswith("__"):
+            continue
+        if key in skip:
+            continue
+        value = getattr(obj, key, None)
+        if value is None:
+            continue
+        if plain:
+            txt += f"{value} "
+        elif isinstance(value, str) and len(value.split()) >= 2:
+            txt += f'{key}="{value}" '
+        else:
+            txt += f'{key}={value} '
+    return txt.strip()
+
 
 
 def items(obj):
@@ -109,6 +147,9 @@ def values(obj):
     return obj.__dict__.values()
 
 
+"decoder"
+
+
 class ObjectDecoder(json.JSONDecoder):
 
     def __init__(self, *args, **kwargs):
@@ -140,6 +181,9 @@ def loads(string, *args, **kw):
     kw["cls"] = ObjectDecoder
     kw["object_hook"] = hook
     return json.loads(string, *args, **kw)
+
+
+"encoder"
 
 
 class ObjectEncoder(json.JSONEncoder):
@@ -181,14 +225,17 @@ def dumps(*args, **kw):
     return json.dumps(*args, **kw)
 
 
+"interface"
+
+
 def __dir__():
     return (
+        'Config',
         'Object',
+        'Obj',
         'construct',
         'dumps',
         'edit',
-        'fmt',
-        'fqn',
         'keys',
         'loads',
         'items',

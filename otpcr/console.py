@@ -5,22 +5,31 @@
 "console"
 
 
+import os
 import readline
 import sys
 import termios
 import time
 
 
-from .main    import Client, Config, Event, forever, parse, scanner
+from .command import NAME, command, parse, scanner
 from .modules import face
-from .persist import NAME
-from .runtime import Errors, later
+from .object  import Config
+from .persist import Workdir
+from .runtime import Client, Errors, Event, errors, forever, later
 
 
-cfg = Config()
+Workdir.wdr = os.path.expanduser(f"~/.{NAME}")
+
+
+cfg  = Config()
 
 
 class Console(Client):
+
+    def __init__(self):
+        Client.__init__(self)
+        self.register("command", command)
 
     def callback(self, evt):
         Client.callback(self, evt)
@@ -29,6 +38,7 @@ class Console(Client):
     def poll(self):
         evt = Event()
         evt.txt = input("> ")
+        evt.type = "command"
         return evt
 
     def raw(self, txt):
@@ -40,10 +50,18 @@ def banner():
     print(f"{NAME.upper()} since {tme}")
 
 
-def errors():
-    for error in Errors.errors:
-        for line in error:
-            print(line)
+def main():
+    parse(cfg, " ".join(sys.argv[1:]))
+    if "v" in cfg.opts:
+        banner()
+    for mod, thr in scanner(face, init="i" in cfg.opts, disable=cfg.sets.dis):
+        if "v" in cfg.opts and "output" in dir(mod):
+            mod.output = print
+        if thr and "w" in cfg.opts:
+            thr.join()
+    csl = Console()
+    csl.start()
+    forever()
 
 
 def wrap(func):
@@ -65,22 +83,9 @@ def wrap(func):
 
 def wrapped():
     wrap(main)
-    if "v" in cfg.opts:
-        errors()
+    for line in errors():
+        print(line)
 
-
-def main():
-    parse(cfg, " ".join(sys.argv[1:]))
-    if "v" in cfg.opts:
-        banner()
-    for mod, thr in scanner(face, init="i" in cfg.opts, disable=cfg.sets.dis):
-        if "v" in cfg.opts and "output" in dir(mod):
-            mod.output = print
-        if thr and "w" in cfg.opts:
-            thr.join()
-    csl = Console()
-    csl.start()
-    forever()
 
 
 if __name__ == "__main__":

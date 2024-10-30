@@ -5,33 +5,37 @@
 "cli"
 
 
+import os
 import sys
 
 
-from .main    import Client, Config, Event, scanner, command, parse, wrap
+from .command import NAME, scanner, command, parse
 from .modules import face
-from .runtime import Errors
+from .object  import Config
+from .persist import Workdir
+from .runtime import Client, Errors, Event, errors, wrap
 
 
-cfg = Config()
+Workdir.wdr = os.path.expanduser(f"~/.{NAME}")
+
+
+cfg  = Config()
 
 
 class CLI(Client):
+
+    def __init__(self):
+        Client.__init__(self)
+        self.register("command", command)
 
     def raw(self, txt):
         print(txt)
 
 
-def errors():
-    for error in Errors.errors:
-        for line in error:
-            print(line)
-
-
 def wrapped():
     wrap(main)
-    if "v" in cfg.opts:
-        errors()
+    for error in errors():
+        print(line)
 
 
 def main():

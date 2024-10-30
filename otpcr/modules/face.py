@@ -7,7 +7,7 @@
 
 
 from . import cmd, err, fnd, irc, log, mdl, mod, opm, req
-from . import rss, srv, tdo, thr, upt
+from . import rss, tdo, thr, upt
 
 
 def __dir__():
@@ -22,7 +22,6 @@ def __dir__():
         'opm',
         'req',
         'rss',
-        'srv',
         'tdo',
         'thr',
         'upt'

@@ -64,6 +64,7 @@
     | ``$ pipx install otpcr``
     | ``$ pipx ensurepath``
 
+
 **USAGE**
 
     without any argument the bot does nothing
@@ -75,8 +76,7 @@
 
     | ``$ otpcr cmd``
     | ``cfg,cmd,dne,dpl,err,exp,imp,log,mod,mre,nme,``
-    | ``pwd,rem,req,res,rss,srv,syn,tdo,thr,upt``
-
+    | ``now,pwd,rem,req,res,rss,srv,syn,tdo,thr,upt``
 
     start a console
 
@@ -107,6 +107,7 @@
     | 2500 CM The Hague
     | The Netherlands
 
+
 **COMMANDS**
 
     here is a list of available commands
@@ -119,6 +120,7 @@
     | ``imp`` - import opml
     | ``log`` - log text
     | ``mre`` - display cached output
+    | ``now`` - show genocide stats
     | ``pwd`` - sasl nickserv name/pass
     | ``rem`` - removes a rss feed
     | ``res`` - restore deleted feeds
@@ -158,7 +160,10 @@
 
 **SYSTEMD**
 
-    | ``$ otpcr srv > otpcr.service``
+    | use the admin program ``otpcra`` to create the
+    | service file
+    |
+    | ``$ otpcra srv > otpcr.service``
     | ``$ sudo mv otpcr.service /etc/systemd/system/``
     | ``$ sudo systemctl enable otpcr --now``
     |
@@ -167,12 +172,14 @@
 
 **SOURCE**
 
-    source is `here <https://github.com/rssbotd/otpcr>`_
+    source is `here <https://github.com/otpcr/otpcr>`_
+
 
 **FILES**
 
     | ``~/.otpcr``
     | ``~/.local/bin/otpcr``
+    | ``~/.local/bin/otpcra``
     | ``~/.local/bin/otpcrc``
     | ``~/.local/bin/otpcrd``
     | ``~/.local/bin/otpcrs``
@@ -187,5 +194,3 @@
 **COPYRIGHT**
 
     | ``OTPCR`` is Public Domain.
-
-

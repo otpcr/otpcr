@@ -5,6 +5,7 @@
 "errors,reactor,threads,timers"
 
 
+import os
 import queue
 import threading
 import time
@@ -18,6 +19,12 @@ import _thread
 class Errors:
 
     errors = []
+
+
+def errors():
+    for err in Errors.errors:
+        for line in err:
+            yield line
 
 
 def fmat(exc):
@@ -137,6 +144,46 @@ class Reactor:
         self.stopped.set()
 
 
+class Client(Reactor):
+
+    def display(self, evt):
+        for txt in evt.result:
+            self.raw(txt)
+
+    def raw(self, txt):
+        raise NotImplementedError
+
+
+"event"
+
+
+class Event:
+
+    def __init__(self):
+        self._ready = threading.Event()
+        self._thr   = None
+        self.result = []
+        self.type   = "event"
+        self.txt    = ""
+
+    def __getattr__(self, key):
+        return self.__dict__.get(key, "")
+
+    def __str__(self):
+        return str(self.__dict__)
+
+    def ready(self):
+        self._ready.set()
+
+    def reply(self, txt):
+        self.result.append(txt)
+
+    def wait(self):
+        self._ready.wait()
+        if self._thr:
+            self._thr.join()
+
+
 "timers"
 
 
@@ -178,18 +225,51 @@ class Repeater(Timer):
         super().run()
 
 
+"utilitties"
+
+
+def forever():
+    while True:
+        try:
+            time.sleep(0.1)
+        except (KeyboardInterrupt, EOFError):
+            _thread.interrupt_main()
+
+
+def privileges():
+    import getpass
+    import pwd
+    pwnam2 = pwd.getpwnam(getpass.getuser())
+    os.setgid(pwnam2.pw_gid)
+    os.setuid(pwnam2.pw_uid)
+
+
+def wrap(func):
+    try:
+        func()
+    except (KeyboardInterrupt, EOFError):
+        pass
+    except Exception as ex:
+        later(ex)
+
+
 "interface"
 
 
 def __dir__():
     return (
-        'Reactor',
+        'Client',
         'Errors',
         'Event',
+        'Reactor',
         'Repeater',
         'Thread',
         'Timer',
+        'errors',
+        'forever',
         'later',
         'launch',
-        'name'
+        'name',
+        'privlleges',
+        'wrap'
     )

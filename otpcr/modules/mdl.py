@@ -2,22 +2,21 @@
 # pylint: disable=C0209
 
 
-"Genocide model of the Netherlands since 04-02-2019"
+"Genocide model of the Netherlands since 4 March 2019"
 
 
 import datetime
 import time
 
 
-from ..main    import Event
 from ..object  import Object, construct, keys
 from ..persist import Cache, laps
-from ..runtime import Repeater
+from ..runtime import Event, Repeater
 
 
 DAY = 24*60*60
 YEAR = 365*DAY
-SOURCE = "https://github.com/otpcr/otpcr"
+SOURCE = "https://github.com/bthate/genocide"
 STARTDATE = "2019-03-04 00:00:00"
 STARTTIME = time.mktime(time.strptime(STARTDATE, "%Y-%m-%d %H:%M:%S"))
 
@@ -338,7 +337,7 @@ def cbnow(_evt):
             continue
         nrtimes = int(delta/needed)
         txt += f"{getalias(nme)} {nrtimes} | "
-    txt += " http://genocide.rtfd.io"
+    txt += " https://pypi.org/project/genocide"
     for obj in Cache.typed("IRC"):
         obj.announce(txt)
 
