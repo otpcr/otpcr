@@ -25,16 +25,16 @@ classifiers=[
 
 
 [project.scripts]
-"otpcr " = "otpcr.cli:wrapped"
+"otpcr"  = "otpcr.cli:wrapped"
 "otpcra" = "otpcr.admin:wrapped"
 "otpcrc" = "otpcr.console:wrapped"
-"otpcrd" = "otpcr.daemon:wrapped"
+"otpcrd" = "otpcr.daemon:main"
 "otpcrs" = "otpcr.service:wrapped"
 
 
 [project.urls]
-"home" = "https://pypi.org/project/otpcr"
-"bugs" = "https://github.com/otpcr/otpcr/issues"
+"home"   = "https://pypi.org/project/otpcr"
+"bugs"   = "https://github.com/otpcr/otpcr/issues"
 "source" = "https://github.com/otpcr/otpcr"
 
 [tool.setuptools]
