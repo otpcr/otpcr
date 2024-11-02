@@ -64,7 +64,7 @@ extensions = [
 
 html_title = "Office of the Prosecutor Communication 117 of the year 2019"
 html_style = 'otpcr.css'
-html_static_path = ["_static", "_static/otpcr.css", "files/sitemap.xml"]
+html_static_path = ["_static", "files/sitemap.xml"]
 html_css_files = ["otpcr.css",]
 html_short_title = "%s %s" % (NAME, VERSION)
 html_theme = "alabaster"
@@ -145,4 +145,4 @@ nitpick_ignore = [
 
 
 def setup(app):
-    app.add_css_file('otpcr.css', 100)
+    app.add_css_file("otpcr.css", 800)
