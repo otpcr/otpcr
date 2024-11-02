@@ -142,3 +142,7 @@ autoclass_content = "class"
 nitpick_ignore = [
                   ('py:class', 'builtins.BaseException'),
                  ]
+
+
+def setup(app):
+    app.add_css_file('otpcr.css', 100)
