@@ -1,5 +1,4 @@
 @import 'alabaster.css';
-/*@import 'theme.css';*/
 
 div.body a:link, div.body h, div.body p, div.body dd, div.body li, div.body blockquote {
     -moz-hyphens: false;
@@ -16,8 +15,8 @@ body {
     font-size: 113%;
     background-color: #fff;
     color: #555;
-    margin: 40px;
-    padding: 0px 30px 10px 30px;
+    margin: 40px !important ;
+    padding: 0px 30px 10px 30px !important ;
 }
 
 
