@@ -1,13 +1,12 @@
 .. _writings:
 
 
-.. title:: Writings
-
-
 .. raw:: html
 
-    <br><br>
-    <center><b>WRITINGS</b></center><br>
+  <br>
+
+
+.. title:: Writings
 
 
 **ACK**

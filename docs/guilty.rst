@@ -1,18 +1,16 @@
 .. _guilty:
 
+.. raw:: html
+
+  <br>
+
 .. title:: Guilty
 
 
 .. _informed:
 
-.. raw:: html
-
-    <br><br>
-    <center><b>GUILTY</b></center><br>
-
 
 **INFORMED**
-
 
 .. raw:: html
 
