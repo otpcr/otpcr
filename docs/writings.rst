@@ -10,20 +10,6 @@
     <center><b>WRITINGS</b></center><br>
 
 
-**EMAIL 1**
-
-
-|
-| **From**: Bart Thate <bthate@dds.nl>
-| **To**: otp.informationdesk@icc-cpi.int
-| **Subject**: Information that the king of the netherlands is aware that the medicine administered with the use of new defines laws are proven to be poison and is commiting 3 of 5 genocide crimes on parts of the population here in the netherlands
-| **Message-ID**: <e49d02a2-6a8e-ad64-6c8d-9abd45cf5c0e@dds.nl>
-| **Date**: Mon, 21 Jan 2019 16:17:13 +0100
-|
-
-see :ref:`request <home>` for content.
-
-
 .. raw:: html
 
     <br>
@@ -37,6 +23,21 @@ see :ref:`request <home>` for content.
 
 .. image:: ack3.png
     :width: 100%
+
+
+**EMAIL 1**
+
+
+|
+| **From**: Bart Thate <bthate@dds.nl>
+| **To**: otp.informationdesk@icc-cpi.int
+| **Subject**: Information that the king of the netherlands is aware that the medicine administered with the use of new defines laws are proven to be poison and is commiting 3 of 5 genocide crimes on parts of the population here in the netherlands
+| **Message-ID**: <e49d02a2-6a8e-ad64-6c8d-9abd45cf5c0e@dds.nl>
+| **Date**: Mon, 21 Jan 2019 16:17:13 +0100
+|
+
+
+.. include:: reconsider.rst
 
 
 .. raw:: html
@@ -71,7 +72,9 @@ see :ref:`request <home>` for content.
 | **Date:** Wed, 26 Jun 2019 21:05:13 +0200
 |
 
-see :ref:`reconsider <reconsider>` for content.
+
+.. include:: request.rst
+
 
 .. raw:: html
 
@@ -80,12 +83,15 @@ see :ref:`reconsider <reconsider>` for content.
 
 **OTP-CR-117/19/001**
 
+
 .. raw:: html
 
     <br>
 
+
 .. image:: OTP222.png
     :width: 100%
+
 
 .. raw:: html
 

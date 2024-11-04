@@ -50,7 +50,7 @@
 
     Current status is a :ref:`"no basis to proceed"
     <writings>` judgement of the prosecutor which
-    requires a :ref:`"basis to prosecute" <home>`
+    requires a :ref:`"basis to prosecute" <reconsider>`
     to have the king actually arrested.
 
 
