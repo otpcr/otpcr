@@ -13,8 +13,8 @@ from .runtime import errors
 
 def wrapped():
     wrap(main)
-    for txt in errors():
-        print(txt)
+    for text in errors():
+        print(text)
 
 
 def main():
