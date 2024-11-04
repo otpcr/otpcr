@@ -28,9 +28,6 @@ from otpcr.runtime import Client, Errors, Event, later, launch
 "defines"
 
 
-Workdir.wdr = os.path.expanduser(f"~/.{NAME}")
-
-
 cfg = Config()
 cfg.index = 0
 face.rss.DEBUG = True
