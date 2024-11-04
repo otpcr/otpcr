@@ -92,7 +92,7 @@ start service
 
 show request to the prosecutor
 
-| $ ``otpcr req``
+| ``$ otpcr req``
 | Information and Evidence Unit
 | Office of the Prosecutor
 | Post Office Box 19519
