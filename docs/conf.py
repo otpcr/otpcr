@@ -5,11 +5,11 @@
 # ruff: noqa: E402, E501
 
 
-"Office of the Prosecutor Communication 117 of the year 2019"
+"Office of the Prosecutor's 117th communication of the year 2019."
 
 
 NAME = "otpcr"
-VERSION = "54"
+VERSION = "55"
 
 
 import os
@@ -62,10 +62,10 @@ extensions = [
 # -- Options for HTML output -------------------------------------------------
 
 
-html_title = "Office of the Prosecutor Communication 117 of the year 2019"
-html_style = 'cusom.css'
+html_title = "Office of the Prosecutor's 117th communication of the year 2019"
+html_style = 'otpcr.css'
 html_static_path = ["_static", "files/sitemap.xml"]
-html_css_files = ["custom.css",]
+html_css_files = ["otpcr.css",]
 html_short_title = "%s %s" % (NAME, VERSION)
 html_theme = "alabaster"
 html_theme_options = {
@@ -105,7 +105,7 @@ intersphinx_cache_limit = 1
 rst_prolog = '''.. image:: genocide.png
     :width: 100%
     :height: 2.6cm
-    :target: index.html
+    :target: about.html
 
 .. raw:: html
 
@@ -121,7 +121,7 @@ rst_epilog = '''.. raw:: html
     <center>
     <b>
 
-:ref:`about <home>` - :ref:`manual <manual>` - :ref:`evidence <evidence>` - :ref:`writings <writings>`
+:ref:`reconsider <home>` - :ref:`evidence <evidence>` - :ref:`guilty <guilty>` - :ref:`writings <writings>`
 
 .. raw:: html
 
@@ -145,4 +145,4 @@ nitpick_ignore = [
 
 
 def setup(app):
-    app.add_css_file("custom.css", 800)
+    app.add_css_file("otpcr.css", 800)

@@ -5,6 +5,11 @@
 
 .. _informed:
 
+.. raw:: html
+
+    <br><br>
+    <center><b>GUILTY</b></center><br>
+
 
 **INFORMED**
 

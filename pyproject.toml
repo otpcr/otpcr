@@ -47,6 +47,7 @@ packages = [
     'README.rst',
 ]
 "share/doc/otpcr/docs" = [
+    'docs/about.rst',
     'docs/googlea6568bcc05c8d50b.html',
     'docs/ack.png',
     'docs/ack3.png',
