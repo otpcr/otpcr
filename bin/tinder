@@ -7,6 +7,7 @@
 
 
 import os
+import platform
 import shutil
 import sys
 import termios
@@ -17,11 +18,14 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.command import NAME, Commands, command, parse, scanner
+from otpcr.command import NAME, Config, Commands, command, laps, parse, scanner
 from otpcr.modules import face
-from otpcr.object  import Config, Object
-from otpcr.persist import Workdir, laps, skel
+from otpcr.object  import Object
+from otpcr.persist import Workdir, skel
 from otpcr.runtime import Client, Errors, Event, later, launch
+
+
+"defines"
 
 
 Workdir.wdr = os.path.expanduser(f"~/.{NAME}")
@@ -60,6 +64,9 @@ param.tdo = ["mekker", ""]
 param.ver = [""]
 
 
+"cli"
+
+
 class CLI(Client):
 
     def __init__(self):
@@ -69,6 +76,9 @@ class CLI(Client):
     def raw(self, txt):
         if "v" in cfg.opts:
             print(txt)
+
+
+"utilities"
 
 
 def banner():
@@ -118,6 +128,9 @@ def wrap(function):
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
 
 
+"runtime"
+
+
 def main():
     Workdir.wdr = ".test"
     parse(cfg, " ".join(sys.argv[1:]))
@@ -147,7 +160,7 @@ def main():
         print(f"{lap} {nrs} {nrcommands} {percall}")
         if not Errors.errors:
             print("no errors")
-
+        print(platform.python_version())
 
 if __name__ == "__main__":
     wrap(main)
