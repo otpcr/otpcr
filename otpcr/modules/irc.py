@@ -590,7 +590,7 @@ def cb_quit(bot, evt):
 
 def cfg(event):
     config = Config()
-    last(config)
+    path = last(config)
     if not event.sets:
         event.reply(
                     format(
@@ -601,7 +601,7 @@ def cfg(event):
                    )
     else:
         edit(config, event.sets)
-        write(config)
+        write(config, path)
         event.reply('ok')
 
 
