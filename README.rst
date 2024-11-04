@@ -5,15 +5,15 @@ O T P C R
 **NAME**
 
 
-    ``OTPCR`` - Office of the Prosecutor's 117th Communication of the year 2019
+ ``OTPCR`` - Office of the Prosecutor's 117th Communication of the year 2019
 
 
 **SYNOPSIS**
 
 
-    | ``otpcr <cmd> [key=val] [key==val]``
-    | ``otpcrd`` 
-    | ``otpcrs``
+ | ``otpcr <cmd> [key=val] [key==val]``
+ | ``otpcrd`` 
+ | ``otpcrs``
 
 
 **DESCRIPTION**
