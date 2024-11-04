@@ -3,12 +3,6 @@
 .. title:: Guilty
 
 
-.. raw:: html
-
-    <br><br>
-    <center><b>GUILTY</b></center><br>
-
-
 .. _informed:
 
 
