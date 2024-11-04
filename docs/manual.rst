@@ -17,15 +17,13 @@
 **NAME**
 
 
-    ``OTPCR`` - Office of the Prosecutor Communication 117 of the year 2019
+    ``OTPCR`` - Office of the Prosecutor's 117th communication of the year 2019.
 
 
 **SYNOPSIS**
 
 
     | ``otpcr  <cmd> [key=val] [key==val]``
-    | ``otpcra``
-    | ``otpcrc [-i] [-v]``
     | ``otpcrd`` 
     | ``otpcrs``
 
@@ -59,8 +57,7 @@
     to have the king actually arrested.
 
 
-    ``OTP-CR-117/19`` entered the Communications
-    Register of the Office on ``4 march 2019``
+    ``OTP-CR-117/19`` entered Communications Register on ``4 march 2019``
 
 
 **INSTALL**
@@ -69,6 +66,14 @@
 
     | ``$ pipx install otpcr``
     | ``$ pipx ensurepath``
+
+    <new terminal>
+
+    | ``$ otpcr srv > otpcr.service``
+    | ``$ sudo mv otpcr.service /etc/systemd/system/``
+    | ``$ sudo systemctl enable otpcr --now``
+    |
+    | joins ``#otpcr`` on localhost
 
 
 **USAGE**
@@ -83,16 +88,6 @@
     | ``$ otpcr cmd``
     | ``cfg,cmd,dne,dpl,err,exp,imp,log,mod,mre,nme,``
     | ``now,pwd,rem,req,res,rss,srv,syn,tdo,thr,upt``
-
-    start a console
-
-    | ``$ otpcrc``
-    | ``>``
-
-    use -i to init modules
-
-    | ``$ otpcrc -i``
-    | ``>``
 
     start daemon
 
@@ -164,18 +159,6 @@
     | ``$ otpcr imp <filename>``
 
 
-**SYSTEMD**
-
-    | use the admin program ``otpcra`` to create the
-    | service file
-    |
-    | ``$ otpcra srv > otpcr.service``
-    | ``$ sudo mv otpcr.service /etc/systemd/system/``
-    | ``$ sudo systemctl enable otpcr --now``
-    |
-    | joins ``#otpcr`` on localhost
-
-
 **SOURCE**
 
     source is `here <https://github.com/otpcr/otpcr>`_
@@ -185,8 +168,6 @@
 
     | ``~/.otpcr``
     | ``~/.local/bin/otpcr``
-    | ``~/.local/bin/otpcra``
-    | ``~/.local/bin/otpcrc``
     | ``~/.local/bin/otpcrd``
     | ``~/.local/bin/otpcrs``
     | ``~/.local/pipx/venvs/otpcr/*``
@@ -194,7 +175,7 @@
 
 **AUTHOR**
 
-    | Bart Thate <``record11719@gmail.com``>
+    | Bart Thate <``bthate@dds.nl``>
 
 
 **COPYRIGHT**
