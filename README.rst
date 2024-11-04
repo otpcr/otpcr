@@ -100,6 +100,12 @@ show request to the prosecutor
 | The Netherlands
 |
 
+show number of killed psychiatric patient since 4 march 2019
+
+| ``$ otpcr now``
+| 5y247d MENTAL #66337 (14/32/11682) every 44m59s
+|
+
 **COMMANDS**
 
 | ``cfg`` - irc configuration
