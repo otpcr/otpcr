@@ -14,7 +14,7 @@ O T P C R
 | ``otpcr <cmd> [key=val] [key==val]``
 | ``otpcrd`` 
 | ``otpcrs``
-
+|
 
 **DESCRIPTION**
 
@@ -49,128 +49,128 @@ Register of the Office on ``4 march 2019``
 
 **INSTALL**
 
-    installation is done with pipx
+installation is done with pipx
 
-    | ``$ pipx install otpcr``
-    | ``$ pipx ensurepath``
+| ``$ pipx install otpcr``
+| ``$ pipx ensurepath``
 
-    <new terminal>
+<new terminal>
 
-    | ``$ otpcr srv > otpcr.service``
-    | ``$ sudo mv otpcr.service /etc/systemd/system/``
-    | ``$ sudo systemctl enable otpcr --now``
-    |
-    | joins ``#otpcr`` on localhost
+| ``$ otpcr srv > otpcr.service``
+| ``$ sudo mv otpcr.service /etc/systemd/system/``
+| ``$ sudo systemctl enable otpcr --now``
+|
+| joins ``#otpcr`` on localhost
 
 
 **USAGE**
 
-    without any argument the bot does nothing
+without any argument the bot does nothing
 
-    | ``$ otpcr``
-    | ``$``
+| ``$ otpcr``
+| ``$``
 
-    see list of commands
+see list of commands
 
-    | ``$ otpcr cmd``
-    | ``cfg,cmd,dne,dpl,err,exp,imp,log,mod,mre,nme,``
-    | ``now,pwd,rem,req,res,rss,srv,syn,tdo,thr,upt``
+| ``$ otpcr cmd``
+| ``cfg,cmd,dne,dpl,err,exp,imp,log,mod,mre,nme,``
+| ``now,pwd,rem,req,res,rss,srv,syn,tdo,thr,upt``
 
-    start daemon
+start daemon
 
-    | ``$ otpcrd``
-    | ``$``
+| ``$ otpcrd``
+| ``$``
 
-    start service
+start service
 
-    | ``$ otpcrs``
-    | ``<runs until ctrl-c>``
+| ``$ otpcrs``
+| ``<runs until ctrl-c>``
 
-    show request to the prosecutor
+show request to the prosecutor
 
-    | $ ``otpcr req``
-    | Information and Evidence Unit
-    | Office of the Prosecutor
-    | Post Office Box 19519
-    | 2500 CM The Hague
-    | The Netherlands
+| $ ``otpcr req``
+| Information and Evidence Unit
+| Office of the Prosecutor
+| Post Office Box 19519
+| 2500 CM The Hague
+| The Netherlands
 
 
 **COMMANDS**
 
-    here is a list of available commands
+here is a list of available commands
 
-    | ``cfg`` - irc configuration
-    | ``cmd`` - commands
-    | ``dpl`` - sets display items
-    | ``err`` - show errors
-    | ``exp`` - export opml (stdout)
-    | ``imp`` - import opml
-    | ``log`` - log text
-    | ``mre`` - display cached output
-    | ``now`` - show genocide stats
-    | ``pwd`` - sasl nickserv name/pass
-    | ``rem`` - removes a rss feed
-    | ``res`` - restore deleted feeds
-    | ``req`` - reconsider
-    | ``rss`` - add a feed
-    | ``syn`` - sync rss feeds
-    | ``tdo`` - add todo item
-    | ``thr`` - show running threads
-    | ``upt`` - show uptime
+| ``cfg`` - irc configuration
+| ``cmd`` - commands
+| ``dpl`` - sets display items
+| ``err`` - show errors
+| ``exp`` - export opml (stdout)
+| ``imp`` - import opml
+| ``log`` - log text
+| ``mre`` - display cached output
+| ``now`` - show genocide stats
+| ``pwd`` - sasl nickserv name/pass
+| ``rem`` - removes a rss feed
+| ``res`` - restore deleted feeds
+| ``req`` - reconsider
+| ``rss`` - add a feed
+| ``syn`` - sync rss feeds
+| ``tdo`` - add todo item
+| ``thr`` - show running threads
+| ``upt`` - show uptime
 
 
 **CONFIGURATION**
 
-    irc
+irc
 
-    | ``$ otpcr cfg server=<server>``
-    | ``$ otpcr cfg channel=<channel>``
-    | ``$ otpcr cfg nick=<nick>``
+| ``$ otpcr cfg server=<server>``
+| ``$ otpcr cfg channel=<channel>``
+| ``$ otpcr cfg nick=<nick>``
 
-    sasl
+sasl
 
-    | ``$ otpcr pwd <nsvnick> <nspass>``
-    | ``$ otpcr cfg password=<frompwd>``
+| ``$ otpcr pwd <nsvnick> <nspass>``
+| ``$ otpcr cfg password=<frompwd>``
 
-    rss
+rss
 
-    | ``$ otpcr rss <url>``
-    | ``$ otpcr dpl <url> <item1,item2>``
-    | ``$ otpcr rem <url>``
-    | ``$ otpcr nme <url> <name>``
+| ``$ otpcr rss <url>``
+| ``$ otpcr dpl <url> <item1,item2>``
+| ``$ otpcr rem <url>``
+| ``$ otpcr nme <url> <name>``
 
-    opml
+opml
 
-    | ``$ otpcr exp``
-    | ``$ otpcr imp <filename>``
+| ``$ otpcr exp``
+| ``$ otpcr imp <filename>``
 
 
 **SYSTEMD**
 
-    | use the admin program ``otpcra`` to create the
-    | service file
-    |
+| use the admin program ``otpcra`` to create the
+| service file
+|
 
 **SOURCE**
 
-    source is `here <https://github.com/otpcr/otpcr>`_
+| source is `here <https://github.com/otpcr/otpcr>`_
 
 
 **FILES**
 
-    | ``~/.otpcr``
-    | ``~/.local/bin/otpcr``
-    | ``~/.local/bin/otpcrd``
-    | ``~/.local/bin/otpcrs``
-    | ``~/.local/pipx/venvs/otpcr/*``
+| ``~/.otpcr``
+| ``~/.local/bin/otpcr``
+| ``~/.local/bin/otpcrd``
+| ``~/.local/bin/otpcrs``
+| ``~/.local/pipx/venvs/otpcr/*``
 
 
 **AUTHOR**
 
-    | Bart Thate <``bthate@dds.nl``>
+| Bart Thate <``bthate@dds.nl``>
 
 
 **COPYRIGHT**
 
-    | ``OTPCR`` is Public Domain.
+| ``OTPCR`` is Public Domain.
