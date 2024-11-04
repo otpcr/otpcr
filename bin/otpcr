@@ -1,1 +1,1 @@
-python3 -m otpcr.cli $* ;
+python3 -m otpcr.control $* ;

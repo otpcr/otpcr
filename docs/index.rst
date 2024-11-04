@@ -57,7 +57,6 @@ to get the king in his cell and his genocide, thereby, stopped.
 .. toctree::
     :hidden:
 
-    about
     reconsider
     writings
     evidence
