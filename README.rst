@@ -102,8 +102,6 @@ show request to the prosecutor
 
 **COMMANDS**
 
-here is a list of available commands
-
 | ``cfg`` - irc configuration
 | ``cmd`` - commands
 | ``dpl`` - sets display items
@@ -153,11 +151,6 @@ opml
 | ``$ otpcr imp <filename>``
 |
 
-**SYSTEMD**
-
-| use the admin program ``otpcra`` to create the
-| service file
-|
 
 **SOURCE**
 
