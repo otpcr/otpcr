@@ -53,15 +53,15 @@ installation is done with pipx
 
 | ``$ pipx install otpcr``
 | ``$ pipx ensurepath``
-
-<new terminal>
-
+|
+| <new terminal>
+|
 | ``$ otpcr srv > otpcr.service``
 | ``$ sudo mv otpcr.service /etc/systemd/system/``
 | ``$ sudo systemctl enable otpcr --now``
 |
 | joins ``#otpcr`` on localhost
-
+|
 
 **USAGE**
 
@@ -69,22 +69,26 @@ without any argument the bot does nothing
 
 | ``$ otpcr``
 | ``$``
+|
 
 see list of commands
 
 | ``$ otpcr cmd``
 | ``cfg,cmd,dne,dpl,err,exp,imp,log,mod,mre,nme,``
 | ``now,pwd,rem,req,res,rss,srv,syn,tdo,thr,upt``
+|
 
 start daemon
 
 | ``$ otpcrd``
 | ``$``
+|
 
 start service
 
 | ``$ otpcrs``
 | ``<runs until ctrl-c>``
+|
 
 show request to the prosecutor
 
@@ -94,7 +98,7 @@ show request to the prosecutor
 | Post Office Box 19519
 | 2500 CM The Hague
 | The Netherlands
-
+|
 
 **COMMANDS**
 
@@ -118,7 +122,7 @@ here is a list of available commands
 | ``tdo`` - add todo item
 | ``thr`` - show running threads
 | ``upt`` - show uptime
-
+|
 
 **CONFIGURATION**
 
@@ -127,11 +131,13 @@ irc
 | ``$ otpcr cfg server=<server>``
 | ``$ otpcr cfg channel=<channel>``
 | ``$ otpcr cfg nick=<nick>``
+|
 
 sasl
 
 | ``$ otpcr pwd <nsvnick> <nspass>``
 | ``$ otpcr cfg password=<frompwd>``
+|
 
 rss
 
@@ -139,12 +145,13 @@ rss
 | ``$ otpcr dpl <url> <item1,item2>``
 | ``$ otpcr rem <url>``
 | ``$ otpcr nme <url> <name>``
+|
 
 opml
 
 | ``$ otpcr exp``
 | ``$ otpcr imp <filename>``
-
+|
 
 **SYSTEMD**
 
@@ -164,13 +171,14 @@ opml
 | ``~/.local/bin/otpcrd``
 | ``~/.local/bin/otpcrs``
 | ``~/.local/pipx/venvs/otpcr/*``
-
+|
 
 **AUTHOR**
 
 | Bart Thate <``bthate@dds.nl``>
-
+|
 
 **COPYRIGHT**
 
 | ``OTPCR`` is Public Domain.
+|
