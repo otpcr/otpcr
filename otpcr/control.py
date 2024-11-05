@@ -40,7 +40,8 @@ def srv(event):
 
 def wrapped():
     wrap(main)
-
+    for line in errors():
+        print(line)
 
 def main():
     Commands.add(srv)

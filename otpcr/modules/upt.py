@@ -11,8 +11,5 @@ import time
 from ..command import STARTTIME, laps
 
 
-STARTTIME = time.time()
-
-
 def upt(event):
     event.reply(laps(time.time()-STARTTIME))
