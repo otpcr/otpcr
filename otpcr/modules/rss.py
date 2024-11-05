@@ -25,9 +25,6 @@ from ..persist import Cache, find, fntime, last, ident, write
 from ..runtime import Repeater, launch
 
 
-"defines"
-
-
 DEBUG = False
 
 
@@ -38,9 +35,6 @@ def init():
     fetcher = Fetcher()
     fetcher.start()
     return fetcher
-
-
-"classes"
 
 
 class Feed(Object):
@@ -192,9 +186,6 @@ class Parser:
                     setattr(obj, itm, val)
             result.append(obj)
         return result
-
-
-"utilities"
 
 
 def cdata(line):

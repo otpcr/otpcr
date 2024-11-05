@@ -12,9 +12,6 @@ import termios
 import time
 
 
-sys.path.insert(0, os.getcwd())
-
-
 from .command import NAME, Config, command, forever, parse, scanner
 from .modules import face
 from .runtime import Client, Errors, Event, errors, later
@@ -65,9 +62,6 @@ def wrap(func):
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
     for txt in errors():
         print(txt)
-
-
-"runtime"
 
 
 def wrapped():

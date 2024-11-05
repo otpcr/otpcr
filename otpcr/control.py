@@ -12,32 +12,14 @@ import termios
 import time
 
 
-sys.path.insert(0, os.getcwd())
-
-
 from .command import NAME, Commands, Config
 from .command import command, forever, parse, scanner, wrap
+from .defines import TXT
 from .modules import face
 from .runtime import Client, Errors, Event, errors, later
 
 
 cfg  = Config()
-
-
-TXT = """[Unit]
-Description=%s
-After=network-online.target
-
-[Service]
-Type=simple
-User=%s
-Group=%s
-ExecStart=/home/%s/.local/bin/%ss
-
-[Install]
-WantedBy=multi-user.target"""
-
-
 
 
 class CLI(Client):

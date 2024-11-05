@@ -8,9 +8,6 @@
 from ..runtime import Errors
 
 
-"commands"
-
-
 def err(event):
     nmr = 0
     for exc in Errors.errors:

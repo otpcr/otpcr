@@ -13,17 +13,11 @@ from ..object  import Object
 from ..persist import find, fntime, ident, write
 
 
-"classes"
-
-
 class Log(Object):
 
     def __init__(self):
         super().__init__()
         self.txt = ''
-
-
-"commands"
 
 
 def log(event):

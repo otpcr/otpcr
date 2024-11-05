@@ -22,9 +22,6 @@ from ..persist import Cache, ident, last, write
 from ..runtime import Event, Reactor, later, launch
 
 
-"defines"
-
-
 IGNORE = ["PING", "PONG", "PRIVMSG"]
 output = None
 saylock = _thread.allocate_lock()
@@ -44,9 +41,6 @@ def init():
     irc.events.ready.wait()
     debug(f'{format(Config, skip="edited,password")}')
     return irc
-
-
-"config"
 
 
 class Config(Object):
@@ -77,9 +71,6 @@ class Config(Object):
         self.username = Config.username
 
 
-"wrapper"
-
-
 class TextWrap(textwrap.TextWrapper):
 
     def __init__(self):
@@ -93,9 +84,6 @@ class TextWrap(textwrap.TextWrapper):
 
 
 wrapper = TextWrap()
-
-
-"output"
 
 
 class Output:
@@ -158,9 +146,6 @@ class Output:
         if chan in Output.cache:
             return len(getattr(Output.cache, chan, []))
         return 0
-
-
-"irc"
 
 
 class IRC(Reactor, Output):
@@ -509,9 +494,6 @@ class IRC(Reactor, Output):
 
     def wait(self):
         self.events.ready.wait()
-
-
-"callbacks"
 
 
 def cb_auth(bot, evt):

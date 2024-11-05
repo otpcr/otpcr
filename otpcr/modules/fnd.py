@@ -13,9 +13,6 @@ from ..object  import format
 from ..persist import find, fntime, long, skel, types
 
 
-"commands"
-
-
 def fnd(event):
     skel()
     if not event.rest:

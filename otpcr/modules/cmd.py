@@ -9,8 +9,5 @@ from ..command import Commands
 from ..object import keys
 
 
-"commands"
-
-
 def cmd(event):
     event.reply(",".join(sorted(keys(Commands.cmds))))

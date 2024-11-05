@@ -8,9 +8,6 @@
 import os
 
 
-"commands"
-
-
 def mod(event):
     path = os.path.dirname(__file__)
     mods = []
