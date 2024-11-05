@@ -1,12 +1,10 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,W0105,W0611,W0718
-
+# pylint: disable=C,W0718
 
 "console"
 
 
-import os
-import readline
+import readline # pylint: disable=W0611
 import sys
 import termios
 import time
@@ -14,7 +12,7 @@ import time
 
 from .command import NAME, Config, command, forever, parse, scanner
 from .modules import face
-from .runtime import Client, Errors, Event, errors, later
+from .runtime import Client, Event, errors, later
 
 
 cfg  = Config()

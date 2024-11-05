@@ -1,22 +1,16 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,W0105,W0611,W0718
-
+# pylint: disable=C
 
 "console"
 
 
-import os
-import readline
 import sys
-import termios
-import time
 
 
 from .command import NAME, Commands, Config
-from .command import command, forever, parse, scanner, wrap
-from .defines import TXT
+from .command import command, parse, scanner, wrap
 from .modules import face
-from .runtime import Client, Errors, Event, errors, later
+from .runtime import Client, Event, errors
 
 
 cfg  = Config()
@@ -53,7 +47,21 @@ def main():
     csl = CLI()
     command(csl, evt)
     evt.wait()
-    
+
+
+TXT = """[Unit]
+Description=%s
+After=network-online.target
+
+[Service]
+Type=simple
+User=%s
+Group=%s
+ExecStart=/home/%s/.local/bin/%ss
+
+[Install]
+WantedBy=multi-user.target"""
+
 
 if __name__ == "__main__":
     wrapped()

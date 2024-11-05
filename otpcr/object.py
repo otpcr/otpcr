@@ -1,11 +1,16 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R,W0105,W0622
+# pylint: disable=C,R,W0622
 
 
 "a clean namespace"
 
 
 import json
+
+
+class JSONError(Exception):
+
+    pass
 
 
 class Object:
@@ -207,6 +212,7 @@ def dumps(*args, **kw) -> str:
 
 def __dir__():
     return (
+        'JSONError',
         'Object',
         'construct',
         'dumps',

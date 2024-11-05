@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R,W0105,W0719,E1101
+# pylint: disable=C,R,W0105,E1101
 
 
 "persist to disk"
@@ -13,7 +13,7 @@ import time
 import _thread
 
 
-from .object import Object, dump, load, search, update
+from .object import JSONError, Object, dump, load, search, update
 
 
 cachelock = _thread.allocate_lock()
@@ -192,7 +192,7 @@ def fetch(obj, pth) -> None:
             try:
                 update(obj, load(ofile))
             except json.decoder.JSONDecodeError as ex:
-                raise Exception(pth) from ex
+                raise JSONError(pth) from ex
 
 
 def write(obj, pth) -> str:

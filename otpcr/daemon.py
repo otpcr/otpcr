@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,W0105,W0212
+# pylint: disable=C,W0212
 
 
 "daemon"
