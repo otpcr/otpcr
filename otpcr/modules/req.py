@@ -66,11 +66,6 @@ medicine are poison at the time they voted for this law and the day the
 Wfz law took effect (1-1-2019), i ask the prosecutor to prosecute the
 king for making the commiting of the above mentioned crimes (killing,
 torture and impotent making) possible.
-
-p.s.
-
-
-1) ``OTP-CR-117/19`` entered the Communications Register on ``4 march 2019``
 """
 
 

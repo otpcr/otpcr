@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R
+# pylint: disable=C,R,W0105
 
 
 "todo list"
@@ -8,9 +8,8 @@
 import time
 
 
-from ..command import laps
 from ..object  import Object
-from ..persist import find, fntime, ident, write
+from ..persist import find, fntime, ident, laps, write
 
 
 class Todo(Object):

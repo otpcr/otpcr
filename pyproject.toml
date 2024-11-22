@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "otpcr"
-version = "55"
+version = "56"
 authors = [
     {name = "Bart Thate", email = "bthate@dds.nl" },
 ]
@@ -27,7 +27,7 @@ classifiers=[
 [project.scripts]
 "otpcr"  = "otpcr.control:wrapped"
 "otpcrd" = "otpcr.daemon:main"
-"otpcrs" = "otpcr.service:wrapped"
+"otpcrs" = "otpcr.daemon:service"
 
 
 [project.urls]

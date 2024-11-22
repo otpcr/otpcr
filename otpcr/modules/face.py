@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=W0611,E0611
+# pylint: disable=W0611
 # ruff: noqa: F401
 
 
@@ -7,7 +7,7 @@
 
 
 from . import cmd, err, fnd, irc, log, mod, opm, rss, tdo, thr, upt
-from . import mdl, req
+from . import mdl, req, srv
 
 
 def __dir__():
@@ -26,3 +26,6 @@ def __dir__():
         'thr',
         'upt'
     )
+
+
+__all__ = __dir__()

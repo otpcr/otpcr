@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R
+# pylint: disable=C0116,C0209,W0105
 
 
 "Genocide model of the Netherlands since 4 March 2019"
@@ -9,9 +9,8 @@ import datetime
 import time
 
 
-from ..command import laps
 from ..object  import Object, construct, keys
-from ..persist import Cache
+from ..persist import Cache, laps
 from ..runtime import Event, Repeater
 
 
@@ -23,7 +22,6 @@ STARTTIME = time.mktime(time.strptime(STARTDATE, "%Y-%m-%d %H:%M:%S"))
 
 
 def init():
-    "start repeaters"
     for key in keys(oorzaken):
         if "Psych" not in key:
             continue
@@ -358,6 +356,9 @@ def cbstats(evt):
             obj.announce(txt)
 
 
+"commands"
+
+
 def now(event):
     nme = event.rest or "Psych"
     needed = seconds(getnr(nme))
@@ -377,6 +378,9 @@ def now(event):
             laps(needed)
         )
         event.reply(txt)
+
+
+"runtime"
 
 
 def boot():
@@ -408,11 +412,5 @@ def boot():
         nms = nms.strip()
         setattr(oorzaken, nms, aantal[_nr])
 
-
-def __dir__():
-    return (
-            'init',
-            'now'
-           )
 
 boot()

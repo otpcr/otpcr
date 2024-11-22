@@ -7,7 +7,6 @@
 
 
 import os
-import platform
 import shutil
 import sys
 import termios
@@ -18,19 +17,15 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.command import NAME, Config, Commands, command, laps, parse, scanner
-from otpcr.modules import face
+from otpcr.control import NAME, Config, Commands, command, parse, scan
+from otpcr.modules import face, srv
 from otpcr.object  import Object
-from otpcr.persist import Workdir, skel
-from otpcr.runtime import Client, Errors, Event, later, launch
-
-
-"defines"
+from otpcr.persist import Workdir, laps, skel
+from otpcr.runtime import BufferedClient, Errors, Event, later, launch
 
 
 cfg = Config()
 cfg.index = 0
-face.rss.DEBUG = True
 
 
 LAP = 1
@@ -40,42 +35,41 @@ PERCALL   = 1
 STARTTIME = time.time()
 
 
+face.rss.DEBUG = True
+
+
 events = []
 paylock = _thread.allocate_lock()
 
 
 param = Object()
 param.cmd = [""]
-param.dpl = ["hnrss title,url"]
-param.fnd = ["log", "todo", "rss", "config", "urls"]
-param.imp = ["tests/feeds.opml"]
-param.log = ["bla"]
+param.dpl = ["hnrss title,url", ""]
+param.exp = ['']
+param.fnd = ["log", "todo", "rss", "config", "urls", ""]
+param.imp = ["tests/feeds.opml", ""]
+param.log = ["bla", ""]
 param.mod = [""]
 param.mre = [""]
-param.nme = ["hnrss hackernews"]
-param.pwd = ["bla mekker"]
-param.rem = ["hnrss"]
+param.nme = ["hnrss hackernews", ""]
+param.pwd = ["bla mekker", ""]
+param.rem = ["hnrss", ""]
 param.res = [""]
 param.rss = ["http://hnrss.org/newest", ""]
+param.srv = [""]
 param.tdo = ["mekker", ""]
 param.ver = [""]
 
 
-"cli"
-
-
-class CLI(Client):
+class CLI(BufferedClient):
 
     def __init__(self):
-        Client.__init__(self)
+        BufferedClient.__init__(self)
         self.register("command", command)
 
     def raw(self, txt):
         if "v" in cfg.opts:
             print(txt)
-
-
-"utilities"
 
 
 def banner():
@@ -125,13 +119,11 @@ def wrap(function):
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
 
 
-"runtime"
-
-
 def main():
     Workdir.wdr = ".test"
     parse(cfg, " ".join(sys.argv[1:]))
-    scanner(face)
+    scan(face)
+    Commands.scan(srv)
     nrcommands = len(Commands.cmds) or 1
     if "v" in cfg.opts:
         banner()
@@ -145,19 +137,17 @@ def main():
     thrs = []
     for _nr in range(nrs):
         thrs.append(launch(payload, clt))
-    consume(events)
     for thr in thrs:
         thr.join()
-    #clt.wait()
-    if "v" in cfg.opts:
-        endtime = time.time()
-        lap = laps(endtime-STARTTIME)
-        percall = (endtime-STARTTIME)/(nrs*nrcommands)
-        print(",".join(Commands.cmds))
-        print(f"{lap} {nrs} {nrcommands} {percall}")
-        if not Errors.errors:
-            print("no errors")
-        print(platform.python_version())
+    consume(events)
+    clt.wait()
+    endtime = time.time()
+    lap = laps(endtime-STARTTIME)
+    percall = (endtime-STARTTIME)/(nrs*nrcommands)
+    print(f"{lap} {nrs} {nrcommands} {percall}")
+    if not Errors.errors:
+        print("no errors")
+
 
 if __name__ == "__main__":
     wrap(main)

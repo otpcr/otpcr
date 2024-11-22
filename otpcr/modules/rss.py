@@ -19,9 +19,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from ..command import laps, spl
 from ..object  import Object, format, update
-from ..persist import Cache, find, fntime, last, ident, write
+from ..persist import Cache, find, fntime, laps, last, ident, spl, write
 from ..runtime import Repeater, launch
 
 
@@ -257,7 +256,6 @@ def unescape(text):
 
 
 def useragent(txt):
-    "return useragent."
     return 'Mozilla/5.0 (X11; Linux x86_64) ' + txt
 
 

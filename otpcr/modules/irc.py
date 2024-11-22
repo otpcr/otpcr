@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R,W0105,W0622,W0718,E1102
+# pylint: disable=C,R,W0105,W0201,W0613,w0622,W0718,E1102
 
 
 "internet relay chat"
@@ -16,7 +16,7 @@ import time
 import _thread
 
 
-from ..command import NAME, command
+from ..control import NAME, command
 from ..object  import Object, edit, format, keys
 from ..persist import Cache, ident, last, write
 from ..runtime import Event, Reactor, later, launch
@@ -572,7 +572,7 @@ def cb_quit(bot, evt):
 
 def cfg(event):
     config = Config()
-    path = last(config)
+    last(config)
     if not event.sets:
         event.reply(
                     format(
@@ -583,7 +583,7 @@ def cfg(event):
                    )
     else:
         edit(config, event.sets)
-        write(config, path)
+        write(config)
         event.reply('ok')
 
 
