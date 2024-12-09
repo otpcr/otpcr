@@ -8,11 +8,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "otpcr"
-version = "56"
+version = "60"
 authors = [
     {name = "Bart Thate", email = "bthate@dds.nl" },
 ]
-description = "Office of the Prosecutor's 117th communication of the year 2019."
+description = "Office of the Prosecutor's 117th communication of the year 2019"
 readme = "README.rst"
 license = { text="Public Domain"}
 classifiers=[
@@ -26,8 +26,9 @@ classifiers=[
 
 [project.scripts]
 "otpcr"  = "otpcr.control:wrapped"
+"otpcrc" = "otpcr.console:wrapped"
 "otpcrd" = "otpcr.daemon:main"
-"otpcrs" = "otpcr.daemon:service"
+"otpcrs" = "otpcr.service:wrapped"
 
 
 [project.urls]
@@ -43,11 +44,7 @@ packages = [
 
 
 [tool.setuptools.data-files]
-"share/doc/otpcr/" = [
-    'README.rst',
-]
 "share/doc/otpcr/docs" = [
-    'docs/about.rst',
     'docs/googlea6568bcc05c8d50b.html',
     'docs/ack.png',
     'docs/ack3.png',

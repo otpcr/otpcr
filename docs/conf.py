@@ -104,14 +104,12 @@ intersphinx_cache_limit = 1
 
 rst_prolog = '''.. image:: genocide.png
     :width: 100%
-    :height: 2.6cm
-    :target: about.html
+    :height: 2.4cm
+    :target: manual.html
 
 .. raw:: html
 
-    <center>
-    Elderly, Handicapped, Criminals, Wicked
-    </center>
+    <center><i>Elderly, Handicapped, Criminals, Wicked</i></center>
 
 '''
 
@@ -121,13 +119,12 @@ rst_epilog = '''.. raw:: html
     <center>
     <b>
 
-:ref:`reconsider <home>` - :ref:`evidence <evidence>` - :ref:`guilty <guilty>` - :ref:`writings <writings>`
+:ref:`reconsider <reconsider>` - :ref:`evidence <evidence>` - :ref:`guilty <guilty>` - :ref:`writings <writings>`
 
 .. raw:: html
 
     </b>
     </center>
-    <br>
 
 '''
 
@@ -143,7 +140,3 @@ autoclass_content = "class"
 nitpick_ignore = [
                   ('py:class', 'builtins.BaseException'),
                  ]
-
-
-def setup(app):
-    app.add_css_file("otpcr.css", 800)

@@ -9,11 +9,6 @@
 .. title:: Manual
 
 
-.. raw:: html
-
-    <center><b>MANUAL</b></center><br>
-
-
 **NAME**
 
 
@@ -24,6 +19,7 @@
 
 
     | ``otpcr  <cmd> [key=val] [key==val]``
+    | ``otpcrc``
     | ``otpcrd`` 
     | ``otpcrs``
 
@@ -33,23 +29,26 @@
 
     ``OTPCR`` holds evidence that king
     netherlands is doing a genocide, a
-    written response where king
+    :ref:`written response <king>` where king
     netherlands confirmed taking note
     of “what i have written”, namely
     :ref:`proof  <evidence>` that medicine
-    he uses in treatement laws like zyprexa,
+    he uses in treatment laws like zyprexa,
     haldol, abilify and clozapine are
-    poison that make impotent, is both
+    poison.
+
+    Poison that makes impotent, is both
     physical (contracted muscles) and
     mental (make people hallucinate)
     torture and kills members of the
-    victim groups.
+    victim groups: Elderly, Handicapped, Criminals
+    and Psychiatric patients.
 
     ``OTPCR`` contains :ref:`correspondence
     <writings>` with the International Criminal
     Court, asking for arrest of the king of the
     netherlands, for the genocide he is committing
-    with his new treatement laws.
+    with his new treatment laws.
 
     Current status is a :ref:`"no basis to proceed"
     <writings>` judgement of the prosecutor which
@@ -161,13 +160,14 @@
 
 **SOURCE**
 
-    source is `here <https://github.com/otpcr/otpcr>`_
+    source is at `https://github.com/otpcr/otpcr <https://github.com/otpcr/otpcr>`_
 
 
 **FILES**
 
     | ``~/.otpcr``
     | ``~/.local/bin/otpcr``
+    | ``~/.local/bin/otpcrc``
     | ``~/.local/bin/otpcrd``
     | ``~/.local/bin/otpcrs``
     | ``~/.local/pipx/venvs/otpcr/*``

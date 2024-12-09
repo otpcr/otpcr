@@ -1,19 +1,14 @@
-.. _home:
+.. _reconsider:
 
 
 .. raw:: html
 
-    <br><br>
+    <br><br><br>
+
 
 .. title:: Reconsider
 
 
-.. raw:: html
-
-    <center><b>RECONSIDER</b></center><br>
-
-
-|
 | **Information and Evidence Unit**
 | **Office of the Prosecutor**
 | **Post Office Box 19519**
@@ -70,20 +65,12 @@ prosecute the king for making the commiting of the above mentioned crimes
 (killing, torture and impotent making) possible.
 
 
-p.s.
-
-
-1) ``OTP-CR-117/19`` entered the Communications Register on ``4 march 2019``
-
-
 .. toctree::
     :hidden:
 
-    about
     reconsider
     writings
     evidence
     guilty
     request
     manual
-
