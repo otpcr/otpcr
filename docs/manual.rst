@@ -56,9 +56,6 @@
     to have the king actually arrested.
 
 
-    ``OTP-CR-117/19`` entered Communications Register on ``4 march 2019``
-
-
 **INSTALL**
 
     installation is done with pipx
