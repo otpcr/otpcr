@@ -12,7 +12,7 @@
 **NAME**
 
 
-    ``OTPCR`` - Office of the Prosecutor's 117th communication of the year 2019.
+    ``OTPCR`` - Office of the Prosecutor's 117th communication of the year 2019
 
 
 **SYNOPSIS**
