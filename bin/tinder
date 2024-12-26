@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C,W0105,W0201,W0212,W0718
+# pylint: disable=C,R0903,W0105,W0201,W0212,W0718,E0401
 
 
 "tinder"
@@ -17,11 +17,15 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.control import NAME, Config, Commands, command, parse, scan
-from otpcr.modules import face, srv
+from otpcr.client  import Client, Commands, parse, scan
+from otpcr.modules import face
 from otpcr.object  import Object
-from otpcr.persist import Workdir, laps, skel
-from otpcr.runtime import BufferedClient, Errors, Event, later, launch
+from otpcr.persist import Config, laps, skel
+from otpcr.runtime import Event, errors, later, launch
+
+
+Config.name = "tinder"
+Config.wdr = ".test"
 
 
 cfg = Config()
@@ -35,15 +39,13 @@ PERCALL   = 1
 STARTTIME = time.time()
 
 
-face.rss.DEBUG = True
-
-
 events = []
 paylock = _thread.allocate_lock()
 
 
 param = Object()
 param.cmd = [""]
+param.dne = ["mekker", ""]
 param.dpl = ["hnrss title,url", ""]
 param.exp = ['']
 param.fnd = ["log", "todo", "rss", "config", "urls", ""]
@@ -61,45 +63,43 @@ param.tdo = ["mekker", ""]
 param.ver = [""]
 
 
-class CLI(BufferedClient):
+class CLI(Client):
 
-    def __init__(self):
-        BufferedClient.__init__(self)
-        self.register("command", command)
+    def dosay(self, channel, txt):
+        print(txt)
 
     def raw(self, txt):
         if "v" in cfg.opts:
             print(txt)
+            sys.stdout.flush()
 
 
 def banner():
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{NAME.upper()} since {tme}")
+    print(f"{Config.name.upper()} since {tme}")
 
 
 def consume(evts):
+    done = []
     for evt in evts:
         evt.wait()
-
-
-def errors():
-    for erring in Errors.errors:
-        for line in erring:
-            print(line)
+        done.append(evt)
+    for todo in done:
+        events.remove(todo)
+    return done
 
 
 def payload(clt):
-    with paylock:
-        nmr = 0
-        for cmdd in sorted(Commands.cmds):
-            for ex in getattr(param, cmdd, [""]):
-                evt = Event()
-                evt.txt = cmdd + " " + ex
-                evt.type = "command"
-                clt.put(evt)
-                events.append(evt)
-                nmr += 1
-        return nmr
+    nmr = 0
+    for cmdd in sorted(Commands.cmds):
+        for ex in getattr(param, cmdd, [""]):
+            evt = Event()
+            evt.txt = cmdd + " " + ex
+            evt.type = "command"
+            events.append(evt)
+            clt.put(evt)
+            nmr += 1
+    return nmr
 
 
 def wrap(function):
@@ -120,16 +120,16 @@ def wrap(function):
 
 
 def main():
-    Workdir.wdr = ".test"
+    Config.wdr = ".test"
     parse(cfg, " ".join(sys.argv[1:]))
+    face.rss.DEBUG = True
     scan(face)
-    Commands.scan(srv)
     nrcommands = len(Commands.cmds) or 1
     if "v" in cfg.opts:
         banner()
     if "f" not in cfg.opts:
-        if os.path.exists(Workdir.wdr):
-            shutil.rmtree(Workdir.wdr)
+        if os.path.exists(Config.wdr):
+            shutil.rmtree(Config.wdr)
     skel()
     clt = CLI()
     clt.start()
@@ -141,15 +141,19 @@ def main():
         thr.join()
     consume(events)
     clt.wait()
+    clt.stop()
     endtime = time.time()
     lap = laps(endtime-STARTTIME)
     percall = (endtime-STARTTIME)/(nrs*nrcommands)
     print(f"{lap} {nrs} {nrcommands} {percall}")
-    if not Errors.errors:
+    if not errors():
         print("no errors")
 
 
 if __name__ == "__main__":
     wrap(main)
-    errors()
-    sys.exit(0)
+    for line in errors():
+        print(line)
+    if events:
+        print(f"{len(events)} events remained")
+    sys.stdout.flush()
