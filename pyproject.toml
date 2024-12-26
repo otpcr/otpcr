@@ -25,10 +25,9 @@ classifiers=[
 
 
 [project.scripts]
-"otpcr"  = "otpcr.control:wrapped"
-"otpcrc" = "otpcr.console:wrapped"
-"otpcrd" = "otpcr.daemon:main"
-"otpcrs" = "otpcr.service:wrapped"
+"otpcr" = "otpcr.__main__:wrapped"
+"otpcrd" = "otpcr.__main__:background"
+"otpcrs" = "otpcr.__main__:wraps"
 
 
 [project.urls]

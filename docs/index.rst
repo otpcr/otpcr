@@ -1,14 +1,17 @@
 .. _reconsider:
 
+.. raw:: html
+
+    <br><br>
+
+
+.. title:: Reconsider
 
 .. raw:: html
 
-    <br><br><br>
+    <center><b>RECONSIDER</b></center><br>
 
-
-.. title:: OTPCR
-
-
+|
 | **Information and Evidence Unit**
 | **Office of the Prosecutor**
 | **Post Office Box 19519**
@@ -68,6 +71,7 @@ prosecute the king for making the commiting of the above mentioned crimes
 .. toctree::
     :hidden:
 
+    about
     reconsider
     writings
     evidence
