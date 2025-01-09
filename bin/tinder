@@ -17,12 +17,12 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.client  import Buffered, Client
+from otpcr.client  import Buffered
 from otpcr.command import Commands, parse, scan
 from otpcr.default import Config
 from otpcr.error   import errors, later
 from otpcr.event   import Event
-from otpcr.find    import Workdir, fntime, laps, skel
+from otpcr.find    import Workdir, laps, skel
 from otpcr.modules import face
 from otpcr.object  import Object
 from otpcr.thread  import launch

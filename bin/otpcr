@@ -187,7 +187,6 @@ def wrap(func):
     finally:
         if old:
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
-    Output.stop()
     for line in errors():
         print(line)
     
