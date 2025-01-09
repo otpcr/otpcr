@@ -9,7 +9,7 @@
 
 
 NAME = "otpcr"
-VERSION = "55"
+VERSION = "61"
 
 
 import os
@@ -69,7 +69,7 @@ html_css_files = ["otpcr.css",]
 html_short_title = "%s %s" % (NAME, VERSION)
 html_theme = "alabaster"
 html_theme_options = {
-    'logo': 'skull3.png',
+    'logo': 'otpcr.jpg',
     'link': '#000',
     'link_hover': '#000',
     'nosidebar': True,
@@ -77,7 +77,7 @@ html_theme_options = {
     'show_relbar_top': False,
     'sidebar_width': '0px',
 }
-html_favicon = "skull3.png"
+html_favicon = "otpcr.jpg"
 html_extra_path = ["robots.txt", "googlea6568bcc05c8d50b.html"]
 html_last_updated_fmt = '%Y-%b-%d'
 html_additional_pages = {}
@@ -132,7 +132,7 @@ rst_epilog = '''.. raw:: html
 # code generation
 
 
-autosummary_generate = False
+autosummary_generate = True
 autodoc_default_flags = ['members', 'undoc-members', 'private-members', "imported-members"]
 autodoc_member_order = 'groupwise'
 autodoc_docstring_signature = False

@@ -19,9 +19,9 @@
 
 
     | ``otpcr  <cmd> [key=val] [key==val]``
-    | ``otpcrc``
-    | ``otpcrd`` 
-    | ``otpcrs``
+    | ``otpcr -c``
+    | ``otpcr -d`` 
+    | ``otpcr -s``
 
 
 **DESCRIPTION**
@@ -164,9 +164,6 @@
 
     | ``~/.otpcr``
     | ``~/.local/bin/otpcr``
-    | ``~/.local/bin/otpcrc``
-    | ``~/.local/bin/otpcrd``
-    | ``~/.local/bin/otpcrs``
     | ``~/.local/pipx/venvs/otpcr/*``
 
 

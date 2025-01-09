@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "otpcr"
-version = "60"
+version = "61"
 authors = [
     {name = "Bart Thate", email = "bthate@dds.nl" },
 ]
@@ -22,12 +22,6 @@ classifiers=[
     'Programming Language :: Python :: 3',
     'Topic :: Utilities'
 ]
-
-
-[project.scripts]
-"otpcr" = "otpcr.__main__:wrapped"
-"otpcrd" = "otpcr.__main__:background"
-"otpcrs" = "otpcr.__main__:wraps"
 
 
 [project.urls]
@@ -57,6 +51,7 @@ packages = [
     'docs/evidence.rst',
     'docs/genocide.jpg',
     'docs/genocide.png',
+    'docs/genocide3.png',
     'docs/genocideblack.png',
     'docs/guilty.rst',
     'docs/index.rst',
@@ -65,6 +60,7 @@ packages = [
     'docs/manual.rst',
     'docs/OTP111.png',
     'docs/OTP222.png',
+    'docs/otpcr.jpg',
     'docs/reconsider.rst',
     'docs/request.rst',
     'docs/robots.txt',
