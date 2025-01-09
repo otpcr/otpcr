@@ -39,6 +39,7 @@ packages = [
 [tool.setuptools.data-files]
 "share/doc/otpcr/docs" = [
     'docs/googlea6568bcc05c8d50b.html',
+    'docs/about.rst',
     'docs/ack.png',
     'docs/ack3.png',
     'docs/bevestigd.jpg',
@@ -66,6 +67,7 @@ packages = [
     'docs/robots.txt',
     'docs/since.png',
     'docs/skull3.png',
+    'docs/source.rst',
     'docs/verbatim7.png',
     'docs/writings.rst'
 ]

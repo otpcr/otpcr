@@ -11,7 +11,9 @@ import sys
 
 
 NAME = "otpcr"
+DIST = os.path.expanduser(f"~/{NAME}/dist")
 curdir = os.getcwd()
+
 
 TXT = '''
 #
@@ -104,7 +106,7 @@ def popen2(txt):
 #    popen("python3 setup.py sdist")
 if not os.path.exists("env"):
     popen("python3 -mvirtualenv env")
-    #popen(f"env/bin/pip3 install {NAME} -f dist --upgrade --force")
+    popen(f"env/bin/pip3 install {NAME} -f {DIST} --upgrade --force")
     TEXT = " ".join([f"{x}" for x in TXT.split("\n") if "#" not in x])
     popen2(f"env/bin/python3 env/bin/pip3 install -I {TEXT}")
 
