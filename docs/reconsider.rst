@@ -1,6 +1,3 @@
-.. _reconsider:
-
-
 .. title:: Reconsider
 
 

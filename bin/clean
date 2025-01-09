@@ -42,6 +42,7 @@ def main():
     popen("rm -fR .pytest_cache .test __pycache__ .ruff_cache")
     if "-f" not in sys.argv:
         popen("rm -fR env html")
+    popen('rm -f docs/otpcr.*.rst')
     popen("rm -fR .*~ *~")
     loop(".", "rm -fR *~")
     loop(".", "rm -fR __pycache__")
