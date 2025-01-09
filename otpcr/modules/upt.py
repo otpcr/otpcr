@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C0116
+# pylint: disable=C0116,E0402
 
 
 "uptime"
@@ -8,7 +8,7 @@
 import time
 
 
-from ..persist import laps
+from ..find import laps
 
 
 STARTTIME = time.time()

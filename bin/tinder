@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C,R0903,W0105,W0201,W0212,W0718,E0401
+# pylint: disable=C,R0903,W0105,W0201,W0212,W0603,W0613,W0718,E0401
 
 
 "tinder"
@@ -17,26 +17,30 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.client  import Client, Commands, parse, scan
+from otpcr.client  import Buffered, Client
+from otpcr.command import Commands, parse, scan
+from otpcr.default import Config
+from otpcr.error   import errors, later
+from otpcr.event   import Event
+from otpcr.find    import Workdir, fntime, laps, skel
 from otpcr.modules import face
 from otpcr.object  import Object
-from otpcr.persist import Config, laps, skel
-from otpcr.runtime import Event, errors, later, launch
+from otpcr.thread  import launch
 
 
-Config.name = "tinder"
-Config.wdr = ".test"
+Workdir.name = "tinder"
+Workdir.wdr = ".test"
 
 
 cfg = Config()
 cfg.index = 0
 
 
-LAP = 1
-NRS = 1
-NRCOMMAND = 1
-PERCALL   = 1
-STARTTIME = time.time()
+lap = 1
+nrs = 1
+nrcommand = 1
+percall   = 1
+starttime = time.time()
 
 
 events = []
@@ -56,17 +60,15 @@ param.mre = [""]
 param.nme = ["hnrss hackernews", ""]
 param.pwd = ["bla mekker", ""]
 param.rem = ["hnrss", ""]
-param.res = [""]
+param.res = ["hnrss"]
 param.rss = ["http://hnrss.org/newest", ""]
 param.srv = [""]
 param.tdo = ["mekker", ""]
+param.thr = [""]
 param.ver = [""]
 
 
-class CLI(Client):
-
-    def dosay(self, channel, txt):
-        print(txt)
+class CLI(Buffered):
 
     def raw(self, txt):
         if "v" in cfg.opts:
@@ -76,12 +78,12 @@ class CLI(Client):
 
 def banner():
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{Config.name.upper()} since {tme}")
+    print(f"{Workdir.name.upper()} since {tme}")
 
 
 def consume(evts):
     done = []
-    for evt in evts:
+    for evt in sorted(evts, key=lambda x: x.ctime):
         evt.wait()
         done.append(evt)
     for todo in done:
@@ -120,16 +122,18 @@ def wrap(function):
 
 
 def main():
-    Config.wdr = ".test"
+    global nrs
+    global nrcommand
     parse(cfg, " ".join(sys.argv[1:]))
     face.rss.DEBUG = True
     scan(face)
-    nrcommands = len(Commands.cmds) or 1
+    nrcommand = len(Commands.cmds) or 1
     if "v" in cfg.opts:
         banner()
+        print("verbose is on")
     if "f" not in cfg.opts:
-        if os.path.exists(Config.wdr):
-            shutil.rmtree(Config.wdr)
+        if os.path.exists(Workdir.wdr):
+            shutil.rmtree(Workdir.wdr)
     skel()
     clt = CLI()
     clt.start()
@@ -140,20 +144,21 @@ def main():
     for thr in thrs:
         thr.join()
     consume(events)
-    clt.wait()
     clt.stop()
-    endtime = time.time()
-    lap = laps(endtime-STARTTIME)
-    percall = (endtime-STARTTIME)/(nrs*nrcommands)
-    print(f"{lap} {nrs} {nrcommands} {percall}")
-    if not errors():
-        print("no errors")
+    clt.wait()
 
 
 if __name__ == "__main__":
     wrap(main)
+    endtime = time.time()
+    lap = laps(endtime-starttime)
+    percall = (endtime-starttime)/(nrs*nrcommand)
     for line in errors():
         print(line)
-    if events:
-        print(f"{len(events)} events remained")
+    if "v" in cfg.opts:
+        if not list(errors()):
+            print("no errors")
+        if events:
+            print(f"{len(events)} events")
+        print(f"{lap} {nrs} {nrcommand} {percall}")
     sys.stdout.flush()

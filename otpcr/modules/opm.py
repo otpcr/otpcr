@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,W0105
+# pylint: disable=C,W0105,E0402
 
 
 "OPML"
@@ -10,12 +10,11 @@ import uuid
 import _thread
 
 
-from ..client  import spl
+from ..command import spl
+from ..disk    import ident, write
+from ..find    import find, store
 from ..object  import Object, update
-from ..persist import find, ident, write
-
-
-from .rss import Rss
+from  .rss     import Rss
 
 
 importlock = _thread.allocate_lock()
@@ -94,6 +93,9 @@ class OPMLParser:
         return result
 
 
+"utilities"
+
+
 def attrs(obj, txt):
     update(obj, OPMLParser.parse(txt))
 
@@ -150,7 +152,7 @@ def imp(event):
             update(feed, obj)
             feed.rss = obj.xmlUrl
             feed.insertid = insertid
-            write(feed, ident(feed))
+            write(feed, store(ident(feed)))
             nrs += 1
     if nrskip:
         event.reply(f"skipped {nrskip} urls.")

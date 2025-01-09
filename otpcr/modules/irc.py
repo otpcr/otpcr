@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R,W0105,W0611,W0401,W0622,W0718,E1102
+# pylint: disable=C,R,W0105,W0611,W0401,W0622,W0718,E0402,E1102
 
 
 "internet relay chat"
@@ -16,15 +16,20 @@ import time
 import _thread
 
 
-from ..client  import Commands, command, spl
-from ..object  import Object, edit, format, keys
-from ..persist import Cache, ident, last, write
-from ..persist import Config as Main
-from ..runtime import Event, Reactor, later, launch
+from ..cache   import Cache
+from ..command import command, spl
+from ..default import Default
+from ..disk    import ident, write
+from ..error   import later
+from ..event   import Event
+from ..find    import Workdir, format, last, store
+from ..object  import Object, edit, keys
+from ..reactor import Reactor
+from ..thread  import launch
 
 
 IGNORE = ["PING", "PONG", "PRIVMSG"]
-NAME   = Object.__module__.split(".", maxsplit=2)[-2]
+NAME   = Object.__module__.rsplit(".", maxsplit=2)[-2]
 
 
 output = None
@@ -47,7 +52,7 @@ def init():
     return irc
 
 
-class Config(Object):
+class Config(Default):
 
     channel = f'#{NAME}'
     commands = True
@@ -64,7 +69,7 @@ class Config(Object):
     users = False
 
     def __init__(self):
-        Object.__init__(self)
+        Default.__init__(self)
         self.channel = Config.channel
         self.commands = Config.commands
         self.nick = Config.nick
@@ -586,7 +591,7 @@ def cfg(event):
                    )
     else:
         edit(config, event.sets)
-        write(config)
+        write(config, store(ident(config)))
         event.reply('ok')
 
 

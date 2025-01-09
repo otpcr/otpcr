@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R0903,W0105,W0622
+# pylint: disable=C,R0903,W0105,W0622,E0402
 
 
 "rich site syndicate"
@@ -18,10 +18,12 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from ..client  import spl
-from ..object  import Object, format, update
-from ..persist import Cache, find, fntime, laps, last, ident, write
-from ..runtime import Repeater, launch
+from ..cache   import Cache
+from ..command import spl
+from ..disk    import ident, write
+from ..find    import find, fntime, format, laps, last, store
+from ..object  import Object, update
+from ..thread  import Repeater, launch
 
 
 DEBUG = False
@@ -105,11 +107,11 @@ class Fetcher(Object):
                 if uurl in seen:
                     continue
                 if self.dosave:
-                    write(fed, ident(fed))
+                    write(fed, store(ident(fed)))
                 result.append(fed)
             setattr(self.seen, feed.rss, urls)
             if not self.seenfn:
-                self.seenfn = ident(self.seen)
+                self.seenfn = store(ident(self.seen))
             write(self.seen, self.seenfn)
         if silent:
             return counter
@@ -328,7 +330,7 @@ def rss(event):
             return
     feed = Rss()
     feed.rss = event.args[0]
-    write(feed, ident(feed))
+    write(feed, store(ident(feed)))
     event.reply('ok')
 
 

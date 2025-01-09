@@ -2,7 +2,7 @@
 # pylint: disable=C0116
 
 
-"available modules."
+"available modules"
 
 
 import os
