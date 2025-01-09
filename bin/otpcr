@@ -23,7 +23,6 @@ from otpcr.error   import errors, later
 from otpcr.event   import Event
 from otpcr.find    import Workdir
 from otpcr.modules import face
-from otpcr.output  import Output
 
 
 cfg = Config()
