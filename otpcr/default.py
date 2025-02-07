@@ -1,11 +1,12 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R0903
 
 
-"default values"
+"default"
 
 
 class Default:
+
+    """ Default """
 
     def __contains__(self, key):
         return key in dir(self)
@@ -23,14 +24,7 @@ class Default:
         return str(self.__dict__)
 
 
-class Config(Default):
-
-    pass
-
-
 def __dir__():
     return (
-        'Config',
-        'Default'
+        'Default',
     )
-        

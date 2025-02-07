@@ -1,18 +1,17 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,E0402
 
 
 "errors"
 
 
-from ..error import Errors
+from ..excepts import Errors
 
 
 def err(event):
+    """ show errors. """
     nmr = 0
-    for exc in Errors.errors:
-        for line in exc:
-            event.reply(line.strip())
+    for line in Errors.errors:
+        event.reply(line.strip())
         nmr += 1
     if not nmr:
         event.reply("no errors")

@@ -1,5 +1,4 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C0116
 
 
 "available modules"
@@ -9,6 +8,7 @@ import os
 
 
 def mod(event):
+    """ list available modules. """
     path = os.path.dirname(__file__)
     mods = []
     for mdd in os.listdir(path):

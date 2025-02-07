@@ -1,67 +1,74 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C,R0912,R0915,W0718,E0402
 
 
-"commands"
+"command"
 
 
 import inspect
-import types
-import _thread
 
 
 from .default import Default
-from .error   import later
-from .thread  import launch
-
-
-lock = _thread.allocate_lock()
+from .package import Table, gettable
 
 
 class Commands:
 
+    """ Commands """
+
     cmds = {}
+    names = gettable()
 
     @staticmethod
-    def add(func):
+    def add(func, mod=None):
+        """ add function. """
         Commands.cmds[func.__name__] = func
+        if mod:
+            Commands.names[func.__name__] = mod.__name__
+
+    @staticmethod
+    def get(cmd):
+        """ return command. """
+        return Commands.cmds.get(cmd, None)
+
+    @staticmethod
+    def getname(cmd):
+        """ return name of module containing the command. """
+        return Commands.names.get(cmd)
 
     @staticmethod
     def scan(mod):
+        """ scan modules for command. """
         for key, cmdz in inspect.getmembers(mod, inspect.isfunction):
             if key.startswith("cb"):
                 continue
             if 'event' in cmdz.__code__.co_varnames:
-                Commands.add(cmdz)
+                Commands.add(cmdz, mod)
 
 
-def command(bot, evt):
-    try:
-        parse(evt, evt.txt)
-        if "ident" in dir(bot):
-            evt.orig = bot.ident
-        func = Commands.cmds.get(evt.cmd, None)
-        if func:
-            func(evt)
-            bot.display(evt)
-    except Exception as ex:
-        later(ex)
-    evt.ready()
-
-
-def modloop(*pkgs, disable=""):
-    for pkg in pkgs:
-        for modname in dir(pkg):
-            if modname in spl(disable):
-                continue
-            if modname.startswith("__"):
-                continue
-            yield getattr(pkg, modname)
+def command(evt):
+    """ command callback. """
+    parse(evt)
+    func = Commands.get(evt.cmd)
+    if not func:
+        mname = Commands.names.get(evt.cmd)
+        if mname:
+            mod = Table.load(mname)
+            Commands.scan(mod)
+            func = Commands.get(evt.cmd)
+    if not func:
+        evt.ready()
+        return
+    func(evt)
+    evt.display()
 
 
 def parse(obj, txt=None):
+    """ parse text for commands. """
     if txt is None:
-        txt = ""
+        if "txt" in dir(obj):
+            txt = obj.txt
+        else:
+            txt = ""
     args = []
     obj.args    = []
     obj.cmd     = ""
@@ -69,7 +76,7 @@ def parse(obj, txt=None):
     obj.index   = None
     obj.mod     = ""
     obj.opts    = ""
-    obj.result  = []
+    obj.result  = {}
     obj.sets    = Default()
     obj.txt     = txt or ""
     obj.otxt    = obj.txt
@@ -83,10 +90,7 @@ def parse(obj, txt=None):
             continue
         if "==" in spli:
             key, value = spli.split("==", maxsplit=1)
-            val = getattr(obj.gets, key, None)
-            if val:
-                value = val + "," + value
-                setattr(obj.gets, key, value)
+            setattr(obj.gets, key, value)
             continue
         if "=" in spli:
             key, value = spli.split("=", maxsplit=1)
@@ -113,31 +117,10 @@ def parse(obj, txt=None):
     return obj
 
 
-def scan(*pkgs, init=False, disable=""):
-    result = []
-    for mod in modloop(*pkgs, disable=disable):
-        if type(mod) is not types.ModuleType:
-            continue
-        Commands.scan(mod)
-        thr = None
-        if init and "init" in dir(mod):
-            thr = launch(mod.init)
-        result.append((mod, thr))
-    return result
-
-
-def spl(txt):
-    try:
-        result = txt.split(',')
-    except (TypeError, ValueError):
-        result = txt
-    return [x for x in result if x]
-
-
 def __dir__():
     return (
         'Commands',
         'command',
-        'parse',
-        'scan'
+        'cmd',
+        'parse'
     )

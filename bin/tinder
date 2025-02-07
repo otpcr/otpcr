@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C,R0903,W0105,W0201,W0212,W0603,W0613,W0718,E0401
 
 
 "tinder"
@@ -17,19 +16,21 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.client  import Buffered
-from otpcr.command import Commands, parse, scan
-from otpcr.default import Config
-from otpcr.error   import errors, later
-from otpcr.event   import Event
-from otpcr.find    import Workdir, laps, skel
-from otpcr.modules import face
-from otpcr.object  import Object
-from otpcr.thread  import launch
+from otpcr.clients import Buffered, Config
+from otpcr.command import Commands, command, parse
+from otpcr.excepts import errors, later
+from otpcr.objects import Object, keys
+from otpcr.package import Table
+from otpcr.reactor import Event
+from otpcr.threads import STARTTIME, launch
+from otpcr.utility import elapsed
+from otpcr.workdir import Workdir, skel
 
 
-Workdir.name = "tinder"
-Workdir.wdr = ".test"
+import otpcr.modules as MODS
+
+
+Workdir.wdr  = ".test"
 
 
 cfg = Config()
@@ -40,7 +41,6 @@ lap = 1
 nrs = 1
 nrcommand = 1
 percall   = 1
-starttime = time.time()
 
 
 events = []
@@ -48,13 +48,14 @@ paylock = _thread.allocate_lock()
 
 
 param = Object()
+param.log = ["bla", ""]
+param.cfg = ["cfg nick=mekker", ""]
 param.cmd = [""]
 param.dne = ["mekker", ""]
 param.dpl = ["hnrss title,url", ""]
 param.exp = ['']
-param.fnd = ["log", "todo", "rss", "config", "urls", ""]
+param.fnd = ["log", ""]
 param.imp = ["tests/feeds.opml", ""]
-param.log = ["bla", ""]
 param.mod = [""]
 param.mre = [""]
 param.nme = ["hnrss hackernews", ""]
@@ -70,22 +71,26 @@ param.ver = [""]
 
 class CLI(Buffered):
 
+    def __init__(self):
+        Buffered.__init__(self)
+        self.register("command", command)
+
     def raw(self, txt):
         if "v" in cfg.opts:
             print(txt)
-            sys.stdout.flush()
 
 
 def banner():
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{Workdir.name.upper()} since {tme}")
+    print(f"{Config.name.upper()} since {tme}")
+    print(",".join(sorted(keys(Commands.cmds))))
 
 
 def consume(evts):
     done = []
-    for evt in sorted(evts, key=lambda x: x.ctime):
-        evt.wait()
-        done.append(evt)
+    for event in evts:
+        event.wait()
+        done.append(event)
     for todo in done:
         events.remove(todo)
     return done
@@ -93,13 +98,13 @@ def consume(evts):
 
 def payload(clt):
     nmr = 0
-    for cmdd in sorted(Commands.cmds):
+    for cmdd in sorted(Commands.names.keys()):
         for ex in getattr(param, cmdd, [""]):
-            evt = Event()
-            evt.txt = cmdd + " " + ex
-            evt.type = "command"
-            events.append(evt)
-            clt.put(evt)
+            event = Event()
+            event.txt = cmdd + " " + ex
+            event.type = "command"
+            events.append(event)
+            clt.put(event)
             nmr += 1
     return nmr
 
@@ -125,8 +130,9 @@ def main():
     global nrs
     global nrcommand
     parse(cfg, " ".join(sys.argv[1:]))
-    face.rss.DEBUG = True
-    scan(face)
+    for mod in Table.all(MODS):
+        Commands.scan(mod)
+        mod.DEBUG = True
     nrcommand = len(Commands.cmds) or 1
     if "v" in cfg.opts:
         banner()
@@ -145,20 +151,24 @@ def main():
         thr.join()
     consume(events)
     clt.stop()
-    clt.wait()
+    if "w" in cfg.opts:
+        clt.wait()
 
 
 if __name__ == "__main__":
     wrap(main)
     endtime = time.time()
-    lap = laps(endtime-starttime)
-    percall = (endtime-starttime)/(nrs*nrcommand)
-    for line in errors():
-        print(line)
+    lap = elapsed(endtime-STARTTIME)
+    percall = (endtime-STARTTIME)/(nrs*nrcommand)
     if "v" in cfg.opts:
         if not list(errors()):
             print("no errors")
+        for line in errors():
+            print(line)
         if events:
+            for evt in events:
+                print(evt)
             print(f"{len(events)} events")
         print(f"{lap} {nrs} {nrcommand} {percall}")
     sys.stdout.flush()
+    sys.exit(0)

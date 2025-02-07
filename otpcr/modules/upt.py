@@ -1,5 +1,4 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C0116,E0402
 
 
 "uptime"
@@ -8,11 +7,16 @@
 import time
 
 
-from ..find import laps
-
-
-STARTTIME = time.time()
+from ..clients import Config
+from ..threads import STARTTIME
+from ..utility import elapsed
 
 
 def upt(event):
-    event.reply(laps(time.time()-STARTTIME))
+    """ show uptime. """
+    event.reply(elapsed(time.time()-STARTTIME))
+
+
+def ver(event):
+    """ show version. """
+    event.reply(f"{Config.name.upper()} {Config.version}")

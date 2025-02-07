@@ -1,19 +1,20 @@
-# This file is placed in the Public Domain.[B
-# pylint: disable=W,C0116,E0402
+# This file is placed in the Public Domain.
 
 
 "find"
 
 
-import os
-import pathlib
 import time
 
 
-from ..find import Workdir, find, fntime, format, laps, long, skel, types
+from ..locater import find, fntime
+from ..objects import fmt
+from ..workdir import long, skel, types
+from ..utility import elapsed
 
 
 def fnd(event):
+    """ locate objects. """
     skel()
     if not event.rest:
         res = sorted([x.split('.')[-1].lower() for x in types()])
@@ -23,8 +24,8 @@ def fnd(event):
     otype = event.args[0]
     clz = long(otype)
     nmr = 0
-    for fnm, obj in find(clz, event.gets):
-        event.reply(f"{nmr} {format(obj)} {laps(time.time()-fntime(fnm))}")
+    for fnm, obj in list(find(clz, event.gets)):
+        event.reply(f"{nmr} {fmt(obj)} {elapsed(time.time()-fntime(fnm))}")
         nmr += 1
     if not nmr:
         event.reply("no result")
