@@ -2,7 +2,7 @@
 # ruff: noqa: F401
 
 
-"NIXT"
+"OTPCR"
 
 
 from . import caching
