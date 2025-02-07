@@ -1,4 +1,5 @@
 # This file is placed in the Public Domain.
+# pylint: disable=R0902
 
 
 "a clean namespace"

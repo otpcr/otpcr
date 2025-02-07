@@ -24,19 +24,22 @@
     :template: base.rst
 
 
-    otpcr.cache
-    otpcr.client
+    otpcr.caching
+    otpcr.clients
     otpcr.command
+    otpcr.decoder
     otpcr.default
-    otpcr.disk
-    otpcr.error
-    otpcr.event
-    otpcr.find
-    otpcr.object
-    otpcr.output
+    otpcr.encoder
+    otpcr.excepts
+    otpcr.locater
+    otpcr.lookups
+    otpcr.objects
+    otpcr.package
+    otpcr.persist
     otpcr.reactor
-    otpcr.thread
-
+    otpcr.threads
+    otpcr.utility
+    otpcr.workdir
 
 
 .. raw:: html
@@ -56,16 +59,12 @@
     :toctree: 
     :template: base.rst
 
-    otpcr.modules.cmd
     otpcr.modules.err
     otpcr.modules.fnd
     otpcr.modules.irc
     otpcr.modules.log
-    otpcr.modules.mdl
     otpcr.modules.mod
-    otpcr.modules.opm
     otpcr.modules.req
     otpcr.modules.rss
-    otpcr.modules.tdo
     otpcr.modules.thr
     otpcr.modules.upt

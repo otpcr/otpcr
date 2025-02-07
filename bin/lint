@@ -13,7 +13,6 @@ NAME = "otpcr"
 
 
 def popen(txt):
-    "run text in popen."
     for line in os.popen(txt).readlines():
         print(line.rstrip())
         sys.stdout.flush()
@@ -23,4 +22,4 @@ if os.path.exists("bin/clean"):
     popen("bin/clean")
 
 
-popen("pylint otpcr/* otpcr/modules/*  bin/*")
+popen(f"pylint {NAME} {NAME}/modules bin/clean bin/docs bin/profile bin/tinder")
