@@ -12,7 +12,7 @@ version = "70"
 authors = [
     {name = "Bart Thate", email = "bthate@dds.nl" },
 ]
-description = "Office of the Prosecutor's 117th communication of the year 2019."
+description = "Since 4 March 2019."
 readme = "README.rst"
 license = { text="Public Domain"}
 classifiers=[
@@ -22,6 +22,10 @@ classifiers=[
     'Programming Language :: Python :: 3',
     'Topic :: Utilities'
 ]
+
+
+[project.scripts]
+"otpcr" = "otpcr.__main__:main"
 
 
 [project.urls]
