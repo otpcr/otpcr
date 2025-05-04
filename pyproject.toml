@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "otpcr"
-version = "70"
+version = "80"
 authors = [
     {name = "Bart Thate", email = "bthate@dds.nl" },
 ]
@@ -24,16 +24,15 @@ classifiers=[
 ]
 
 
-[project.scripts]
-"otpcr" = "otpcr.__main__:main"
-
-
 [project.urls]
 "home"   = "https://pypi.org/project/otpcr"
 "bugs"   = "https://github.com/otpcr/otpcr/issues"
 "source" = "https://github.com/otpcr/otpcr"
 
 [tool.setuptools]
+script-files = [
+    'bin/otpcr'
+]
 packages = [
    'otpcr',
    'otpcr.modules'
