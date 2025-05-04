@@ -24,22 +24,16 @@
     :template: base.rst
 
 
-    otpcr.caching
-    otpcr.clients
-    otpcr.command
-    otpcr.decoder
-    otpcr.default
-    otpcr.encoder
-    otpcr.excepts
-    otpcr.locater
-    otpcr.lookups
-    otpcr.objects
-    otpcr.package
-    otpcr.persist
-    otpcr.reactor
-    otpcr.threads
-    otpcr.utility
-    otpcr.workdir
+    otpcr.client
+    otpcr.disk
+    otpcr.event
+    otpcr.find
+    otpcr.fleet
+    otpcr.handler
+    otpcr.json
+    otpcr.object
+    otpcr.store
+    otpcr.thread
 
 
 .. raw:: html
@@ -60,11 +54,25 @@
     :template: base.rst
 
     otpcr.modules.err
+    otpcr.modules.flt
     otpcr.modules.fnd
     otpcr.modules.irc
+    otpcr.modules.llm
     otpcr.modules.log
+    otpcr.modules.man
+    otpcr.modules.mbx
+    otpcr.modules.mdl
     otpcr.modules.mod
     otpcr.modules.req
     otpcr.modules.rss
+    otpcr.modules.rst
+    otpcr.modules.slg
+    otpcr.modules.tbl
+    otpcr.modules.tdo
     otpcr.modules.thr
+    otpcr.modules.tmr
+    otpcr.modules.udp
     otpcr.modules.upt
+    otpcr.modules.ver
+    otpcr.modules.web
+    otpcr.modules.wsd

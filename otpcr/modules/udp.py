@@ -13,7 +13,7 @@ import time
 
 from ..object import Object
 from ..fleet  import Fleet
-from ,.thread import launch
+from ..thread import launch
 from .        import debug
 
 
