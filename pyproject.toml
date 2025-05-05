@@ -23,6 +23,8 @@ classifiers=[
     'Topic :: Utilities'
 ]
 
+[project.scripts]
+"bin/otpcr" = "otpcr.__main__:main"
 
 [project.urls]
 "home"   = "https://pypi.org/project/otpcr"

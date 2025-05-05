@@ -71,7 +71,7 @@ html_css_files = ["otpcr.css",]
 html_short_title = "%s %s" % (NAME, VERSION)
 html_theme = "alabaster"
 html_theme_options = {
-    'logo': 'otpcr.jpg',
+    'logo': 'skull3.png',
     'link': '#000',
     'link_hover': '#000',
     'nosidebar': True,
@@ -79,7 +79,7 @@ html_theme_options = {
     'show_relbar_top': False,
     'sidebar_width': '0px',
 }
-html_favicon = "otpcr.jpg"
+html_favicon = "skull3.png"
 html_extra_path = ["robots.txt", "googlea6568bcc05c8d50b.html"]
 html_last_updated_fmt = '%Y-%b-%d'
 html_additional_pages = {}
