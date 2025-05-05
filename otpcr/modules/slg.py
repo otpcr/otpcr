@@ -4,8 +4,7 @@
 "slogan"
 
 
-TXT = "By law using poison, castrated, tortured, killed, destructed in whole or in part since 4 March 2019. @KarimKhanQC reconsider OTP-CR-117/19 http://bit.ly/gcid3 !"
-TXT = "By law using poison, castrated, tortured, killed, destructed in whole/in part since 4 March 2019 @KarimKhanQC reconsider OTP-CR-117/19 http://otpcr.github.io !"
+TXT = "By law using poison, castrated, tortured, killed, destructed in whole/in part since 4 March 2019. @KarimKhanQC reconsider OTP-CR-117/19 http://otpcr.github.io !"
 
 
 def slg(event):
