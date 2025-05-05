@@ -21,8 +21,7 @@ from ..client import Fleet
 from ..thread import later, launch
 
 
-CHECKSUM = "7b3aa07511d3d882d07a62bd8c3b6239"
-CHECKSUM = ""
+CHECKSUM = "7c38eec85550e9257d9b559980de148c"
 MD5      = {}
 NAMES    = {}
 
@@ -44,11 +43,11 @@ class Main(Default):
     debug   = False
     ignore  = 'dbg,udp,wsd'
     init    = ""
-    md5     = False
+    md5     = True
     name    = __name__.split(".", maxsplit=1)[0]
     opts    = Default()
     verbose = False
-    version = 80
+    version = 81
 
 
 class Commands:
