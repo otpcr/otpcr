@@ -5,11 +5,11 @@
 # ruff: noqa: E402, E501
 
 
-"Office of the Prosecutor's 117th communication of the year 2019."
+"Since 4 March 2019."
 
 
 NAME = "otpcr"
-VERSION = "61"
+VERSION = "81"
 
 
 import os
@@ -53,18 +53,20 @@ pygments_style = 'colorful'
 extensions = [
               'sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
-              'sphinx.ext.viewcode',
+              'sphinx.ext.duration',
+              'sphinx.ext.doctest',
+              'sphinx.ext.githubpages',
               'sphinx.ext.todo',
-              'sphinx.ext.githubpages'
+              'sphinx.ext.viewcode'
              ]
 
 
 # -- Options for HTML output -------------------------------------------------
 
 
-html_title = "Office of the Prosecutor's 117th communication of the year 2019"
+html_title = "Since 4 March 2019."
 html_style = 'otpcr.css'
-html_static_path = ["_static", "files/sitemap.xml"]
+html_static_path = ["_static", "_static/otpcr.css", "files/sitemap.xml"]
 html_css_files = ["otpcr.css",]
 html_short_title = "%s %s" % (NAME, VERSION)
 html_theme = "alabaster"
@@ -88,7 +90,7 @@ html_show_sourcelink = False
 html_show_sphinx = False
 html_show_copyright = False
 html_copy_source = False
-html_use_opensearch = 'http://%s.rtfd.io/' % NAME
+html_use_opensearch = 'http://%s.github.io/' % NAME
 html_file_suffix = '.html'
 htmlhelp_basename = 'testdoc'
 
@@ -132,7 +134,7 @@ rst_epilog = '''.. raw:: html
 # code generation
 
 
-autosummary_generate = True
+autosummary_generate = False
 autodoc_default_flags = ['members', 'undoc-members', 'private-members', "imported-members"]
 autodoc_member_order = 'groupwise'
 autodoc_docstring_signature = False
