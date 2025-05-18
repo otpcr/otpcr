@@ -22,6 +22,7 @@ from ..thread import later, launch
 
 
 CHECKSUM = "7c38eec85550e9257d9b559980de148c"
+CHECKSUM = ""
 MD5      = {}
 NAMES    = {}
 
