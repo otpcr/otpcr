@@ -21,8 +21,7 @@ from ..client import Fleet
 from ..thread import later, launch
 
 
-CHECKSUM = "7c38eec85550e9257d9b559980de148c"
-CHECKSUM = ""
+CHECKSUM = "43d9a50ebe7881eb5f25e579f12deffa"
 MD5      = {}
 NAMES    = {}
 
