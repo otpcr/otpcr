@@ -14,15 +14,15 @@ import threading
 import time
 
 
-from ..disk    import getpath, ident, write
-from ..find    import last
-from ..object  import Object, keys
-from ..store   import store 
-from ..client  import Client, Fleet
-from ..event   import Event
-from ..thread  import launch
-from .         import debug as ldebug
-from .         import Default, Main, command, edit, fmt
+from ..client import Client
+from ..disk   import getpath, ident, write
+from ..event  import Event as IEvent
+from ..fleet  import Fleet
+from ..find   import last
+from ..object import Default, Object, keys
+from ..thread import launch
+from .        import debug as ldebug
+from .        import Main, command, edit, fmt
 
 
 IGNORE  = ["PING", "PONG", "PRIVMSG"]
@@ -42,7 +42,7 @@ def init():
     irc = IRC()
     irc.start()
     irc.events.joined.wait(30.0)
-    debug(f'irc at {Config.server}:{Config.port} {Config.channel}')
+    debug(f'irc at {irc.cfg.server}:{irc.cfg.port} {irc.cfg.channel}')
     return irc
 
 
@@ -73,9 +73,6 @@ class Config(Default):
         self.username = Config.username
 
 
-"output"
-
-
 class TextWrap(textwrap.TextWrapper):
 
     def __init__(self):
@@ -91,29 +88,28 @@ class TextWrap(textwrap.TextWrapper):
 wrapper = TextWrap()
 
 
-class Output:
+class Output(Object):
 
-    cache = Object()
 
     def __init__(self):
+        Object.__init__(self)
+        self.cache  = Default()
         self.dostop = threading.Event()
         self.oqueue = queue.Queue()
 
     def dosay(self, channel, txt):
         raise NotImplementedError
 
-    @staticmethod
-    def extend(channel, txtlist):
-        if channel not in dir(Output.cache):
-            Output.cache[channel] = []
-        chanlist = getattr(Output.cache, channel)
+    def extend(self, channel, txtlist):
+        if channel not in dir(self.cache):
+            self.cache[channel] = []
+        chanlist = getattr(self.cache, channel)
         chanlist.extend(txtlist)
 
-    @staticmethod
-    def gettxt(channel):
+    def gettxt(self, channel):
         txt = None
         try:
-            che = getattr(Output.cache, channel, None)
+            che = getattr(self.cache, channel, None)
             if che:
                 txt = che.pop(0)
         except (KeyError, IndexError):
@@ -121,8 +117,8 @@ class Output:
         return txt
 
     def oput(self, channel, txt):
-        if channel and channel not in dir(Output.cache):
-            setattr(Output.cache, channel, [])
+        if channel and channel not in dir(self.cache):
+            setattr(self.cache, channel, [])
         self.oqueue.put_nowait((channel, txt))
 
     def output(self):
@@ -152,24 +148,35 @@ class Output:
                          f"use !mre to show more (+{length})"
                         )
 
-    @staticmethod
-    def size(chan):
-        if chan in dir(Output.cache):
-            return len(getattr(Output.cache, chan, []))
+    def size(self, chan):
+        if chan in dir(self.cache):
+            return len(getattr(self.cache, chan, []))
         return 0
 
     def start(self):
         launch(self.output)
 
 
-"irc"
-
-
-class IRC(Client, Output):
+class Event(IEvent):
 
     def __init__(self):
-        Client.__init__(self)
+        super().__init__()
+        self.args      = []
+        self.arguments = []
+        self.command   = ""
+        self.channel   = ""
+        self.nick      = ""
+        self.origin    = ""
+        self.rawstr    = ""
+        self.rest      = ""
+        self.txt       = ""
+
+
+class IRC(Output, Client):
+
+    def __init__(self):
         Output.__init__(self)
+        Client.__init__(self)
         self.buffer = []
         self.cfg = Config()
         self.channels = []
@@ -223,10 +230,11 @@ class IRC(Client, Output):
             self.direct('CAP LS 302')
         else:
             addr = socket.getaddrinfo(server, port, socket.AF_INET)[-1][-1]
+            addr = tuple(addr[:2])
             self.sock = socket.create_connection(addr)
             self.events.authed.set()
         if self.sock:
-            os.set_inheritable(self.sock.fileno(), os.O_RDWR)
+            os.set_inheritable(self.sock.fileno(), True)
             self.sock.setblocking(True)
             self.sock.settimeout(180.0)
             self.events.connected.set()
@@ -511,10 +519,7 @@ class IRC(Client, Output):
         self.events.ready.wait()
 
 
-"callbacks"
-
-
-def cb_auth(bot, evt):
+def cb_auth(evt):
     bot = Fleet.get(evt.orig)
     bot.docommand(f'AUTHENTICATE {bot.cfg.password}')
 
@@ -546,7 +551,7 @@ def cb_h904(evt):
     bot.events.authed.set()
 
 
-def cb_kill(bot, evt):
+def cb_kill(evt):
     pass
 
 def cb_log(evt):
@@ -623,13 +628,13 @@ def mre(event):
     if 'cache' not in dir(bot):
         event.reply('bot is missing cache')
         return
-    if event.channel not in dir(Output.cache):
+    if event.channel not in dir(bot.cache):
         event.reply(f'no output in {event.channel} cache.')
         return
     for _x in range(3):
-        txt = Output.gettxt(event.channel)
+        txt = bot.gettxt(event.channel)
         event.reply(txt)
-    size = IRC.size(event.channel)
+    size = bot.size(event.channel)
     if size != 0:
         event.reply(f'{size} more in cache')
 

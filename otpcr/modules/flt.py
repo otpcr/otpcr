@@ -4,14 +4,14 @@
 "fleet"
 
 
-from ..client import Fleet
+from ..fleet  import Fleet
 from ..thread import name
 from .        import fmt
 
 
 def flt(event):
-    clt = list(Fleet.clients.values())
+    clts = list(Fleet.clients.values())
     try:
-        event.reply(fmt(clt[int(event.args[0])]))
+        event.reply(fmt(clts[int(event.args[0])]))
     except (KeyError, IndexError, ValueError):
-        event.reply(",".join([name(x).split(".")[-1] for x in clt]))
+        event.reply(",".join([name(x).split(".")[-1] for x in clts]))

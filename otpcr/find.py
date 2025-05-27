@@ -13,21 +13,21 @@ from .object import Object, fqn, items, update
 from .store  import long, skel, store
 
 
-p = os.path.join
+j = os.path.join
 
 
-def fns(clz) -> [str]:
+def fns(clz):
     pth = store(clz)
     for rootdir, dirs, _files in os.walk(pth, topdown=False):
         if dirs:
             for dname in dirs:
                 if dname.count('-') == 2:
-                    ddd = p(rootdir, dname)
+                    ddd = j(rootdir, dname)
                     for fll in os.listdir(ddd):
-                        yield p(ddd, fll)
+                        yield j(ddd, fll)
 
 
-def fntime(daystr) -> int:
+def fntime(daystr):
     datestr = ' '.join(daystr.split(os.sep)[-2:])
     datestr = datestr.replace("_", " ")
     if '.' in datestr:
@@ -37,10 +37,10 @@ def fntime(daystr) -> int:
     timed = time.mktime(time.strptime(datestr, '%Y-%m-%d %H:%M:%S'))
     if rest:
         timed += float('.' + rest)
-    return timed
+    return float(timed)
 
 
-def find(clz, selector=None, deleted=False, matching=False) -> [Object]:
+def find(clz, selector={}, deleted=False, matching=False):
     skel()
     res = []
     clz = long(clz)
@@ -50,7 +50,7 @@ def find(clz, selector=None, deleted=False, matching=False) -> [Object]:
             obj = Object()
             read(obj, pth)
             Cache.add(pth, obj)
-        if not deleted and '__deleted__' in dir(obj) and obj.__deleted__:
+        if not deleted and isdeleted(obj):
             continue
         if selector and not search(obj, selector, matching):
             continue
@@ -58,14 +58,15 @@ def find(clz, selector=None, deleted=False, matching=False) -> [Object]:
     return sorted(res, key=lambda x: fntime(x[0]))
 
 
-def last(obj, selector=None) -> Object:
+def isdeleted(obj):
+    return '__deleted__' in dir(obj) and obj.__deleted__
+
+
+def last(obj, selector={}):
     if selector is None:
         selector = {}
-    result = sorted(
-                    find(fqn(obj), selector),
-                    key=lambda x: fntime(x[0])
-                   )
-    res = None
+    result = sorted(find(fqn(obj), selector), key=lambda x: fntime(x[0]))
+    res = ""
     if result:
         inp = result[-1]
         update(obj, inp[-1])
@@ -73,7 +74,7 @@ def last(obj, selector=None) -> Object:
     return res
 
 
-def search(obj, selector, matching=None) -> bool:
+def search(obj, selector, matching=False):
     res = False
     if not selector:
         return res

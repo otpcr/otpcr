@@ -5,8 +5,8 @@
 
 
 import queue
-import threading
 import time
+import threading
 import traceback
 import _thread
 
@@ -16,22 +16,29 @@ STARTTIME = time.time()
 
 class Errors:
 
-    name = __file__.rsplit("/", maxsplit=2)[-2]
+    name   = __file__.rsplit("/", maxsplit=2)[-2]
     errors = []
 
 
 class Thread(threading.Thread):
 
     def __init__(self, func, thrname, *args, daemon=True, **kwargs):
-        super().__init__(None, self.run, name, (), {}, daemon=daemon)
-        self.name = thrname
-        self.queue = queue.Queue()
-        self.result = None
+        super().__init__(None, self.run, thrname, (), daemon=daemon)
+        self.name      = thrname
+        self.queue     = queue.Queue()
+        self.result    = None
         self.starttime = time.time()
-        self.stopped = threading.Event()
+        self.stopped   = threading.Event()
         self.queue.put((func, args))
 
-    def run(self) -> None:
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        for k in dir(self):
+            yield k
+
+    def run(self):
         try:
             func, args = self.queue.get()
             self.result = func(*args)
@@ -43,8 +50,8 @@ class Thread(threading.Thread):
                 pass
             _thread.interrupt_main()
 
-    def join(self, timeout=None):
-        if timeout is not None:
+    def join(self, timeout=0.0):
+        if timeout != 0.0:
             while 1:
                 if not self.is_alive():
                     break
@@ -53,53 +60,61 @@ class Thread(threading.Thread):
         return self.result
 
 
-class Timer:
+class Timy(threading.Timer):
 
-    def __init__(self, sleep, func, *args, thrname=None, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.state     = {}
+        self.starttime = time.time()
+
+
+class Timed:
+
+    def __init__(self, sleep, func, *args, thrname="", **kwargs):
         self.args   = args
         self.func   = func
         self.kwargs = kwargs
         self.sleep  = sleep
         self.name   = thrname or kwargs.get("name", name(func))
-        self.state  = {}
+        self.target = time.time() + self.sleep
         self.timer  = None
 
-    def run(self) -> None:
-        self.state["latest"] = time.time()
+    def run(self):
+        self.timer.latest = time.time()
         self.func(*self.args)
 
-    def start(self) -> None:
-        timer = threading.Timer(self.sleep, self.run)
-        timer.name   = self.name
-        timer.sleep  = self.sleep
-        timer.state  = self.state
-        timer.func   = self.func
+    def start(self):
+        timer = Timy(self.sleep, self.run)
+        timer.state["latest"] = time.time()
         timer.state["starttime"] = time.time()
-        timer.state["latest"]    = time.time()
         timer.start()
         self.timer   = timer
 
-    def stop(self) -> None:
+    def stop(self):
         if self.timer:
             self.timer.cancel()
 
 
-class Repeater(Timer):
+class Repeater(Timed):
 
     def run(self) -> None:
         launch(self.start)
         super().run()
 
 
-def full(exc) -> str:
-    return traceback.format_exception(type(exc),exc,exc.__traceback__)
+def full(exc):
+    return traceback.format_exception(
+                                      type(exc),
+                                      exc,
+                                      exc.__traceback__
+                                     )
 
 
-def later(exc) -> None:
+def later(exc):
     Errors.errors.append(exc)
 
 
-def launch(func, *args, **kwargs) -> Thread:
+def launch(func, *args, **kwargs):
     nme = kwargs.get("name")
     if not nme:
         nme = name(func)
@@ -119,9 +134,9 @@ def line(exc):
         linenr = i[1]
         plugfile = fname.split("/")
         mod = []
-        for i in plugfile[::-1]:
-            mod.append(i)
-            if Errors.name in i or "bin" in i:
+        for ii in list(plugfile[::-1]):
+            mod.append(ii)
+            if Errors.name in ii or "bin" in ii:
                 break
         ownname = '.'.join(mod[::-1])
         if ownname.endswith("__"):
@@ -137,7 +152,7 @@ def line(exc):
     return res
 
 
-def name(obj) -> str:
+def name(obj):
     typ = type(obj)
     if '__builtins__' in dir(typ):
         return obj.__name__
@@ -149,7 +164,7 @@ def name(obj) -> str:
         return f"{obj.__class__.__module__}.{obj.__class__.__name__}"
     if '__name__' in dir(obj):
         return f'{obj.__class__.__name__}.{obj.__name__}'
-    return None
+    return ""
 
 
 def __dir__():
@@ -158,7 +173,7 @@ def __dir__():
         'Errors',
         'Repeater',
         'Thread',
-        'Timer',
+        'Timed',
         'full',
         'later',
         'launch',

@@ -19,7 +19,15 @@ class Object:
         return str(self.__dict__)
 
 
-def construct(obj, *args, **kwargs) -> None:
+class Default(Object):
+
+    def __getattr__(self, key):
+        if key not in self:
+            setattr(self, key, "")
+        return self.__dict__.get(key, "")
+
+
+def construct(obj, *args, **kwargs):
     if args:
         val = args[0]
         if isinstance(val, zip):
@@ -32,38 +40,39 @@ def construct(obj, *args, **kwargs) -> None:
         update(obj, kwargs)
 
 
-def fqn(obj) -> str:
+def fqn(obj):
     kin = str(type(obj)).split()[-1][1:-2]
     if kin == "type":
         kin = f"{obj.__module__}.{obj.__name__}"
     return kin
 
 
-def items(obj) -> []:
+def items(obj):
     if isinstance(obj,type({})):
         return obj.items()
     return obj.__dict__.items()
 
 
-def keys(obj) -> [str]:
+def keys(obj):
     if isinstance(obj, type({})):
         return obj.keys()
-    return list(obj.__dict__.keys())
+    return obj.__dict__.keys()
 
 
-def update(obj, data) -> None:
+def update(obj, data):
     if not isinstance(data, type({})):
         obj.__dict__.update(vars(data))
     else:
         obj.__dict__.update(data)
 
 
-def values(obj) -> []:
+def values(obj):
     return obj.__dict__.values()
 
 
 def __dir__():
     return (
+        'Default',
         'Object',
         'construct',
         'fqn',

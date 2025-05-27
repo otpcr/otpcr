@@ -14,13 +14,13 @@ class Client(Handler):
         Handler.__init__(self)
         Fleet.add(self)
 
-    def announce(self, txt) -> None:
+    def announce(self, txt):
         pass
 
-    def raw(self, txt) -> None:
+    def raw(self, txt):
         raise NotImplementedError("raw")
 
-    def say(self, channel, txt) -> None:
+    def say(self, channel, txt):
         self.raw(txt)
 
 

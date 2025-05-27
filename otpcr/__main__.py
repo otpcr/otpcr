@@ -27,13 +27,13 @@ class CLI(Client):
         self.register("command", command)
 
     def raw(self, txt):
-        output(txt.encode('utf-8', 'replace').decode("utf-8"))
+        out(txt.encode('utf-8', 'replace').decode("utf-8"))
 
 
 class Console(CLI):
 
     def announce(self, txt):
-        #output(txt)
+        #out(txt)
         pass
 
     def callback(self, evt):
@@ -54,27 +54,9 @@ def handler(signum, frame):
 "output"
 
 
-def doprint(txt):
+def out(txt):
     print(txt.rstrip())
     sys.stdout.flush()
-
-
-def output(txt):
-    doprint(txt)
-
-
-def nil(txt):
-    pass
-
-
-def enable():
-    global output
-    output = doprint
-
-
-def disable():
-    global output
-    output = nil
 
 
 "utilities"
@@ -82,7 +64,7 @@ def disable():
 
 def banner():
     tme = time.ctime(time.time()).replace("  ", " ")
-    output(f"{Main.name.upper()} since {tme}")
+    out(f"{Main.name.upper()} since {tme}")
 
 
 def check(txt):
@@ -119,7 +101,7 @@ def daemon(verbose=False):
 def errors():
     for exc in Errors.errors:
         for line in full(exc):
-            output(line)
+            out(line)
 
 
 def forever():
@@ -203,7 +185,6 @@ def background():
     daemon("-v" in sys.argv)
     setwd(Main.name)
     privileges()
-    disable()
     pidfile(pidname(Main.name))
     settable()
     Commands.add(cmd)
@@ -214,7 +195,6 @@ def background():
 def console():
     import readline # noqa: F401
     setwd(Main.name)
-    enable()
     settable()
     Commands.add(cmd)
     parse(Main, " ".join(sys.argv[1:]))
@@ -235,7 +215,6 @@ def control():
         return
     setwd(Main.name)
     settable()
-    enable()
     Commands.add(cmd)
     Commands.add(md5)
     Commands.add(srv)
@@ -254,7 +233,6 @@ def service():
     setwd(Main.name)
     settable()
     nodebug()
-    enable()
     banner()
     privileges()
     pidfile(pidname(Main.name))
@@ -270,7 +248,7 @@ def wrapped(func):
     try:
         func()
     except (KeyboardInterrupt, EOFError):
-        output("")
+        out("")
     errors()
 
 
@@ -313,7 +291,6 @@ def main():
         Main.init = ",".join(modules())
     if check("v"):
         setattr(Main.opts, "v", True)
-        enable()
     if check("c"):
         wrap(console)
     elif check("d"):

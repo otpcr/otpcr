@@ -8,7 +8,6 @@ import threading
 import time
 
 
-from ..object import Object, update
 from ..thread import STARTTIME
 from .        import elapsed
 
@@ -18,14 +17,10 @@ def thr(event):
     for thread in sorted(threading.enumerate(), key=lambda x: x.name):
         if str(thread).startswith('<_'):
             continue
-        obj = Object()
-        update(obj, vars(thread))
-        if getattr(obj, 'current', None):
-            thread.name = obj.current
-        if getattr(obj, 'sleep', None):
-            uptime = obj.sleep - int(time.time() - obj.state["latest"])
-        elif getattr(obj, 'starttime', None):
-            uptime = int(time.time() - obj.starttime)
+        if getattr(thread, 'state', None) and getattr(thread, "sleep", None):
+            uptime = thread.sleep - int(time.time() - thread.state["latest"])
+        elif getattr(thread, 'starttime', None):
+            uptime = int(time.time() - thread.starttime)
         else:
             uptime = int(time.time() - STARTTIME)
         result.append((uptime, thread.name))

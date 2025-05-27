@@ -1,11 +1,11 @@
 # This file is placed in the Public Domain.
 
 
-"disk"
+"persistence"
 
 
 import datetime
-import json
+import json.decoder
 import os
 import pathlib
 import threading
@@ -17,7 +17,7 @@ from .store  import store
 
 
 lock = threading.RLock()
-p    = os.path.join
+j    = os.path.join
 
 
 class Error(Exception):
@@ -30,7 +30,7 @@ class Cache:
     objs = {}
 
     @staticmethod
-    def add(path, obj) -> None:
+    def add(path, obj):
         Cache.objs[path] = obj
 
     @staticmethod
@@ -38,40 +38,38 @@ class Cache:
         return Cache.objs.get(path, None)
 
     @staticmethod
-    def typed(matcher) -> []:
+    def typed(matcher):
         for key in Cache.objs:
             if matcher not in key:
                 continue
             yield Cache.objs.get(key)
 
 
-
-def cdir(path) -> None:
+def cdir(path):
     pth = pathlib.Path(path)
     pth.parent.mkdir(parents=True, exist_ok=True)
 
 
 def getpath(obj):
-    return p(store(ident(obj)))
+    return j(store(ident(obj)))
 
 
-def ident(obj) -> str:
-    return p(fqn(obj),*str(datetime.datetime.now()).split())
+def ident(obj):
+    return j(fqn(obj),*str(datetime.datetime.now()).split())
 
 
-def read(obj, path) -> str:
+def read(obj, path):
     with lock:
         with open(path, "r", encoding="utf-8") as fpt:
             try:
                 update(obj, load(fpt))
             except json.decoder.JSONDecodeError as ex:
                 raise Error(path) from ex
-    return path
 
 
-def write(obj, path=None) -> str:
+def write(obj, path=""):
     with lock:
-        if path is None:
+        if path == "":
             path = getpath(obj)
         cdir(path)
         with open(path, "w", encoding="utf-8") as fpt:
