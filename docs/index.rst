@@ -75,6 +75,7 @@ prosecute the king for making the commiting of the above mentioned crimes
     reconsider
     writings
     evidence
+    pubchem
     guilty
     request
     manual
