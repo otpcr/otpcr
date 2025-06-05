@@ -28,7 +28,8 @@ lock = threading.RLock()
 path = os.path.dirname(__file__)
 
 
-CHECKSUM = "2765c39f81bda21019349a10bcea48cd"
+CHECKSUM = "28ba85256977cf1856e8d2afad318773"
+
 MD5      = {}
 NAMES    = {}
 
