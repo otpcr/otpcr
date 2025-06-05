@@ -20,10 +20,10 @@ sys.path.insert(0, os.getcwd())
 from otpcr.client  import Client
 from otpcr.event   import Event
 from otpcr.modules import Main, command, elapsed, modules, parse, settable, spl
-from otpcr.modules import inits
+from otpcr.modules import STARTTIME, inits
 from otpcr.object  import Object, keys
-from otpcr.store   import Workdir, skel
-from otpcr.thread  import STARTTIME, Errors, full, launch
+from otpcr.paths   import Workdir, skel
+from otpcr.thread  import Errors, full, launch
 
 
 Main.debug  = True
@@ -63,7 +63,7 @@ param.ver = [""]
 
 
 pre = Object()
-pre.cfg = ["cfg nick=mekker", ""]
+pre.cfg = ["nick=mekker", ""]
 pre.imp = ["tests/feeds.opml", ""]
 pre.log = ["bla", ""]
 pre.rss = ["http://hnrss.org/newest", ""]
@@ -144,8 +144,7 @@ def wrap(function):
         if old3:
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
     for exc in Errors.errors:
-        for line in full(exc):
-            print(line.rstrip())
+        print(full(exc))
 
 
 def main():
@@ -184,7 +183,6 @@ def main():
         nr = thr.join()
         nrcommand += nr
     consume(events)
-
 
 if __name__ == "__main__":
     wrap(main)

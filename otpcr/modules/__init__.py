@@ -8,26 +8,37 @@ import hashlib
 import importlib
 import importlib.util
 import inspect
+import logging
 import os
 import sys
 import threading
-import types
+import time
 import _thread
 
 
-from ..event  import Event
 from ..fleet  import Fleet
-from ..object import Default, Object, items, keys
-from ..thread import Thread, later, launch
+from ..object import Object, items, keys
+from ..thread import later, launch
+
+
+STARTTIME = time.time()
 
 
 lock = threading.RLock()
 path = os.path.dirname(__file__)
 
 
-CHECKSUM = ""
+CHECKSUM = "2765c39f81bda21019349a10bcea48cd"
 MD5      = {}
 NAMES    = {}
+
+
+class Default(Object):
+
+    def __getattr__(self, key):
+        if key not in self:
+            setattr(self, key, "")
+        return self.__dict__.get(key, "")
 
 
 class Main(Default):
@@ -36,13 +47,14 @@ class Main(Default):
     gets    = Default()
     ignore  = ""
     init    = ""
+    level   = "warn"
     md5     = True
     name    = __name__.split(".", maxsplit=1)[0]
     opts    = Default()
     otxt    = ""
     sets    = Default()
     verbose = False
-    version = 321
+    version = 323
 
 
 class Commands:
@@ -177,7 +189,7 @@ def check(name, md5=""):
         return True
     mname = f"{__name__}.{name}"
     if sys.modules.get(mname):
-        return False
+        return True
     pth = os.path.join(path, name + ".py")
     spec = importlib.util.spec_from_file_location(mname, pth)
     if not spec:
@@ -285,6 +297,28 @@ def table():
     return NAMES
 
 
+"logging"
+
+
+def level(loglevel="debug"):
+    if loglevel != "none":
+        os.environ["PYTHONUNBUFFERED"] = "yoo"
+        format_short = "%(message)-80s"
+        datefmt = '%H:%M:%S'
+        logging.basicConfig(stream=sys.stderr, datefmt=datefmt, format=format_short)
+        logging.getLogger().setLevel(LEVELS.get(loglevel))
+
+
+
+def rlog(level, txt, ignore=None):
+    if ignore is None:
+        ignore = []
+    for ign in ignore:
+        if ign in str(txt):
+            return
+    logging.log(LEVELS.get(level), txt)
+
+
 "utilities"
 
 
@@ -388,6 +422,18 @@ def fmt(obj, args=None, skip=None, plain=False):
         else:
             txt += f'{key}={value} '
     return txt.strip()
+
+
+"data"
+
+
+LEVELS = {'debug': logging.DEBUG,
+          'info': logging.INFO,
+          'warning': logging.WARNING,
+          'warn': logging.WARNING,
+          'error': logging.ERROR,
+          'critical': logging.CRITICAL
+         }
 
 
 "interface"

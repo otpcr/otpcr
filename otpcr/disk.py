@@ -11,9 +11,9 @@ import pathlib
 import threading
 
 
-from .json   import dump, load
 from .object import fqn, update
-from .store  import store
+from .serial import dump, load
+from .paths  import store
 
 
 lock = threading.RLock()
@@ -43,6 +43,13 @@ class Cache:
             if matcher not in key:
                 continue
             yield Cache.objs.get(key)
+
+    @staticmethod
+    def update(path, obj):
+        try:
+            update(Cache.objs[path], obj)
+        except KeyError:
+            Cache.add(path, obj)
 
 
 def cdir(path):
@@ -74,6 +81,7 @@ def write(obj, path=""):
         cdir(path)
         with open(path, "w", encoding="utf-8") as fpt:
             dump(obj, fpt, indent=4)
+        Cache.update(path, obj)
         return path
 
 

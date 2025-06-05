@@ -24,7 +24,7 @@ classifiers=[
 ]
 
 [project.scripts]
-"bin/otpcr" = "otpcr.__main__:main"
+"otpcr" = "otpcr.__main__:main"
 
 [project.urls]
 "home"   = "https://pypi.org/project/otpcr"
@@ -32,9 +32,6 @@ classifiers=[
 "source" = "https://github.com/otpcr/otpcr"
 
 [tool.setuptools]
-script-files = [
-    'bin/otpcr'
-]
 packages = [
    'otpcr',
    'otpcr.modules'

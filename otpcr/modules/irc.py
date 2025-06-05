@@ -5,6 +5,7 @@
 
 
 import base64
+import logging
 import os
 import queue
 import socket
@@ -17,12 +18,12 @@ import time
 from ..client import Client
 from ..disk   import getpath, ident, write
 from ..event  import Event as IEvent
-from ..fleet  import Fleet
 from ..find   import last
-from ..object import Default, Object, keys
+from ..fleet  import Fleet
+from ..object import Object, keys
 from ..thread import launch
 from .        import debug as ldebug
-from .        import Main, command, edit, fmt
+from .        import Default, Main, command, edit, fmt, rlog
 
 
 IGNORE  = ["PING", "PONG", "PRIVMSG"]
@@ -35,14 +36,14 @@ def debug(txt):
     for ign in IGNORE:
         if ign in str(txt):
             return
-    ldebug(txt)
+    logging.debug(txt)
 
 
 def init():
     irc = IRC()
     irc.start()
     irc.events.joined.wait(30.0)
-    debug(f'irc at {irc.cfg.server}:{irc.cfg.port} {irc.cfg.channel}')
+    rlog("debug", f'irc at {irc.cfg.server}:{irc.cfg.port} {irc.cfg.channel}')
     return irc
 
 
@@ -214,11 +215,11 @@ class IRC(Output, Client):
             self.oput(channel, txt)
 
     def connect(self, server, port=6667):
-        debug(f"connecting to {server}:{port}")
+        rlog("debug", f"connecting to {server}:{port}")
         self.state.nrconnect += 1
         self.events.connected.clear()
         if self.cfg.password:
-            debug("using SASL")
+            rlog("debug", "using SASL")
             self.cfg.sasl = True
             self.cfg.port = "6697"
             ctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
@@ -287,8 +288,8 @@ class IRC(Output, Client):
                     ConnectionResetError
                    ) as ex:
                 self.state.error = str(ex)
-                debug(str(ex))
-            debug(f"sleeping {self.cfg.sleep} seconds")
+                rlog("error", str(ex))
+            rlog("error", f"sleeping {self.cfg.sleep} seconds")
             time.sleep(self.cfg.sleep)
         self.logon(server, nck)
 
@@ -340,7 +341,7 @@ class IRC(Output, Client):
             self.state.pongcheck = True
             self.docommand('PING', self.cfg.server)
             if self.state.pongcheck:
-                debug("failed pong check, restarting")
+                rlog('error', "failed pong check, restarting")
                 self.state.pongcheck = False
                 self.state.keeprunning = False
                 self.events.connected.clear()
@@ -358,7 +359,7 @@ class IRC(Output, Client):
         rawstr = str(txt)
         rawstr = rawstr.replace('\u0001', '')
         rawstr = rawstr.replace('\001', '')
-        debug(txt)
+        rlog("debug", txt, IGNORE)
         obj = Event()
         obj.args = []
         obj.rawstr = rawstr
@@ -434,7 +435,7 @@ class IRC(Output, Client):
                 self.stop()
                 self.state.nrerror += 1
                 self.state.error = str(ex)
-                debug("handler stopped")
+                rlog("error", "handler stopped")
                 evt = self.event(str(ex))
                 return evt
         try:
@@ -445,7 +446,7 @@ class IRC(Output, Client):
 
     def raw(self, txt):
         txt = txt.rstrip()
-        debug(txt)
+        rlog("debug", txt, IGNORE)
         txt = txt[:500]
         txt += '\r\n'
         txt = bytes(txt, 'utf-8')
@@ -467,7 +468,7 @@ class IRC(Output, Client):
         self.state.nrsend += 1
 
     def reconnect(self):
-        debug(f"reconnecting to {self.cfg.server}:{self.cfg.port}")
+        rlog("error", f"reconnecting to {self.cfg.server}:{self.cfg.port}")
         self.disconnect()
         self.events.connected.clear()
         self.events.joined.clear()
@@ -536,7 +537,7 @@ def cb_error(evt):
     bot = Fleet.get(evt.orig)
     bot.state.nrerror += 1
     bot.state.error = evt.txt
-    debug(evt.txt)
+    rlog("error", evt.txt)
 
 
 def cb_h903(evt):
@@ -593,7 +594,7 @@ def cb_privmsg(evt):
 
 def cb_quit(evt):
     bot = Fleet.get(evt.orig)
-    debug(f"quit from {bot.cfg.server}")
+    rlog("error", f"quit from {bot.cfg.server}")
     bot.state.nrerror += 1
     bot.state.error = evt.txt
     if evt.orig and evt.orig in bot.zelf:

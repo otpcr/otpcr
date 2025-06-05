@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"a clean namespace"
+"clean namespace"
 
 
 class Object:
@@ -17,14 +17,6 @@ class Object:
 
     def __str__(self):
         return str(self.__dict__)
-
-
-class Default(Object):
-
-    def __getattr__(self, key):
-        if key not in self:
-            setattr(self, key, "")
-        return self.__dict__.get(key, "")
 
 
 def construct(obj, *args, **kwargs):
@@ -48,21 +40,23 @@ def fqn(obj):
 
 
 def items(obj):
-    if isinstance(obj,type({})):
+    try:
+        return obj.__dict__.items()
+    except AttributeError:
         return obj.items()
-    return obj.__dict__.items()
 
 
 def keys(obj):
-    if isinstance(obj, type({})):
+    try:
+        return obj.__dict__.keys()
+    except AttributeError:
         return obj.keys()
-    return obj.__dict__.keys()
 
 
 def update(obj, data):
-    if not isinstance(data, type({})):
+    try:
         obj.__dict__.update(vars(data))
-    else:
+    except TypeError:
         obj.__dict__.update(data)
 
 
@@ -72,7 +66,6 @@ def values(obj):
 
 def __dir__():
     return (
-        'Default',
         'Object',
         'construct',
         'fqn',

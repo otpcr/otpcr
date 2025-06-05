@@ -43,6 +43,9 @@ class Handler:
                     break
                 evt.orig = repr(self)
                 self.callback(evt)
+            except (KeyboardInterrupt, EOFError):
+                self.stopped.set()
+                _thread.interrupt_main()
             except Exception as ex:
                 self.stopped.set()
                 later(ex)

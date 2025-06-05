@@ -5,15 +5,37 @@
 
 
 import os
+import threading
 import time
 
 
 from .disk   import Cache, read
 from .object import Object, fqn, items, update
-from .store  import long, skel, store
+from .paths  import long, skel, store
 
 
-j = os.path.join
+lock = threading.RLock()
+j    = os.path.join
+
+
+def find(clz, selector=None, deleted=False, matching=False):
+    skel()
+    res = []
+    clz = long(clz)
+    if selector is None:
+        selector = {}
+    for pth in fns(clz):
+        obj = Cache.get(pth)
+        if not obj:
+            obj = Object()
+            read(obj, pth)
+            Cache.add(pth, obj)
+        if not deleted and isdeleted(obj):
+            continue
+        if selector and not search(obj, selector, matching):
+            continue
+        res.append((pth, obj))
+    return sorted(res, key=lambda x: fntime(x[0]))
 
 
 def fns(clz):
@@ -40,29 +62,11 @@ def fntime(daystr):
     return float(timed)
 
 
-def find(clz, selector={}, deleted=False, matching=False):
-    skel()
-    res = []
-    clz = long(clz)
-    for pth in fns(clz):
-        obj = Cache.get(pth)
-        if not obj:
-            obj = Object()
-            read(obj, pth)
-            Cache.add(pth, obj)
-        if not deleted and isdeleted(obj):
-            continue
-        if selector and not search(obj, selector, matching):
-            continue
-        res.append((pth, obj))
-    return sorted(res, key=lambda x: fntime(x[0]))
-
-
 def isdeleted(obj):
     return '__deleted__' in dir(obj) and obj.__deleted__
 
 
-def last(obj, selector={}):
+def last(obj, selector=None):
     if selector is None:
         selector = {}
     result = sorted(find(fqn(obj), selector), key=lambda x: fntime(x[0]))
@@ -97,7 +101,6 @@ def __dir__():
         'find',
         'fns',
         'fntime',
-        'ident',
         'last',
-        'search'
+        'search',
     )

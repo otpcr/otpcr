@@ -7,7 +7,7 @@
 import time
 
 
-from ..client import Fleet
+from ..fleet  import Fleet
 from ..thread import line
 
 

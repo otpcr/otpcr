@@ -4,13 +4,13 @@
 "decoder/encoder"
 
 
-import json as jsn
+import json
 
 
 from .object import Object, construct
 
 
-class Encoder(jsn.JSONEncoder):
+class Encoder(json.JSONEncoder):
 
     def default(self, o):
         if isinstance(o, dict):
@@ -20,7 +20,7 @@ class Encoder(jsn.JSONEncoder):
         if isinstance(o, list):
             return iter(o)
         try:
-            return jsn.JSONEncoder.default(self, o)
+            return json.JSONEncoder.default(self, o)
         except TypeError:
             try:
                 return vars(o)
@@ -30,12 +30,12 @@ class Encoder(jsn.JSONEncoder):
 
 def dump(obj, fp, *args, **kw):
     kw["cls"] = Encoder
-    jsn.dump(obj, fp, *args, **kw)
+    json.dump(obj, fp, *args, **kw)
 
 
 def dumps(obj, *args, **kw):
     kw["cls"] = Encoder
-    return jsn.dumps(obj, *args, **kw)
+    return json.dumps(obj, *args, **kw)
 
 
 def hook(objdict):
@@ -46,12 +46,12 @@ def hook(objdict):
 
 def load(fp, *args, **kw):
     kw["object_hook"] = hook
-    return jsn.load(fp, *args, **kw)
+    return json.load(fp, *args, **kw)
 
 
 def loads(s, *args, **kw):
     kw["object_hook"] = hook
-    return jsn.loads(s, *args, **kw)
+    return json.loads(s, *args, **kw)
 
 
 def __dir__():

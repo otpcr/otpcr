@@ -13,7 +13,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
 from ..object import Object
-from ..store  import Workdir, types
+from ..paths  import Workdir, types
 from ..thread import launch, later
 from .        import Default, debug
 

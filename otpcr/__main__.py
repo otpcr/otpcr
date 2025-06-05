@@ -13,10 +13,10 @@ import _thread
 
 from .client  import Client
 from .event   import Event
-from .json    import dumps
 from .modules import Commands, Main, command, inits
-from .modules import md5sum, mods, modules, parse, scan, settable
-from .store   import Workdir, pidname
+from .modules import md5sum, mods, level, modules, parse, scan, settable
+from .serial  import dumps
+from .paths   import Workdir, pidname
 from .thread  import Errors, full
 
 
@@ -64,7 +64,7 @@ def out(txt):
 
 def banner():
     tme = time.ctime(time.time()).replace("  ", " ")
-    out(f"{Main.name.upper()} since {tme}")
+    out(f"{Main.name.upper()} since {tme} ({Main.level.upper()})")
 
 
 def check(txt):
@@ -100,8 +100,7 @@ def daemon(verbose=False):
 
 def errors():
     for exc in Errors.errors:
-        for line in full(exc):
-            out(line)
+        out(full(exc))
 
 
 def forever():
@@ -200,6 +199,8 @@ def console():
     parse(Main, " ".join(sys.argv[1:]))
     Main.init = Main.sets.init or Main.init
     Main.verbose = Main.sets.verbose or Main.verbose
+    Main.level   = Main.sets.level or Main.level or "warn"
+    level(Main.level or "debug")
     if "v" in Main.opts:
         banner()
     for _mod, thr in inits(Main.init):
@@ -232,7 +233,7 @@ def control():
 def service():
     setwd(Main.name)
     settable()
-    nodebug()
+    level(Main.level or "none")
     banner()
     privileges()
     pidfile(pidname(Main.name))
