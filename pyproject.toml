@@ -14,10 +14,9 @@ authors = [
 ]
 description = "Since 4 March 2019."
 readme = "README.rst"
-license = 'Unlicense"
+license = "Unlicense"
 classifiers=[
     'Development Status :: 4 - Beta',
-    'License :: Public Domain',
     'Operating System :: Unix',
     'Programming Language :: Python :: 3',
     'Topic :: Utilities'
