@@ -22,7 +22,6 @@ from ..runtime import launch, rlog
 
 
 IGNORE = ["PING", "PONG", "PRIVMSG"]
-IGNorE = []
 
 
 saylock = threading.RLock()
@@ -39,7 +38,7 @@ def init():
 class Config(Default):
 
     channel = f'#{Main.name}'
-    commands = False
+    commands = True
     control = '!'
     nick = Main.name
     password = ""
@@ -105,6 +104,7 @@ class IRC(Output):
         self.events.authed = threading.Event()
         self.events.connected = threading.Event()
         self.events.joined = threading.Event()
+        self.events.logon = threading.Event()
         self.events.ready = threading.Event()
         self.idents = []
         self.sock = None
@@ -140,6 +140,7 @@ class IRC(Output):
         rlog("debug", f"connecting to {server}:{port}")
         self.state.nrconnect += 1
         self.events.connected.clear()
+        self.events.joined.clear()
         if self.cfg.password:
             rlog("debug", "using SASL")
             self.cfg.sasl = True
@@ -220,8 +221,14 @@ class IRC(Output):
     def doconnect(self, server, nck, port=6667):
         while 1:
             try:
-                if self.connect(server, port):
+                self.events.connected.clear()
+                self.events.joined.clear()
+                self.connect(server, port)
+                self.logon(self.cfg.server, self.cfg.nick)
+                self.events.joined.wait(15.0)
+                if self.events.joined.is_set():
                     break
+                self.disconnect()        
             except (
                     socket.timeout,
                     ssl.SSLError,
@@ -232,7 +239,6 @@ class IRC(Output):
                 rlog("error", str(type(ex)) + " " + str(ex))
             rlog("error", f"sleeping {self.cfg.sleep} seconds")
             time.sleep(self.cfg.sleep)
-        self.logon(server, nck)
 
     def dosay(self, channel, txt):
         self.events.joined.wait()
@@ -298,13 +304,13 @@ class IRC(Output):
             time.sleep(self.cfg.sleep)
             self.docommand('PING', self.cfg.server)
             if self.state.pongcheck:
-                rlog('error', 'restarting')
+                rlog('error', 'restarting keepalive')
                 self.state.pongcheck = False
                 self.state.keeprunning = False
-                self.events.connected.clear()
+                self.state.stopkeep = True
+                self.stop()
                 launch(init)
                 break
-        
 
     def logon(self, server, nck):
         self.events.connected.wait()
@@ -398,6 +404,7 @@ class IRC(Output):
                 self.state.error = str(type(ex)) + " " + str(ex)
                 rlog("error", self.state.error)
                 self.state.pongcheck = True
+                self.stop()
                 return None
         try:
             txt = self.buffer.pop(0)
@@ -422,7 +429,7 @@ class IRC(Output):
                     BrokenPipeError,
                     socket.timeout
                    ) as ex:
-                rlog("error", "restarting")
+                rlog("error", "send error")
                 self.state.nrerror += 1
                 self.state.error = str(ex)
                 self.state.pongcheck = True
@@ -471,19 +478,18 @@ class IRC(Output):
         self.events.connected.clear()
         self.events.joined.clear()
         Output.start(self)
-        launch(
-               self.doconnect,
-               self.cfg.server or "localhost",
-               self.cfg.nick,
-               int(self.cfg.port or '6667')
-              )
+        self.doconnect(
+                       self.cfg.server or "localhost",
+                       self.cfg.nick,
+                       int(self.cfg.port) or 6667
+                       )
         if not self.state.keeprunning:
             launch(self.keep)
 
     def stop(self):
         self.state.stopkeep = True
         Output.stop(self)
-        self.disconnect()
+        #self.disconnect()
 
     def wait(self):
         self.events.ready.wait()
@@ -535,7 +541,7 @@ def cb_ready(evt):
 
 def cb_001(evt):
     bot = Fleet.get(evt.orig)
-    bot.logon()
+    bot.events.logon,set()
 
 
 def cb_notice(evt):
