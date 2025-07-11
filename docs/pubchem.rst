@@ -12,7 +12,7 @@
     <center><b>PUBCHEM</b></center><br>
 
 
-.. _haldol:
+.. _haldol2:
 
 
 **HALDOL**
@@ -29,7 +29,7 @@
 
   <br><br>
 
-.. _clozapine:
+.. _clozapine2:
 
 
 **CLOZAPINE**
@@ -48,7 +48,7 @@
 
   <br><br>
 
-.. _zyprexa:
+.. _zyprexa2:
 
 
 **ZYPREXA**
@@ -65,7 +65,7 @@
 
   <br><br>
 
-.. _abilify:
+.. _abilify2:
 
 
 **ABILIFY**
