@@ -10,17 +10,13 @@ import sys
 import time
 
 
-
 from .clients import Client
-from .command import Main, Commands, command, inits, parse, scan
 from .handler import Event
-from .imports import modules
+from .modules import Main, Commands
+from .modules import command, inits, level, modules, parse, scan
 from .persist import Workdir, pidname, skel, types
-from .runtime import level
-from .modules import rss
 
 
-Main.modpath = os.path.dirname(rss.__file__)
 Main.name = Main.__module__.split(".")[0]
 
 

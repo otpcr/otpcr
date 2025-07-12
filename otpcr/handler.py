@@ -102,6 +102,6 @@ class Event(Object):
 
 def __dir__():
     return (
-        'Handler',
-        'Event'
+        'Event',
+        'Handler'
     )

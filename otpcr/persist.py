@@ -18,9 +18,6 @@ from .objects import Object, dump, fqn, items, load, update
 lock = threading.RLock()
 
 
-"cache"
-
-
 class Cache:
 
     objs = {}
