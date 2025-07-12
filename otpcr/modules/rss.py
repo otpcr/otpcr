@@ -22,10 +22,10 @@ from urllib.parse import quote_plus, urlencode
 
 
 from ..clients import Fleet
+from ..command import elapsed, rlog, spl
 from ..objects import Default, Object, fmt, update
 from ..persist import find, fntime, getpath, last, write
 from ..runtime import Repeater, launch
-from .         import elapsed, rlog, spl
 
 
 DEBUG = False

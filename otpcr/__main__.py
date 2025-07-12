@@ -11,10 +11,13 @@ import time
 
 
 from .clients import Client
+from .command import Main, Commands
+from .command import command, inits, level, parse, scan
 from .handler import Event
-from .modules import Main, Commands
-from .modules import command, inits, level, modules, parse, scan
 from .persist import Workdir, pidname, skel, types
+
+
+from . import modules as MODS
 
 
 Main.name = Main.__module__.split(".")[0]
@@ -58,7 +61,7 @@ class Console(CLI):
 def banner():
     tme = time.ctime(time.time()).replace("  ", " ")
     out(f"{Main.name.upper()} {Main.version} since {tme} ({Main.level.upper()})")
-    out(f"loaded {".".join(modules(Main.modpath))}")
+    out(f"loaded {".".join(dir(MODS))}")
 
 
 def check(txt):
@@ -151,8 +154,8 @@ def background():
     setwd(Main.name)
     pidfile(pidname(Main.name))
     Commands.add(cmd)
-    scan(Main.modpath)
-    inits(Main.init or "irc,rss")
+    scan(MODS)
+    inits(MODS, Main.init or "irc,rss")
     forever()
 
 
@@ -166,10 +169,10 @@ def console():
     setwd(Main.name)
     Commands.add(cmd)
     Commands.add(ls)
-    scan(Main.modpath)    
+    scan(MODS)    
     if "v" in Main.opts:
         banner()
-    for _mod, thr in inits(Main.init):
+    for _mod, thr in inits(MODS, Main.init):
         if "w" in Main.opts:
             thr.join(30.0)
     csl = Console()
@@ -186,7 +189,7 @@ def control():
     Commands.add(cmd)
     Commands.add(ls)
     Commands.add(srv)
-    scan(Main.modpath)
+    scan(MODS)
     csl = CLI()
     evt = Event()
     evt.orig = repr(csl)
@@ -203,8 +206,8 @@ def service():
     privileges()
     pidfile(pidname(Main.name))
     Commands.add(cmd)
-    scan(Main.modpath)
-    inits(Main.init or "irc,rss")
+    scan(MODS)
+    inits(MODS, Main.init or "irc,rss")
     forever()
 
 
@@ -251,7 +254,7 @@ def wrap(func):
 
 def main():
     if check("a"):
-        Main.init = ",".join(modules(Main.modpath))
+        Main.init = ",".join(dir(MODS))
     if check("v"):
         setattr(Main.opts, "v", True)
     if check("c"):

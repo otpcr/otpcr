@@ -13,9 +13,9 @@ import sys
 import time
 
 
-from ..clients import Fleet
-from ..objects import Default
-from ..runtime import launch
+from .clients import Fleet
+from .objects import Default
+from .runtime import launch
 
 
 STARTTIME = time.time()
@@ -28,7 +28,6 @@ class Main(Default):
     ignore  = ""
     init    = ""
     level   = "warn"
-    modpath = os.path.dirname(__file__)
     name    = Default.__module__.split(".")[-2]
     opts    = Default()
     otxt    = ""
@@ -73,14 +72,10 @@ def command(evt):
     evt.ready()
 
 
-def inits(names):
+def inits(pkg, names):
     modz = []
     for name in sorted(spl(names)):
-        path = os.path.join(Main.modpath, name + ".py")
-        if not os.path.exists(path):
-            continue
-        mname = pathtoname(path)
-        mod = load(path, mname)
+        mod = getattr(pkg, name, None)
         if not mod:
             continue
         if "init" in dir(mod):
@@ -148,53 +143,10 @@ def parse(obj, txt=""):
         obj.txt = obj.cmd or ""
 
 
-def scan(path):
-    for fnm in os.listdir(path):
-        pth = os.path.join(path, fnm)
-        mod = load(pth)
-        if mod:
-            Commands.scan(mod)
-
-
-"modules"
-
-
-def load(path, mname=None):
-    if not os.path.exists(path):
-        return None
-    if mname is None:
-        mname = pathtoname(path)
-    if mname is None:
-        mname = path.split(os.sep)[-1][:-3]
-    spec = importlib.util.spec_from_file_location(mname, path)
-    if not spec or not spec.loader:
-        return None
-    module = importlib.util.module_from_spec(spec)
-    if not module:
-        return None
-    sys.modules[module.__name__] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-def modules(path):
-    return sorted([
-                   x[:-3] for x in os.listdir(path)
-                   if x.endswith(".py") and not x.startswith("__")
-                  ])
-
-
-def pathtoname(path):
-    brk = __name__.split(".")[0]
-    splitted = path.split(os.sep)
-    res = []
-    for splt in splitted[::-1]:
-        if splt.endswith(".py"):
-           splt = splt[:-3]
-        res.append(splt)
-        if splt == brk:
-            break
-    return ".".join(res[::-1])
+def scan(pkg):
+    for modname in dir(pkg):
+        mod = getattr(pkg, modname)
+        Commands.scan(mod)
 
 
 "logging"
