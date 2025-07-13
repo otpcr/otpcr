@@ -104,6 +104,7 @@ def forever():
         try:
             time.sleep(0.1)
         except (KeyboardInterrupt, EOFError):
+            print("")
             sys.exit(1)
 
 

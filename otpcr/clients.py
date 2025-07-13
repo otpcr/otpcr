@@ -41,47 +41,6 @@ class Client(Handler):
         self.raw(txt)
 
 
-"output"
-
-
-class Output(Client):
-
-    def __init__(self):
-        Client.__init__(self)
-        self.oqueue = queue.Queue()
-        self.oready = threading.Event()
-        self.ostop = threading.Event()
-
-    def oput(self, event):
-        self.oqueue.put(event)
-
-    def output(self):
-        while not self.ostop.is_set():
-            event = self.oqueue.get()
-            if event is None:
-                self.oqueue.task_done()
-                break
-            self.display(event)
-            self.oqueue.task_done()
-        self.oready.set()
-
-    def start(self):
-        super().start()
-        self.oready.clear()
-        self.ostop.clear()
-        launch(self.output)
-
-    def stop(self):
-        Client.stop(self)
-        self.ostop.set()
-        self.oqueue.put(None)
-        self.oready.wait()
-
-    def wait(self):
-        self.oqueue.join()
-        super().wait()
-
-
 "fleet"
 
 
@@ -148,6 +107,5 @@ class Fleet:
 def __dir__():
     return (
         'Client',
-        'Fleet',
-        'Output'
+        'Fleet'
     )

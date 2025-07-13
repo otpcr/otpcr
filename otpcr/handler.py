@@ -12,6 +12,7 @@ import _thread
 
 from .objects import Object
 from .runtime import launch
+from .utility import rlog
 
 
 "handler"
@@ -41,7 +42,7 @@ class Handler:
                 break
             event.orig = repr(self)
             self.callback(event)
-        self.ready.set()
+        rlog("debug", f"{str(self)} stopped")
 
     def poll(self):
         return self.queue.get()
@@ -59,7 +60,6 @@ class Handler:
     def stop(self):
         self.stopped.set()
         self.queue.put(None)
-        self.ready.wait()
 
     def wait(self):
         pass

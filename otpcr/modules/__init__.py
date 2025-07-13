@@ -4,11 +4,12 @@
 "modules"
 
 
-from . import irc, req, rss, slg, thr, ver
+from . import dbg, irc, req, rss, slg, thr, ver
 
 
 def __dir__():
     return (
+        'dbg',
         'irc',
         'req',
         'rss',
