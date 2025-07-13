@@ -21,13 +21,13 @@ sys.path.insert(0, os.getcwd())
 from otpcr.clients import Client, Fleet
 from otpcr.command import STARTTIME, Main, command, parse, scan
 from otpcr.handler import Event
-from otpcr.imports import modules
 from otpcr.objects import Object, keys
 from otpcr.persist import Workdir, skel
-from otpcr.runtime import elapsed, launch, spl
+from otpcr.runtime import launch
+from otpcr.utility import elapsed, spl
 
 
-import otpcr.modules
+import otpcr.modules as MODS
 
 
 Main.debug  = True
@@ -35,7 +35,7 @@ Main.md5    = False
 Workdir.wdr = ".test"
 
 
-path = otpcr.modules.__path__[0]
+path = MODS.__path__[0]
 
 
 param = Object()
@@ -100,7 +100,7 @@ class CLI(Client):
 def banner():
     tme = time.ctime(time.time()).replace("  ", " ")
     print(f"{Main.name.upper()} since {tme}")
-    print("loaded " + ",".join(sorted(modules(path))))
+    print("loaded " + ",".join(sorted(dir(MODS))))
 
 
 def consume(evts):
@@ -151,7 +151,7 @@ def main():
     global nrs
     global nrcommand
     parse(Main, " ".join(sys.argv[1:]))
-    scan(path)
+    scan(MODS)
     nrcommand = 0
     if "v" in Main.opts:
         banner()
