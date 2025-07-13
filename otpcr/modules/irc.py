@@ -14,11 +14,12 @@ import time
 
 
 from ..clients import Fleet, Output
-from ..command import Main, command, rlog
+from ..command import Main, command
 from ..handler import Event as IEvent
 from ..objects import Default, Object, edit, fmt, keys
 from ..persist import getpath, ident, last, write
 from ..runtime import launch
+from ..utility import rlog
 
 
 IGNORE = ["PING", "PONG", "PRIVMSG"]
@@ -27,12 +28,18 @@ IGNORE = ["PING", "PONG", "PRIVMSG"]
 saylock = threading.RLock()
 
 
+"init"
+
+
 def init():
     irc = IRC()
     irc.start()
     irc.events.joined.wait(30.0)
     rlog("debug", fmt(irc.cfg, skip=["password", "realname", "username"]))
     return irc
+
+
+"config"
 
 
 class Config(Default):
@@ -62,6 +69,9 @@ class Config(Default):
         self.username = Config.username
 
 
+"event"
+
+
 class Event(IEvent):
 
     def __init__(self):
@@ -77,6 +87,9 @@ class Event(IEvent):
         self.txt       = ""
 
 
+"wrapper"
+
+
 class TextWrap(textwrap.TextWrapper):
 
     def __init__(self):
@@ -90,6 +103,9 @@ class TextWrap(textwrap.TextWrapper):
 
 
 wrapper = TextWrap()
+
+
+"IRc"
 
 
 class IRC(Output):
@@ -493,6 +509,9 @@ class IRC(Output):
 
     def wait(self):
         self.events.ready.wait()
+
+
+"callbacks"
 
 
 def cb_auth(evt):

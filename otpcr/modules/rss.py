@@ -22,10 +22,10 @@ from urllib.parse import quote_plus, urlencode
 
 
 from ..clients import Fleet
-from ..command import elapsed, rlog, spl
 from ..objects import Default, Object, fmt, update
 from ..persist import find, fntime, getpath, last, write
 from ..runtime import Repeater, launch
+from ..utility import elapsed, rlog, spl
 
 
 DEBUG = False
@@ -37,10 +37,16 @@ errors     = []
 skipped    = []
 
 
+"init"
+
+
 def init():
     fetcher = Fetcher()
     fetcher.start()
     return fetcher
+
+
+"classes"
 
 
 class Feed(Default):
@@ -48,6 +54,24 @@ class Feed(Default):
     def __init__(self):
         Default.__init__(self)
         self.name = ""
+
+
+class Rss(Default):
+
+    def __init__(self):
+        Default.__init__(self)
+        self.display_list = 'title,link,author'
+        self.insertid     = None
+        self.name         = ""
+        self.rss          = ""
+
+
+class Urls(Default):
+
+    pass
+
+
+"fetcher"
 
 
 class Fetcher(Object):
@@ -129,6 +153,63 @@ class Fetcher(Object):
             repeater.start()
 
 
+"parser"
+
+
+class Parser:
+
+    @staticmethod
+    def getitem(line, item):
+        lne = ''
+        index1 = line.find(f'<{item}>')
+        if index1 == -1:
+            return lne
+        index1 += len(item) + 2
+        index2 = line.find(f'</{item}>', index1)
+        if index2 == -1:
+            return lne
+        lne = line[index1:index2]
+        lne = cdata(lne)
+        return lne.strip()
+
+    @staticmethod
+    def getitems(text, token):
+        index = 0
+        result = []
+        stop = False
+        while not stop:
+            index1 = text.find(f'<{token}', index)
+            if index1 == -1:
+                break
+            index1 += len(token) + 2
+            index2 = text.find(f'</{token}>', index1)
+            if index2 == -1:
+                break
+            lne = text[index1:index2]
+            result.append(lne)
+            index = index2
+        return result
+
+    @staticmethod
+    def parse(txt, toke="item", items='title,link'):
+        result = []
+        for line in Parser.getitems(txt, toke):
+            line = line.strip()
+            obj = Object()
+            for itm in spl(items):
+                val = Parser.getitem(line, itm)
+                if val:
+                    val = unescape(val.strip())
+                    val = val.replace("\n", "")
+                    val = striphtml(val)
+                    setattr(obj, itm, val)
+            result.append(obj)
+        return result
+
+
+"opml"
+
+
 class OPML:
 
     @staticmethod
@@ -191,72 +272,6 @@ class OPML:
                 setattr(obj, itm, val.strip())
             result.append(obj)
         return result
-
-
-class Parser:
-
-    @staticmethod
-    def getitem(line, item):
-        lne = ''
-        index1 = line.find(f'<{item}>')
-        if index1 == -1:
-            return lne
-        index1 += len(item) + 2
-        index2 = line.find(f'</{item}>', index1)
-        if index2 == -1:
-            return lne
-        lne = line[index1:index2]
-        lne = cdata(lne)
-        return lne.strip()
-
-    @staticmethod
-    def getitems(text, token):
-        index = 0
-        result = []
-        stop = False
-        while not stop:
-            index1 = text.find(f'<{token}', index)
-            if index1 == -1:
-                break
-            index1 += len(token) + 2
-            index2 = text.find(f'</{token}>', index1)
-            if index2 == -1:
-                break
-            lne = text[index1:index2]
-            result.append(lne)
-            index = index2
-        return result
-
-    @staticmethod
-    def parse(txt, toke="item", items='title,link'):
-        result = []
-        for line in Parser.getitems(txt, toke):
-            line = line.strip()
-            obj = Object()
-            for itm in spl(items):
-                val = Parser.getitem(line, itm)
-                if val:
-                    val = unescape(val.strip())
-                    val = val.replace("\n", "")
-                    val = striphtml(val)
-                    setattr(obj, itm, val)
-            result.append(obj)
-        return result
-
-
-class Rss(Default):
-
-    def __init__(self):
-        Default.__init__(self)
-        self.display_list = 'title,link,author'
-        self.insertid     = None
-        self.name         = ""
-        self.rss          = ""
-
-
-class Urls(Default):
-
-    pass
 
 
 "utilities"
@@ -487,6 +502,9 @@ def syn(event):
         thr.join()
         nrs += 1
     event.reply(f"{nrs} feeds synced")
+
+
+"data"
 
 
 TEMPLATE = """<opml version="1.0">

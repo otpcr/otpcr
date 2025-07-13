@@ -68,5 +68,8 @@ torture and impotent making) possible.
 """
 
 
+"commands"
+
+
 def req(event):
     event.reply(__doc__)

@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"locate"
+"persistence"
 
 
 import datetime
@@ -16,6 +16,9 @@ from .objects import Object, dump, fqn, items, load, update
 
 
 lock = threading.RLock()
+
+
+"cache"
 
 
 class Cache:
@@ -38,32 +41,6 @@ class Cache:
             update(Cache.objs[path], obj)
         else:
             Cache.add(path, obj)
-
-
-"disk"
-
-
-def cdir(path):
-    pth = pathlib.Path(path)
-    pth.parent.mkdir(parents=True, exist_ok=True)
-
-
-def read(obj, path):
-    with lock:
-        with open(path, "r", encoding="utf-8") as fpt:
-            try:
-                update(obj, load(fpt))
-            except json.decoder.JSONDecodeError as ex:
-                ex.add_note(path)
-                raise ex
-
-
-def write(obj, path):
-    with lock:
-        cdir(path)
-        with open(path, "w", encoding="utf-8") as fpt:
-            dump(obj, fpt, indent=4)
-        return path
 
 
 "workdir"
@@ -193,6 +170,32 @@ def search(obj, selector, matching=False):
             res = False
             break
     return res
+
+
+"disk"
+
+
+def cdir(path):
+    pth = pathlib.Path(path)
+    pth.parent.mkdir(parents=True, exist_ok=True)
+
+
+def read(obj, path):
+    with lock:
+        with open(path, "r", encoding="utf-8") as fpt:
+            try:
+                update(obj, load(fpt))
+            except json.decoder.JSONDecodeError as ex:
+                ex.add_note(path)
+                raise ex
+
+
+def write(obj, path):
+    with lock:
+        cdir(path)
+        with open(path, "w", encoding="utf-8") as fpt:
+            dump(obj, fpt, indent=4)
+        return path
 
 
 "interface"

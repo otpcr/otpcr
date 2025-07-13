@@ -12,9 +12,10 @@ import time
 
 from .clients import Client
 from .command import Main, Commands
-from .command import command, inits, level, parse, scan
+from .command import command, inits, parse, scan
 from .handler import Event
 from .persist import Workdir, pidname, skel, types
+from .utility import level
 
 
 from . import modules as MODS
@@ -26,6 +27,9 @@ Main.name = Main.__module__.split(".")[0]
 def out(txt):
     print(txt)
     sys.stdout.flush()
+
+
+"clients"
 
 
 class CLI(Client):
@@ -226,7 +230,6 @@ ExecStart=/home/%s/.local/bin/%s -s
 
 [Install]
 WantedBy=multi-user.target"""
-
 
 
 "runtime"

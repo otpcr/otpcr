@@ -7,6 +7,9 @@
 import json
 
 
+"object"
+
+
 class Object:
 
     def __contains__(self, key):
