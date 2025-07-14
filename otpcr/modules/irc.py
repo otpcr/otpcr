@@ -38,7 +38,10 @@ def init():
         irc = IRC()
         irc.start()
         irc.events.joined.wait(30.0)
-        rlog("debug", fmt(irc.cfg, skip=["password", "realname", "username"]))
+        if irc.events.joined.is_set():
+            rlog("debug", fmt(irc.cfg, skip=["password", "realname", "username"]))
+        else:
+            irc.stop()
         return irc
 
 
@@ -191,7 +194,6 @@ class IRC(Output, Client):
             self.say(channel, txt)
 
     def connect(self, server, port=6667):
-        rlog("debug", f"connecting to {server}:{port}")
         self.state.nrconnect += 1
         self.events.connected.clear()
         self.events.joined.clear()
@@ -216,7 +218,7 @@ class IRC(Output, Client):
             self.sock.setblocking(True)
             self.sock.settimeout(180.0)
             self.events.connected.set()
-            rlog("debug", f"connected to {self.cfg.server}:{self.cfg.port} channel {self.cfg.channel}")
+            rlog("debug", f"connected {self.cfg.server}:{self.cfg.port} {self.cfg.channel}")
             return True
         return False
 
@@ -280,6 +282,7 @@ class IRC(Output, Client):
                     self.events.joined.wait(15.0)
                     if not self.events.joined.is_set():
                         self.disconnect()
+                        self.events.joined.set()
                         continue
                     break
             except (
@@ -288,9 +291,9 @@ class IRC(Output, Client):
                     OSError,
                     ConnectionResetError
                    ) as ex:
+                self.events.joined.set()
                 self.state.error = str(ex)
                 rlog("debug", str(type(ex)) + " " + str(ex))
-            rlog("debug", f"sleeping {self.cfg.sleep} seconds")
             time.sleep(self.cfg.sleep)
 
     def dosay(self, channel, txt):
@@ -477,6 +480,7 @@ class IRC(Output, Client):
                     socket.timeout
                    ) as ex:
                 rlog("debug", str(type(ex)) + " " + str(ex))
+                self.events.joined.set()
                 self.state.nrerror += 1
                 self.state.error = str(ex)
                 self.state.pongcheck = True
@@ -486,14 +490,14 @@ class IRC(Output, Client):
         self.state.nrsend += 1
 
     def reconnect(self):
-        rlog("debug", f"reconnecting to {self.cfg.server}:{self.cfg.port}")
+        rlog("debug", f"reconnecting {self.cfg.server:self.cfg.port}")
         self.disconnect()
         self.events.connected.clear()
         self.events.joined.clear()
         self.doconnect(self.cfg.server, self.cfg.nick, int(self.cfg.port))
 
     def restart(self):
-        rlog('debug', 'restarting')
+        self.events.joined.set()
         self.state.pongcheck = False
         self.state.keeprunning = False
         self.state.stopkeep = True
@@ -536,7 +540,7 @@ class IRC(Output, Client):
         Client.start(self)
         if not self.state.keeprunning:
             launch(self.keep)
-        self.doconnect(
+        launch(self.doconnect,
                        self.cfg.server or "localhost",
                        self.cfg.nick,
                        int(self.cfg.port) or 6667

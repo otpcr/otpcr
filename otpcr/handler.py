@@ -42,7 +42,6 @@ class Handler:
                 break
             event.orig = repr(self)
             self.callback(event)
-        rlog("debug", f"{str(self)} stopped")
 
     def poll(self):
         return self.queue.get()
