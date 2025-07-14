@@ -216,7 +216,7 @@ class IRC(Output, Client):
             self.sock.setblocking(True)
             self.sock.settimeout(180.0)
             self.events.connected.set()
-            rlog("warn", f"connected to {self.cfg.server}:{self.cfg.port} channel {self.cfg.channel}")
+            rlog("debug", f"connected to {self.cfg.server}:{self.cfg.port} channel {self.cfg.channel}")
             return True
         return False
 
