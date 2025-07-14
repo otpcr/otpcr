@@ -83,8 +83,8 @@ class Fetcher(Object):
 
     @staticmethod
     def display(obj):
+        displaylist = ""
         result = ''
-        displaylist = []
         try:
             displaylist = obj.display_list or 'title,link'
         except AttributeError:
@@ -301,6 +301,8 @@ def getfeed(url, items):
         errors.append(url)
         return result
     if rest:
+        if 'link' not in items:
+            items += ",link"
         if url.endswith('atom'):
             result = Parser.parse(str(rest.data, 'utf-8'), 'entry', items) or []
         else:
