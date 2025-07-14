@@ -11,8 +11,7 @@ import _thread
 
 
 from .objects import Object
-from .runtime import launch
-from .utility import rlog
+from .runtime import launch, rlog
 
 
 "handler"

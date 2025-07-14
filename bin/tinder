@@ -19,12 +19,11 @@ sys.path.insert(0, os.getcwd())
 
 
 from otpcr.clients import Client, Fleet
-from otpcr.command import STARTTIME, Main, command, parse, scan
+from otpcr.command import STARTTIME, Main, command, elapsed, parse, scan, spl
 from otpcr.handler import Event
 from otpcr.objects import Object, keys
 from otpcr.persist import Workdir, skel
 from otpcr.runtime import launch
-from otpcr.utility import elapsed, spl
 
 
 import otpcr.modules as MODS

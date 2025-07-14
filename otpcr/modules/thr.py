@@ -8,8 +8,7 @@ import threading
 import time
 
 
-from ..command import STARTTIME
-from ..utility import elapsed
+from ..command import STARTTIME, elapsed
 
 
 "commands"

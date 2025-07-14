@@ -19,8 +19,7 @@ from ..command import Main, command
 from ..handler import Event as IEvent
 from ..objects import Default, Object, edit, fmt, keys
 from ..persist import getpath, ident, last, write
-from ..runtime import launch
-from ..utility import rlog
+from ..runtime import launch, rlog
 
 
 IGNORE = ["PING", "PONG", "PRIVMSG"]
