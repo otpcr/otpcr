@@ -7,8 +7,7 @@
 from . import dbg, irc, req, rss, slg, thr, ver
 
 
-def __dir__():
-    return (
+__all__= (
         'dbg',
         'irc',
         'req',
@@ -17,3 +16,7 @@ def __dir__():
         'thr',
         'ver'
     )
+
+
+def __dir__():
+    return __all__
