@@ -4,11 +4,10 @@
 "modules"
 
 
-from . import dbg, irc, req, rss, slg, thr, ver
+from . import irc, req, rss, slg, thr, ver
 
 
 __all__= (
-        'dbg',
         'irc',
         'req',
         'rss',
