@@ -117,7 +117,7 @@ class Fetcher(Object):
                 if url.path and not url.path == '/':
                     uurl = f'{url.scheme}://{url.netloc}/{url.path}'
                 else:
-                    uurl = url
+                    uurl = fed.link
                 urls.append(uurl)
                 if uurl in seen:
                     continue

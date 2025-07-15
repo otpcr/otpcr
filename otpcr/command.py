@@ -31,7 +31,7 @@ class Main(Default):
     otxt    = ""
     sets    = Default()
     verbose = False
-    version = 85
+    version = 86
 
 
 "commands"
