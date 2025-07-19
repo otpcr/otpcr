@@ -1,13 +1,10 @@
 # This file is placed in the Public Domain.
 
 
-"clean namespace"
+"a clean namespace"
 
 
 import json
-
-
-"object"
 
 
 class Object:
@@ -25,21 +22,6 @@ class Object:
         return str(self.__dict__)
 
 
-"default"
-
-
-class Default(Object):
-
-    def __getattr__(self, key):
-        if key not in self:
-            setattr(self, key, "")
-        return self.__dict__.get(key, "")
-
-
-
-"methods"
-
-
 def construct(obj, *args, **kwargs):
     if args:
         val = args[0]
@@ -51,60 +33,6 @@ def construct(obj, *args, **kwargs):
             update(obj, vars(val))
     if kwargs:
         update(obj, kwargs)
-
-
-def edit(obj, setter, skip=True):
-    for key, val in items(setter):
-        if skip and val == "":
-            continue
-        try:
-            setattr(obj, key, int(val))
-            continue
-        except ValueError:
-            pass
-        try:
-            setattr(obj, key, float(val))
-            continue
-        except ValueError:
-            pass
-        if val in ["True", "true"]:
-            setattr(obj, key, True)
-        elif val in ["False", "false"]:
-            setattr(obj, key, False)
-        else:
-            setattr(obj, key, val)
-
-
-def fmt(obj, args=None, skip=None, plain=False, empty=False):
-    if args is None:
-        args = keys(obj)
-    if skip is None:
-        skip = []
-    txt = ""
-    for key in args:
-        if key.startswith("__"):
-            continue
-        if key in skip:
-            continue
-        value = getattr(obj, key, None)
-        if value is None:
-            continue
-        if not empty and not value:
-            continue
-        if plain:
-            txt += f"{value} "
-        elif isinstance(value, str):
-            txt += f'{key}="{value}" '
-        else:
-            txt += f'{key}={value} '
-    return txt.strip()
-
-
-def fqn(obj):
-    kin = str(type(obj)).split()[-1][1:-2]
-    if kin == "type":
-        kin = f"{obj.__module__}.{obj.__name__}"
-    return kin
 
 
 def items(obj):
@@ -129,9 +57,6 @@ def values(obj):
     if isinstance(obj, dict):
         return obj.values()
     return obj.__dict__.values()
-
-
-"decoder/emcoder"
 
 
 class Encoder(json.JSONEncoder):
@@ -178,19 +103,12 @@ def loads(s, *args, **kw):
     return json.loads(s, *args, **kw)
 
 
-"interface"
-
-
 def __dir__():
     return (
-        'Default',
         'Object',
         'construct',
         'dump',
         'dumps',
-        'edit',
-        'fmt',
-        'fqn',
         'items',
         'keys',
         'load',

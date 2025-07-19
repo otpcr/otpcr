@@ -8,20 +8,20 @@ import threading
 import time
 
 
-from ..command import STARTTIME, elapsed
+from ..utils import elapsed
 
 
-"commands"
+STARTTIME = time.time()
 
 
 def thr(event):
     result = []
     for thread in sorted(threading.enumerate(), key=lambda x: x.name):
-        if str(thread).startswith('<_'):
+        if str(thread).startswith("<_"):
             continue
-        if getattr(thread, 'state', None) and getattr(thread, "sleep", None):
+        if getattr(thread, "state", None) and getattr(thread, "sleep", None):
             uptime = thread.sleep - int(time.time() - thread.state["latest"])
-        elif getattr(thread, 'starttime', None):
+        elif getattr(thread, "starttime", None):
             uptime = int(time.time() - thread.starttime)
         else:
             uptime = int(time.time() - STARTTIME)
@@ -29,8 +29,8 @@ def thr(event):
     res = []
     for uptime, txt in sorted(result, key=lambda x: x[0]):
         lap = elapsed(uptime)
-        res.append(f'{txt}/{lap}')
+        res.append(f"{txt}/{lap}")
     if res:
-        event.reply(' '.join(res))
+        event.reply(" ".join(res))
     else:
-        event.reply('no threads')
+        event.reply("no threads")

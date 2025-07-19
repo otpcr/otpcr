@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"main"
+"main program"
 
 
 import os
@@ -10,26 +10,22 @@ import sys
 import time
 
 
-from .clients import Client
-from .command import Main, Commands
-from .command import command, inits, parse, scan
-from .handler import Event
-from .persist import Workdir, pidname, skel, types
-from .runtime import level
+from .client import Client
+from .cmnd   import Commands, Default, command, inits, parse, scan
+from .event  import Event
+from .log    import level
+from .paths  import pidname, setwd
+from .       import modules as MODS
 
 
-from . import modules as MODS
+class Main(Default):
 
-
-Main.name = Main.__module__.split(".")[0]
-
-
-def out(txt):
-    print(txt)
-    sys.stdout.flush()
-
-
-"clients"
+    init = ""
+    level = "warn"
+    name = Default.__module__.split(".")[-2]
+    opts = Default()
+    verbose = False
+    version = 90
 
 
 class CLI(Client):
@@ -45,7 +41,6 @@ class CLI(Client):
 class Console(CLI):
 
     def announce(self, txt):
-        #out(txt)
         pass
 
     def callback(self, evt):
@@ -59,13 +54,31 @@ class Console(CLI):
         return evt
 
 
-"utilities"
-
-
-def banner():
+def banner(mods):
     tme = time.ctime(time.time()).replace("  ", " ")
     out(f"{Main.name.upper()} {Main.version} since {tme} ({Main.level.upper()})")
-    out(f"loaded {".".join(dir(MODS))}")
+    out(f"loaded {".".join(dir(mods))}")
+
+
+def forever():
+    while True:
+        try:
+            time.sleep(0.1)
+        except (KeyboardInterrupt, EOFError):
+            print("")
+            sys.exit(1)
+
+
+def out(txt):
+    print(txt)
+    sys.stdout.flush()
+
+
+def ver(event):
+    event.reply(f"{Main.name.upper()} {Main.version}")
+
+
+"daemon"
 
 
 def check(txt):
@@ -99,15 +112,6 @@ def daemon(verbose=False):
     os.nice(10)
 
 
-def forever():
-    while True:
-        try:
-            time.sleep(0.1)
-        except (KeyboardInterrupt, EOFError):
-            print("")
-            sys.exit(1)
-
-
 def pidfile(filename):
     if os.path.exists(filename):
         os.unlink(filename)
@@ -125,30 +129,6 @@ def privileges():
     os.setuid(pwnam2.pw_uid)
 
 
-def setwd(name, path=""):
-    Main.name = name
-    path = path or os.path.expanduser(f"~/.{name}")
-    Workdir.wdr = path
-    skel()
-
-
-"commands"
-
-
-def cmd(event):
-    event.reply(",".join(sorted([x for x in Commands.names if x not in Main.ignore])))
-
-
-def ls(event):
-    event.reply(",".join([x.split(".")[-1].lower() for x in types()]))
-
-
-def srv(event):
-    import getpass
-    name = getpass.getuser()
-    event.reply(TXT % (Main.name.upper(), name, name, name, Main.name))
-
-
 "scripts"
 
 
@@ -158,7 +138,7 @@ def background():
     level(Main.level or "debug")
     setwd(Main.name)
     pidfile(pidname(Main.name))
-    Commands.add(cmd)
+    Commands.add(ver)
     scan(MODS)
     inits(MODS, Main.init or "irc,rss")
     forever()
@@ -172,11 +152,10 @@ def console():
     Main.level   = Main.sets.level or Main.level or "warn"
     level(Main.level)
     setwd(Main.name)
-    Commands.add(cmd)
-    Commands.add(ls)
-    scan(MODS)    
+    Commands.add(ver)
+    scan(MODS)
     if "v" in Main.opts:
-        banner()
+        banner(MODS)
     for _mod, thr in inits(MODS, Main.init):
         if "w" in Main.opts:
             thr.join(30.0)
@@ -191,9 +170,8 @@ def control():
     parse(Main, " ".join(sys.argv[1:]))
     level(Main.level or "warn")
     setwd(Main.name)
-    Commands.add(cmd)
-    Commands.add(ls)
-    Commands.add(srv)
+    Commands.scan(MODS.srv)
+    Commands.add(ver)
     scan(MODS)
     csl = CLI()
     evt = Event()
@@ -207,30 +185,13 @@ def control():
 def service():
     level(Main.level or "warn")
     setwd(Main.name)
-    banner()
+    banner(MODS)
     privileges()
     pidfile(pidname(Main.name))
-    Commands.add(cmd)
+    Commands.add(ver)
     scan(MODS)
     inits(MODS, Main.init or "irc,rss")
     forever()
-
-
-"data"
-
-
-TXT = """[Unit]
-Description=%s
-After=network-online.target
-
-[Service]
-Type=simple
-User=%s
-Group=%s
-ExecStart=/home/%s/.local/bin/%s -s
-
-[Install]
-WantedBy=multi-user.target"""
 
 
 "runtime"
@@ -255,6 +216,7 @@ def wrap(func):
     finally:
         if old:
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
+
 
 def main():
     if check("a"):
