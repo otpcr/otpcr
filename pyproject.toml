@@ -33,9 +33,21 @@ classifiers=[
 
 [tool.setuptools]
 packages = [
-   'otpcr',
-   'otpcr.modules'
+    'otpcr',
+    'otpcr.pdf',
+    'otpcr.html',
+    'otpcr.html._static',
+    'otpcr.html._images',
+    'otpcr.modules'
 ]
+include-package-data = true
+
+
+[tool.setuptools.package-data]
+"otpcr.pdf"          = ["*"]
+"otpcr.html"         = ["*"]
+"otpcr.html._images" = ["*"]
+"otpcr.html._static" = ["*"]
 
 
 [tool.setuptools.data-files]

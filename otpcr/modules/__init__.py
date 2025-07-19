@@ -6,7 +6,7 @@
 
 from . import cmd, lst, thr
 from . import irc, rss
-from . import req, slg
+from . import pth, req, slg
 from . import dbg, srv # noqa: F401
 from . import fnd
 
@@ -16,6 +16,7 @@ __all__ = (
     "fnd",
     "irc",
     "lst",
+    'pth',
     "req",
     "rss",
     "slg",
