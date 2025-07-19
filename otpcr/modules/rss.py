@@ -21,6 +21,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
+from ..cmnd   import Default
 from ..disk   import write
 from ..fleet  import Fleet
 from ..find   import find, fntime, last
@@ -30,7 +31,7 @@ from ..object import Object, update
 from ..paths  import getpath
 from ..thread import launch
 from ..timer  import Repeater
-from ..utils  import Default, elapsed, spl
+from ..utils  import elapsed, spl
 
 
 DEBUG = False
@@ -55,12 +56,14 @@ def init():
 
 
 class Feed(Default):
+
     def __init__(self):
         Default.__init__(self)
         self.name = ""
 
 
 class Rss(Default):
+
     def __init__(self):
         Default.__init__(self)
         self.display_list = "title,link,author"
@@ -70,6 +73,7 @@ class Rss(Default):
 
 
 class Urls(Default):
+
     pass
 
 
@@ -77,6 +81,7 @@ class Urls(Default):
 
 
 class Fetcher(Object):
+
     def __init__(self):
         self.dosave = False
         self.seen = Urls()
@@ -158,6 +163,7 @@ class Fetcher(Object):
 
 
 class Parser:
+
     @staticmethod
     def getitem(line, item):
         lne = ""
@@ -211,6 +217,7 @@ class Parser:
 
 
 class OPML:
+
     @staticmethod
     def getnames(line):
         return [x.split('="')[0] for x in line.split()]

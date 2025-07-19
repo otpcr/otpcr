@@ -13,14 +13,6 @@ from .thread import launch
 from .utils  import spl
 
 
-class Default(Object):
-
-    def __getattr__(self, key):
-        if key not in self:
-            setattr(self, key, "")
-        return self.__dict__.get(key, "")
-
-
 class Commands:
 
     cmds = {}
@@ -66,6 +58,20 @@ def inits(pkg, names):
             thr = launch(mod.init)
             modz.append((mod, thr))
     return modz
+
+
+def scan(pkg):
+    for modname in dir(pkg):
+        mod = getattr(pkg, modname)
+        Commands.scan(mod)
+
+
+class Default(Object):
+
+    def __getattr__(self, key):
+        if key not in self:
+            setattr(self, key, "")
+        return self.__dict__.get(key, "")
 
 
 def parse(obj, txt=""):
@@ -127,17 +133,12 @@ def parse(obj, txt=""):
         obj.txt = obj.cmd or ""
 
 
-def scan(pkg):
-    for modname in dir(pkg):
-        mod = getattr(pkg, modname)
-        Commands.scan(mod)
-
-
 def __dir__():
     return (
-        "Commands",
-        "Main",
-        "command",
-        "parse",
-        "scan",
+        'Commands',
+        'Default',
+        'command',
+        'inits',
+        'parse',
+        'scan'
     )

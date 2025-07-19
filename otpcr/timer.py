@@ -12,6 +12,7 @@ from .thread import launch, name
 
 
 class Timy(threading.Timer):
+
     def __init__(self, sleep, func, *args, **kwargs):
         super().__init__(sleep, func)
         self.name = kwargs.get("name", name(func))
@@ -23,6 +24,7 @@ class Timy(threading.Timer):
 
 
 class Timed:
+
     def __init__(self, sleep, func, *args, thrname="", **kwargs):
         self.args = args
         self.func = func
@@ -48,6 +50,7 @@ class Timed:
 
 
 class Repeater(Timed):
+
     def run(self):
         launch(self.start)
         super().run()

@@ -4,7 +4,7 @@
 "create service file"
 
 
-from ..utils import Default
+from ..cmnd import Default
 
 
 class Main:

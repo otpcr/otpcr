@@ -12,6 +12,7 @@ from .thread import launch
 
 
 class Output:
+
     def __init__(self):
         self.olock = threading.RLock()
         self.oqueue = queue.Queue()
