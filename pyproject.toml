@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "otpcr"
-version = "90"
+version = "91"
 authors = [
     {name = "Bart Thate", email = "bthate@dds.nl" },
 ]
