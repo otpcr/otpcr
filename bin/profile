@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"profiler"
+
+
+import profile
+import sys
+import __main__
+
+
+def main():
+    "profile given filename."
+    if len(sys.argv) <= 1:
+        print("profile <filename>")
+        return
+    fnm = sys.argv[1]
+    SRC = ""
+    with open(sys.argv[1], "r") as src:
+        SRC = src.read()
+    code = compile(SRC, fnm, "exec")
+    profile.runctx(code, __main__.__dict__, __main__.__dict__)
+
+
+if __name__ == "__main__":
+    main()

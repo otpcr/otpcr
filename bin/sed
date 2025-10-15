@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"replace"
+
+
+import os
+import sys
+
+
+def popen(txt):
+    for line in os.popen(txt).readlines():
+        print(line.rstrip())
+        sys.stdout.flush()
+
+
+try:
+    arg1 = sys.argv[1]
+    popen(f"find ./ -type f -exec sed -i -e {arg1} {{}} \\;")
+except (IndexError, ValueError) as ex:
+    print("sed <expression>")
+    sys.exit(0)

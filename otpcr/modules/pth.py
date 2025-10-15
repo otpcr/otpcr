@@ -12,8 +12,8 @@ d = os.path.dirname
 p = os.path.join
 
 
-PATH = p(d(d(__file__)), "html", "index.html")
+PATH = p(d(d(__file__)), "network", "html", "index.html")
 
 
 def pth(event):
-    event.reply(f"file://localhost{PATH}")
+    event.reply(f"file://{PATH}")
