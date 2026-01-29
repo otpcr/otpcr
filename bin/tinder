@@ -2,80 +2,61 @@
 # This file is placed in the Public Domain.
 
 
-"simulate clients"
-
-
 import os
-import random
 import queue
 import shutil
 import sys
-import termios
 import threading
 import time
-import _thread
 
 
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.brokers import Fleet
-from otpcr.clients import Client, Output
-from otpcr.command import command, scanner
-from otpcr.handler import Event
-from otpcr.methods import parse
-from otpcr.objects import Object, keys
-from otpcr.package import NAME, Mods
+from otpcr.command import Commands, command
+from otpcr.message import Message
+from otpcr.methods import fmt, parse
+from otpcr.handler import Client
+from otpcr.package import initmods, listmods, pkgname, scanner
+from otpcr.persist import setwd
+from otpcr.runtime import Cfg
 from otpcr.threads import launch
-from otpcr.utility import elapsed, level
-from otpcr.workdir import Workdir, skel
+from otpcr.utility import elapsed, wrapped
 
 
-CHECKSUM = ""
-STARTTIME = time.time()
+from otpcr import modules as MODS
 
 
-Mods.dir("mods", "mods")
-Mods.dir("modules")
-Mods.dir("network")
-Mods.debug = True
+try:
+    import mods as MODS2
+except ModuleNotFoundError:
+    MODS2 = None
 
 
-Workdir.wdr = ".test"
+events = queue.Queue()
 
 
-events  = queue.Queue()
-paylock = _thread.allocate_lock()
-rand    = random.SystemRandom()
+"config"
+
+Cfg.debug = True
+Cfg.ignore = ""
+Cfg.level = "info"
+Cfg.name = pkgname(Commands)
+Cfg.txt = " ".join(sys.argv[1:])
+Cfg.wdr = ".test"
 
 
-class Config:
-
-    debug    = False
-    gets     = {}
-    index    = None
-    init     = ""
-    level    = "warn"
-    md5      = True
-    moddir   = "mods"
-    opts     = ""
-    otxt     = ""
-    sets     = {}
-    verbose  = False
-    version  = 153
+"clients"
 
 
-class CLI(Output):
+class CLI(Client):
 
     def __init__(self):
-        Output.__init__(self)
+        Client.__init__(self)
         self.register("command", command)
 
-    def dosay(self, channel, txt):
-        self.raw(txt)
-
     def raw(self, txt):
-        if "v" in Config.opts:
+        if "v" in Cfg.opts:
             print(txt)
 
 
@@ -87,33 +68,45 @@ class Pool:
     nrlast = 0
 
     @staticmethod
-    def add(clt):
-        "add client to pool."
-        Pool.clients.append(clt)
+    def add(client):
+        Pool.clients.append(client)
 
     @staticmethod
-    def init(clz, nr=None):
-        "initialize client pool."
-        Pool.nrcpu = nr or os.cpu_count()
+    def init(clz, nr):
+        Pool.nrcpu = nr
         for _x in range(Pool.nrcpu):
             clt = clz()
             clt.start()
             Pool.add(clt)
 
     @staticmethod
-    def put(evt):
-        "dispatch to client."
+    def put(event):
         with Pool.lock:
             if Pool.nrlast >= Pool.nrcpu-1:
                 Pool.nrlast = 0
             clt = Pool.clients[Pool.nrlast]
-            clt.put(evt)
+            clt.put(event)
             Pool.nrlast += 1
 
 
-def banner():
+"utilities"
+
+
+def banner(name):
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{NAME[::-1].upper()} {Config.version} TINDER since {tme} ({Config.level.upper()})")
+    print(f"{name.upper()} since {tme} ({Cfg.level})")
+    sys.stdout.flush()
+
+
+def check(text):
+    args = sys.argv[1:]
+    for arg in args:
+        if not arg.startswith("-"):
+            continue
+        for char in text:
+            if char in arg:
+                return True
+    return False
 
 
 def consume():
@@ -126,134 +119,125 @@ def consume():
             os._exit(0)
 
 
-def payload(cmds):
-    with paylock:
-        nmr = 0
-        cmdz = sorted(keys(cmds))
-        if "s" in Config.opts:
-            rand.shuffle(cmdz)
-        todo = []
-        for cmd in cmdz:
-            examples = getattr(cmds, cmd)
-            for example in examples:
-                event = Event()
-                event.txt = cmd + " " + example
-                event.type = "command"
-                todo.append(event)
-        for event in todo:
-            Pool.put(event)
-            events.put(event)
-            nmr += 1
-        return nmr
+def payload(todo):
+    for cmd, example in todo.items():
+        for ex in example:
+            evt = Message()
+            evt.text = f"{cmd} {ex}"
+            evt.kind = "command"
+            Pool.put(evt)
+            events.put(evt)
 
 
-def wrap(function):
-    old3 = None
+"runtime"
+
+
+def wrap(func):
+    "restore console."
+    import termios
+    old = None
     try:
-        old3 = termios.tcgetattr(sys.stdin.fileno())
+        old = termios.tcgetattr(sys.stdin.fileno())
     except termios.error:
         pass
-    res = None, None
     try:
-        res = function()
-    except (KeyboardInterrupt, EOFError):
-        pass
+        wrapped(func)
     finally:
-        if old3:
-            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old3)
-    return res
+        pass
+    if old:
+        termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
 
 
 def main():
-    nrcommand = 0
-    parse(Config, " ".join(sys.argv[1:]))
-    if "v" in Config.opts:
-        banner()
-    if "f" not in Config.opts:
-        if os.path.exists(Workdir.wdr):
-            shutil.rmtree(Workdir.wdr)
-    level(Config.level)
-    skel()
-    for mod in scanner():
-        mod.DEBUG = True
-    nrs = Config.index or 1
-    thrs = []
-    if "z" in Config.opts:
-        Pool.init(CLI)
+    if "p" not in Cfg.opts and os.path.exists(Cfg.wdr):
+        shutil.rmtree(Cfg.wdr)
+    parse(Cfg, " ".join(sys.argv[1:]))
+    setwd(Cfg.wdr)
+    initmods("modules", MODS.__path__[0])
+    if MODS2:
+        initmods("mods", MODS2.__path__[0])
+    scanner(listmods())
+    if "v" in Cfg.opts:
+        banner(Cfg.name)
+    if "z" in Cfg.opts:
+        Pool.init(CLI, os.cpu_count())
     else:
         Pool.init(CLI, 1)
-    for _nr in range(nrs):
-        thrs.append(launch(payload, pre))
-    for thr in thrs:
-        nr = thr.join()
-        if nr:
-            nrcommand += nr
-    thrs = []
-    for _nr in range(nrs):
-        thrs.append(launch(payload, param))
-    for thr in thrs:
-        nr = thr.join()
-        if nr:
-            nrcommand += nr
-    thrs = []
-    for _nr in range(nrs):
-        thrs.append(launch(payload,  post))
-    for thr in thrs:
-        nr = thr.join()
-        if nr:
-            nrcommand += nr
+    starttime = time.time()
+    nrs = Cfg.index or 1
+    for _x in range(nrs):
+        payload(pre)
+    for _x in range(nrs):
+        payload(examples)
+    for _x in range(nrs):
+        payload(post)
     launch(consume)
-    events.join()
-    Fleet.shutdown()
-    return nrs, nrcommand
+    nrevents = events.qsize()
+    try:
+        events.join()
+    except (KeyboardInterrupt, EOFError):
+        pass
+    endtime = time.time()
+    lap = elapsed(endtime-starttime)
+    percall = (endtime-starttime)/nrevents
+    nrs = events.qsize()
+    if "v" in Cfg.opts:
+        print(f"{fmt(Cfg)}")
+        print(f"{nrs} events left.")
+        print(f"total: {lap} nrs: {nrevents} call: %.6fs" % percall)
 
 
-param = Object()
-param.cmd = [""]
-param.dis = [""]
-param.dpl = ["hnrss title,url", ""]
-param.flt = [""]
-param.fnd = ["log", "rss", "config", "todo", ""]
-param.man = [""]
-param.mod = [""]
-param.mre = [""]
-param.nme = ["hnrss hackernews", ""]
-param.now = [""]
-param.pwd = ["bla mekker", ""]
-param.req = [""]
-param.res = ["hnrss", ""]
-param.srv = [""]
-param.thr = [""]
-param.upt = [""]
-param.ver = [""]
+"date"
 
 
-pre = Object()
-pre.cfg = ["nick=mekker", ""]
-pre.imp = ["testing/feeds.opml", ""]
-pre.log = ["bla", ""]
-pre.rss = ["http://hnrss.org/newest", ""]
-pre.tdo = ["mekker", ""]
+examples = {
+    "atr": [""],
+    "cmd": [""],
+    "dis": [""],
+    "dne": ["", "bla"],
+    "dpl": ["hnrss title,url", ""],
+    "eml": ["", "root@localhost"],
+    "flt": ["", "0"],
+    "fnd": ["", "log", "rss", "config", "todo"],
+    "lou": [""],
+    "man": ["", "test"],
+    "mbx": [""],
+    "mod": [""],
+    "mre": [""],
+    "nme": ["", "hnrss hackernews"],
+    "now": [""],
+    "pth": [""],
+    "pwd": ["", "bla mekker"],
+    "req": [""],
+    "res": ["", "hnrss"],
+    "sil": [""],
+    "slg": [""],
+    "srv": [""],
+    "syn": [""],
+    "thr": [""],
+    "tmr": ["", "22:00 test"],
+    "upt": [""],
+    "wsd": [""]
+}
+
+pre = {
+    "cfg": ["", "nick=mekker"],
+    "imp": ["", "testing/feeds.opml"],
+    "log": ["", "log add"],
+    "rss": ["", "http://hnrss.org/newest"],
+    "tdo": ["", "test"]
+}
+
+post = {
+    "dbg": [""],
+    "dne": ["", "mekker"],
+    "exp": [""],
+    "rem": ["", "hnrss"]
+}
 
 
-post = Object()
-post.dne = ["hnrss", ""]
-post.exp = ['']
-post.rem = ["hnrss", ""]
-
+"trampoline"
 
 
 if __name__ == "__main__":
-    nrz, commandz = wrap(main)
-    if nrz is None and commandz is None:
-        os._exit(1)
-    endtime = time.time()
-    lap = elapsed(endtime-STARTTIME)
-    nrevents = events.qsize()
-    percall = (endtime-STARTTIME)/(commandz)
-    if "v" in Config.opts:
-        print(f"debug is {Mods.debug}")
-        print(f"{Pool.nrcpu} cpu's used")
-        print(f"{nrevents} events left.")
-        print(f"total: {lap} nrs: {nrz} cmds: {commandz} call: %.6fs" % percall)
-    sys.exit()
+    wrap(main)
