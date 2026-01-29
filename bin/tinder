@@ -43,6 +43,7 @@ Cfg.ignore = ""
 Cfg.level = "info"
 Cfg.name = pkgname(Commands)
 Cfg.txt = " ".join(sys.argv[1:])
+Cfg.version = 100
 Cfg.wdr = ".test"
 
 
@@ -92,9 +93,9 @@ class Pool:
 "utilities"
 
 
-def banner(name):
+def banner():
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{name.upper()} since {tme} ({Cfg.level})")
+    print(f"{Cfg.name.upper()} {Cfg.version} since {tme} ({Cfg.level})")
     sys.stdout.flush()
 
 
@@ -158,7 +159,7 @@ def main():
         initmods("mods", MODS2.__path__[0])
     scanner(listmods())
     if "v" in Cfg.opts:
-        banner(Cfg.name)
+        banner()
     if "z" in Cfg.opts:
         Pool.init(CLI, os.cpu_count())
     else:

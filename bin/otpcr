@@ -31,7 +31,7 @@ Cfg.ignore = "rst,udp,web"
 Cfg.level = "info"
 Cfg.name = pkgname(Commands)
 Cfg.txt = " ".join(sys.argv[1:])
-Cfg.version = 181
+Cfg.version = 100
 Cfg.wdr = os.path.expanduser(f"~/.{Cfg.name}")
 
 

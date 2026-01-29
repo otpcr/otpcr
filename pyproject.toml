@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "sbn"
+name = "otpcr"
 description = "Since 4 March 2019"
-version = "94"
+version = "100"
 authors = [
     {name = "Bart Thate", email = "bthate@dds.nl" },
 ]
@@ -20,10 +20,6 @@ classifiers=[
 ]
 
 
-[project.scripts]
-"sbn" = "otpcr.network.main:main"
-
-
 [project.urls]
 "home" = "https://pypi.org/project/otpcr"
 "bugs" = "https://github.com/otpcr/otpcr/issues"
@@ -34,17 +30,16 @@ classifiers=[
 packages = [
     'otpcr',
     'otpcr.modules',
-    'otpcr.network',
-    'otpcr.network.html',
-    'otpcr.network.html._static',
-    'otpcr.network.html._images',
-    'otpcr.network.html.pdf'
+    'otpcr.nucleus',
+    'otpcr.nucleus._static',
+    'otpcr.nucleus._images',
+    'otpcr.nucleus.pdf'
 ]
 include-package-data = true
 
 
 [tool.setuptools.package-data]
-"otpcr.network.html"         = ["*"]
-"otpcr.network.html._images" = ["*"]
-"otpcr.network.html._static" = ["*"]
-"otpcr.network.html.pdf"     = ["*"]
+"otpcr.nucleus"         = ["*"]
+"otpcr.nucleus._images" = ["*"]
+"otpcr.nucleus._static" = ["*"]
+"otpcr.nucleus.pdf"     = ["*"]
