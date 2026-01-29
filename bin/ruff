@@ -1,0 +1,1 @@
+ruff check otpcr otpcr/modules bin/otpcr bin/tinder

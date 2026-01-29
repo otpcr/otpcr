@@ -1,0 +1,1 @@
+pylint -d C,R,W,E0401,E0402 otpcr otpcr/modules bin/otpcr bin/tinder
