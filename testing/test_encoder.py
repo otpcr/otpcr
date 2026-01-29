@@ -4,8 +4,8 @@
 import unittest
 
 
-from otpcr.objects import Object
-from otpcr.serials import dumps
+from otpcr.encoder import *
+from otpcr.objects import *
 
 
 VALIDJSON = '{"test": "bla"}'
@@ -17,3 +17,46 @@ class TestEncoder(unittest.TestCase):
         obj = Object()
         obj.test = "bla"
         self.assertEqual(dumps(obj), VALIDJSON)
+
+
+class TestDecoder(unittest.TestCase):
+
+    def test_loads(self):
+        obj = Object()
+        obj.test = "bla"
+        oobj = loads(dumps(obj))
+        self.assertEqual(oobj["test"], "bla")
+
+
+class TestTypes(unittest.TestCase):
+
+    def test_dict(self):
+        obj = loads(dumps({"a": "b"}))
+        self.assertEqual(obj, {"a": "b"})
+
+    def test_integer(self):
+        obj = loads(dumps(1))
+        self.assertEqual(obj, 1)
+
+    def test_float(self):
+        obj = loads(dumps(1.0))
+        self.assertEqual(obj, 1.0)
+
+    def test_string(self):
+        obj = loads(dumps("test"))
+        self.assertEqual(obj, "test")
+
+    def test_true(self):
+        obj = loads(dumps(True))
+        self.assertEqual(obj, True)
+
+    def test_false(self):
+        obj = loads(dumps(False))
+        self.assertEqual(obj, False)
+
+    def test_object(self):
+        ooo = Object()
+        ooo.a = "b"
+        obj = Object()
+        update(obj, loads(dumps(ooo)))
+        self.assertEqual(obj.a, "b")
