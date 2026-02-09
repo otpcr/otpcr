@@ -4,7 +4,7 @@
 import unittest
 
 
-from otpcr.decoder import *
+from otpcr.encoder import *
 from otpcr.objects import *
 
 

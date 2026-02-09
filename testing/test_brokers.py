@@ -6,7 +6,7 @@ import unittest
 
 from otpcr.brokers import Broker
 from otpcr.clients import Client
-from otpcr.decoder import Json
+from otpcr.encoder import Json
 from otpcr.objects import Dict, Object
 
 
