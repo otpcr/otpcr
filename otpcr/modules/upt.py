@@ -4,11 +4,11 @@
 import time
 
 
-from otpcr.utility import elapsed
+from otpcr.utility import Time
 
 
 STARTTIME = time.time()
 
 
 def upt(event):
-    event.reply(elapsed(time.time()-STARTTIME))
+    event.reply(Time.elapsed(time.time()-STARTTIME))

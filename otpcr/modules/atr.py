@@ -1,18 +1,18 @@
 # This file is placed in the Public Domain.
 
 
-from otpcr.persist import attrs, kinds
+from otpcr.persist import Locate, Workdir
 
 
 def atr(event):
     if not event.rest:
-        res = sorted({x.split('.')[-1].lower() for x in kinds()})
+        res = sorted({x.split('.')[-1].lower() for x in Workdir.kinds()})
         if res:
             event.reply(",".join(res))
         else:
             event.reply("no types")
         return
-    itms = attrs(event.args[0])
+    itms = Locate.attrs(event.args[0])
     if not itms:
         event.reply("no attributes")
     else:

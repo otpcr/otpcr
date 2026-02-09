@@ -10,14 +10,14 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
+from otpcr.modules import Cfg
 from otpcr.objects import Object
-from otpcr.runtime import Cfg
-from otpcr.threads import launch
-from otpcr.utility import where
+from otpcr.threads import Thread
+from otpcr.utility import Utils
 
 
 def init():
-    Config.path = os.path.join(where(Object), "nucleus")
+    Config.path = os.path.join(Utils.where(Object), "nucleus")
     if not os.path.exists(os.path.join(Config.path, 'index.html')):
         logging.warning("no index.html")
         return
@@ -56,7 +56,7 @@ class HTTP(HTTPServer, Object):
         self.shutdown()
 
     def start(self):
-        launch(self.serve_forever)
+        Thread.launch(self.serve_forever)
         self._status = "ok"
 
     def request(self):

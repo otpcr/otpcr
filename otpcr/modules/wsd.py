@@ -7,7 +7,7 @@ import logging
 from random import SystemRandom
 
 
-from otpcr.brokers import getobjs
+from otpcr.brokers import Broker
 from otpcr.message import Message
 from otpcr.utility import Repeater
 
@@ -23,7 +23,7 @@ def init():
 
 
 def wsd(event):
-    for bot in getobjs("announce"):
+    for bot in Broker.objs("announce"):
         bot.announce(rand.choice(TXT.split("\n")).strip()[2:])
 
 

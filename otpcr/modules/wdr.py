@@ -4,8 +4,8 @@
 "working directory"
 
 
-from otpcr.persist import workdir
+from otpcr.persist import Workdir
 
 
 def wdr(event):
-    event.reply(workdir())
+    event.reply(Workdir.workdir())

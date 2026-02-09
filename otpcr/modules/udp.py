@@ -9,10 +9,10 @@ import threading
 import time
 
 
-from otpcr.brokers import getobjs
+from otpcr.brokers import Broker
+from otpcr.modules import Cfg
 from otpcr.objects import Object
-from otpcr.runtime import Cfg
-from otpcr.threads import launch
+from otpcr.threads import Thread
 
 
 def init():
@@ -44,7 +44,7 @@ class UDP(Object):
     def output(self, txt, addr=None):
         if addr:
             Config.addr = addr
-        for bot in getobjs("announce"):
+        for bot in Broker.objs("announce"):
             bot.announce(txt.replace("\00", ""))
 
     def loop(self):
@@ -71,7 +71,7 @@ class UDP(Object):
                          )
 
     def start(self):
-        launch(self.loop)
+        Thread.launch(self.loop)
 
 
 def toudp(host, port, txt):

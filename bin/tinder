@@ -13,15 +13,14 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.command import Commands, command
+from otpcr.clients import Client, ClientPool
+from otpcr.command import Commands
 from otpcr.message import Message
-from otpcr.methods import fmt, parse
-from otpcr.handler import Client
-from otpcr.package import initmods, listmods, pkgname, scanner
-from otpcr.persist import setwd
-from otpcr.runtime import Cfg
-from otpcr.threads import launch
-from otpcr.utility import elapsed, wrapped
+from otpcr.objects import Config, Methods
+from otpcr.package import Mods
+from otpcr.persist import Workdir
+from otpcr.threads import Thread
+from otpcr.utility import Time, Utils
 
 
 from otpcr import modules as MODS
@@ -38,10 +37,11 @@ events = queue.Queue()
 
 "config"
 
+Cfg = Config()
 Cfg.debug = True
 Cfg.ignore = ""
 Cfg.level = "info"
-Cfg.name = pkgname(Commands)
+Cfg.name = Mods.pkgname(Commands)
 Cfg.txt = " ".join(sys.argv[1:])
 Cfg.version = 100
 Cfg.wdr = ".test"
@@ -54,14 +54,14 @@ class CLI(Client):
 
     def __init__(self):
         Client.__init__(self)
-        self.register("command", command)
+        self.register("command", Commands.command)
 
     def raw(self, txt):
         if "v" in Cfg.opts:
             print(txt)
 
 
-class Pool:
+class ClientPool:
 
     clients = []
     lock = threading.RLock()
@@ -70,24 +70,25 @@ class Pool:
 
     @staticmethod
     def add(client):
-        Pool.clients.append(client)
+        ClientPool.clients.append(client)
 
     @staticmethod
-    def init(clz, nr):
-        Pool.nrcpu = nr
-        for _x in range(Pool.nrcpu):
-            clt = clz()
+    def init(nrcpu, cls):
+        ClientPool.nrcpu = nrcpu
+        for _x in range(ClientPool.nrcpu):
+            clt = cls()
             clt.start()
-            Pool.add(clt)
+            ClientPool.add(clt)
 
     @staticmethod
-    def put(event):
-        with Pool.lock:
-            if Pool.nrlast >= Pool.nrcpu-1:
-                Pool.nrlast = 0
-            clt = Pool.clients[Pool.nrlast]
-            clt.put(event)
-            Pool.nrlast += 1
+    def put(*args):
+        with ClientPool.lock:
+            if ClientPool.nrlast >= ClientPool.nrcpu-1:
+                ClientPool.nrlast = 0
+            clt = ClientPool.clients[ClientPool.nrlast]
+            clt.put(*args)
+            ClientPool.nrlast += 1
+
 
 
 "utilities"
@@ -126,7 +127,7 @@ def payload(todo):
             evt = Message()
             evt.text = f"{cmd} {ex}"
             evt.kind = "command"
-            Pool.put(evt)
+            ClientPool.put(evt)
             events.put(evt)
 
 
@@ -142,7 +143,7 @@ def wrap(func):
     except termios.error:
         pass
     try:
-        wrapped(func)
+        Utils.wrapped(func)
     finally:
         pass
     if old:
@@ -152,18 +153,18 @@ def wrap(func):
 def main():
     if "p" not in Cfg.opts and os.path.exists(Cfg.wdr):
         shutil.rmtree(Cfg.wdr)
-    parse(Cfg, " ".join(sys.argv[1:]))
-    setwd(Cfg.wdr)
-    initmods("modules", MODS.__path__[0])
+    Methods.parse(Cfg, " ".join(sys.argv[1:]))
+    Workdir.setwd(Cfg.wdr)
+    Mods.init("modules", MODS.__path__[0])
     if MODS2:
-        initmods("mods", MODS2.__path__[0])
-    scanner(listmods())
+        Mods.init("mods", MODS2.__path__[0])
+    Mods.scanner(Mods.list())
     if "v" in Cfg.opts:
         banner()
     if "z" in Cfg.opts:
-        Pool.init(CLI, os.cpu_count())
+        ClientPool.init(os.cpu_count(), CLI)
     else:
-        Pool.init(CLI, 1)
+        ClientPool.init(1, CLI)
     starttime = time.time()
     nrs = Cfg.index or 1
     for _x in range(nrs):
@@ -172,18 +173,18 @@ def main():
         payload(examples)
     for _x in range(nrs):
         payload(post)
-    launch(consume)
+    Thread.launch(consume)
     nrevents = events.qsize()
     try:
         events.join()
     except (KeyboardInterrupt, EOFError):
         pass
     endtime = time.time()
-    lap = elapsed(endtime-starttime)
+    lap = Time.elapsed(endtime-starttime)
     percall = (endtime-starttime)/nrevents
     nrs = events.qsize()
     if "v" in Cfg.opts:
-        print(f"{fmt(Cfg)}")
+        print(f"{Methods.fmt(Cfg, skip='otxt,txt')}")
         print(f"{nrs} events left.")
         print(f"total: {lap} nrs: {nrevents} call: %.6fs" % percall)
 
@@ -223,7 +224,9 @@ examples = {
 
 pre = {
     "cfg": ["", "nick=mekker"],
-    "imp": ["", "testing/feeds.opml"],
+    "imp": ["",
+         "testing/feeds.opml",
+    ],
     "log": ["", "log add"],
     "rss": ["", "http://hnrss.org/newest"],
     "tdo": ["", "test"]
