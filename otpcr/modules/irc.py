@@ -19,7 +19,6 @@ from otpcr.objects import Default, Dict, Object, Methods
 from otpcr.package import Mods
 from otpcr.persist import Disk, Locate
 from otpcr.threads import Thread
-from otpcr.utility import Utils
 
 
 NAME = Mods.pkgname(Broker)
@@ -46,10 +45,10 @@ class Config(Default):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.name = self.name or NAME
         self.channel = f"#{self.name or NAME}"
         self.commands = self.commands or False
         self.control = "!"
-        self.name = self.name or NAME
         self.nick = self.name or NAME
         self.word = ""
         self.port = 6667

@@ -13,7 +13,7 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.clients import Client, ClientPool
+from otpcr.clients import Client
 from otpcr.command import Commands
 from otpcr.message import Message
 from otpcr.objects import Config, Methods
