@@ -7,11 +7,11 @@
 import unittest
 
 
-from otpcr.package import Mods, initmods
+from otpcr.package import Mods
 
 
 class TestPackage(unittest.TestCase):
 
     def test_init(self):
-        initmods("mod", "mod")
+        Mods.init("mod", "mod")
         self.assertTrue("mod" in Mods.dirs)

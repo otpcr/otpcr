@@ -7,8 +7,7 @@
 import unittest
 
 
-from otpcr.methods import fmt
-from otpcr.objects import Object
+from otpcr.objects import Methods, Object
 
 
 class TestMethods(unittest.TestCase):
@@ -16,4 +15,4 @@ class TestMethods(unittest.TestCase):
     def testformat(self):
         o = Object()
         o.a = "b"
-        self.assertEqual(fmt(o), 'a="b"')
+        self.assertEqual(Methods.fmt(o), 'a="b"')

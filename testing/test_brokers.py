@@ -4,52 +4,52 @@
 import unittest
 
 
-from otpcr.brokers import *
-from otpcr.encoder import dumps, loads
-from otpcr.handler import Client
-from otpcr.objects import Object, update, values
+from otpcr.brokers import Broker
+from otpcr.clients import Client
+from otpcr.decoder import Json
+from otpcr.objects import Dict, Object
 
 
 class TestBroker(unittest.TestCase):
 
     def test_add(self):
         clt = Client()
-        self.assertTrue(hasobj(clt))
+        self.assertTrue(Broker.has(clt))
 
     def test_addobj(self):
         obj = Object()
-        addobj(obj)
-        self.assertTrue(hasobj(obj))
+        Broker.add(obj)
+        self.assertTrue(Broker.has(obj))
     
     def test_getobj(self):
         obj = Object()
-        addobj(obj)
-        oobj = getobj(repr(obj))
+        Broker.add(obj)
+        oobj = Broker.get(repr(obj))
         self.assertTrue(oobj is obj)
 
-    def getobjs(self):
+    def test_objs(self):
         clt = Client()
-        objs = getobjs("announce")
+        objs = Broker.objs("announce")
         self.assertTrue(clt in objs)
 
-    def hasobj(self):
+    def test_has(self):
         obj = Object()
-        addobj(obj)
-        self.assertTrue(hasobj(obj))
+        Broker.add(obj)
+        self.assertTrue(Broker.has(obj))
 
-    def likeobj(self):
+    def test_like(self):
         obj = Object()
-        addobj(obj)
-        self.assertTrue(likeobj(repr(obj)))
+        Broker.add(obj)
+        self.assertTrue(Broker.like(repr(obj)))
 
     def test_json(self):
         Broker.a = "b"
-        s = dumps(Broker)
-        o = loads(s)
+        s = Json.dumps(Broker)
+        o = Json.loads(s)
         self.assertEqual(o["a"], "b")
         
     def test_update(self):
         o = {}
         o["a"] = "b"
-        update(Broker, o)
+        Dict.update(Broker, o)
         self.assertEqual(Broker.a, "b")

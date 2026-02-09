@@ -7,9 +7,10 @@
 import unittest
 
 
-from otpcr.handler import Client, Handler
+from otpcr.clients import Client
+from otpcr.handler import Handler
 from otpcr.message import Message
-from otpcr.methods import parse
+from otpcr.objects import Methods
 
 
 buffer = []
@@ -47,7 +48,6 @@ class TestHandler(unittest.TestCase):
         evt.text = "hello"
         self.hdl.callback(evt)
         evt.wait()
-        print(evt)
         self.assertTrue("hello" in evt.result.values())
 
     def test_loop(self):
@@ -116,15 +116,15 @@ class TestClient(unittest.TestCase):
         self.assertTrue("hello bot" in evt.result.values())
     
     def test_poll(self):
-         clt = Client()
-         evt = Message()
-         evt.text = "okdan"
-         clt.iqueue.put(evt)
-         event = clt.poll()
-         self.assertTrue(event is evt)
+        clt = Client()
+        evt = Message()
+        evt.text = "okdan"
+        clt.iqueue.put(evt)
+        event = clt.poll()
+        self.assertTrue(event is evt)
      
     def test_put(self):
-         evt = Message()
-         evt.type = "hello"
-         self.clt.put(evt)
+        evt = Message()
+        evt.type = "hello"
+        self.clt.put(evt)
                       

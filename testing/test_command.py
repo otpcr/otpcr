@@ -7,10 +7,10 @@
 import unittest
 
 
-from otpcr.command import *
-from otpcr.handler import Client
+from otpcr.clients import Client
+from otpcr.command import Commands
+from otpcr.objects import Dict, Object
 from otpcr.message import Message
-from otpcr.objects import values
 
 
 def cmnd(event):
@@ -24,28 +24,27 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(type(cmds), Commands)
 
     def test_addcmd(self):
-        addcmd(cmnd)
-        self.assertTrue(hascmd("cmnd"))
+        Commands.add(cmnd)
+        self.assertTrue(Commands.has("cmnd"))
     
     def test_getcmd(self):
-        addcmd(cmnd)
-        self.assertTrue(getcmd("cmnd"))
+        Commands.add(cmnd)
+        self.assertTrue(Commands.get("cmnd"))
 
     def test_hascmd(self):
-        addcmd(cmnd)
-        self.assertTrue(hascmd("cmnd"))
+        Commands.add(cmnd)
+        self.assertTrue(Commands.get("cmnd"))
     
     def test_scancmd(self):
         from testing import dbg
-        scancmd(dbg)
+        Commands.scan(dbg)
         self.assertTrue("dbg" in Commands.cmds)
 
     def test_command(self):
         clt = Client()
-        addcmd(cmnd)
+        Commands.add(cmnd)
         evt = Message()
         evt.text = "cmnd"
         evt.orig = repr(clt)
-        command(evt)
-        print(evt)
-        self.assertTrue("yo!" in values(evt.result))
+        Commands.command(evt)
+        self.assertTrue("yo!" in Dict.values(evt.result))
