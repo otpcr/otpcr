@@ -112,7 +112,7 @@ class IRC(Output):
         Output.__init__(self)
         self.buffer = []
         self.cache = {}
-        self.cfg = Config()
+        self.cfg = Cfg
         self.channels = []
         self.events = Object()
         self.events.authed = threading.Event()

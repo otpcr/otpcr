@@ -10,8 +10,7 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from otpcr.modules import Cfg
-from otpcr.objects import Object
+from otpcr.objects import Dict, Object
 from otpcr.persist import Workdir
 from otpcr.threads import Thread
 
@@ -19,7 +18,8 @@ from otpcr.threads import Thread
 "init"
 
 
-def init():
+def init(cfg):
+    Dict.update(Cfg, cfg)
     try:
         rest = REST((Config.hostname, int(Config.port)), RESTHandler)
         rest.start()
@@ -34,8 +34,12 @@ def init():
 
 class Config:
 
+    debug = False
     hostname = "localhost"
     port     = 10102
+
+
+Cfg = Config()
 
 
 "rest"

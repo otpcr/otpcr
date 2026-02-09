@@ -16,7 +16,7 @@ from otpcr.utility import NoDate, Time, Timed
 rand = random.SystemRandom()
 
 
-def init():
+def init(cfg):
     Timers.path = Locate.last(Timers.timers) or Methods.ident(Timers.timers)
     remove = []
     for tme, args in Dict.items(Timers.timers):
