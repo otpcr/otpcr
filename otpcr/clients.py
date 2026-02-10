@@ -15,7 +15,7 @@ from .handler import Handler
 from .threads import Thread
 
 
-'client'
+"client"
 
 
 class Client(Handler):
@@ -125,39 +125,6 @@ class Output(Client):
             _thread.interrupt_main()
 
 
-"pool"
-
-
-class ClientPool:
-
-    clients = []
-    lock = threading.RLock()
-    nrcpu = 1
-    nrlast = 0
-
-    @staticmethod
-    def add(client):
-        ClientPool.clients.append(client)
-
-    @staticmethod
-    def init(nrcpu, cls):
-        ClientPool.nrcpu = nrcpu
-        for _x in range(ClientPool.nrcpu):
-            clt = cls()
-            clt.start()
-            ClientPool.add(clt)
-
-    @staticmethod
-    def put(*args):
-        with ClientPool.lock:
-            if ClientPool.nrlast >= ClientPool.nrcpu-1:
-                ClientPool.nrlast = 0
-            clt = ClientPool.clients[ClientPool.nrlast]
-            print(clt, args)
-            clt.put(*args)
-            ClientPool.nrlast += 1
-
-
 "interface"
 
 
@@ -165,7 +132,6 @@ def __dir__():
     return (
         'Cfg',
         'Client',
-        'ClientPool',
         'Console',
         'Output'
     )
