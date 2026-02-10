@@ -397,23 +397,22 @@ class Parser:
     @staticmethod
     def getitems(text, token, nrs=None):
         index = 0
-        result = []
+        end = len(text)
         stop = False
-        nrx = 0
+        nrx = -1
         while not stop:
             nrx += 1
-            index1 = text.find(f"<{token}", index)
-            if index1 == -1:
-                break
-            index1 += len(token) + 2
-            index2 = text.find(f"</{token}>", index1)
-            if index2 == -1:
-                break
-            result.append(text[index1:index2])
             if nrs and nrx >= nrs:
                 break
-            index = index2
-        return result
+            index1 = text.rfind(f"<{token}", index, end)
+            if index1 == -1:
+                break
+            end = index1
+            index1 += len(token) + 2
+            index2 = text.rfind(f"</{token}>", index1)
+            if index2 == -1:
+                break
+            yield text[index1:index2]
 
     @staticmethod
     def parse(txt, toke="item", items="title,link"):

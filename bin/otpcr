@@ -86,7 +86,7 @@ class Scripts:
         Workdir.pidfile(Cfg.name)
         Mods.scanner(Mods.list(), Cfg.ignore)
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Mods.inits(Cfg, Cfg.default or "irc,mdl,rss,wsd", Cfg.ignore)
+        Mods.inits(Cfg.default or "irc,mdl,rss,wsd", Cfg.ignore)
         Runtime.forever()
 
     @staticmethod
@@ -98,7 +98,7 @@ class Scripts:
         Mods.scanner(Mods.list(), Cfg.ignore)
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
         Commands.cmd(Cfg.txt)
-        Mods.inits(Cfg, Cfg.init, Cfg.ignore, "w" in Cfg.opts)
+        Mods.inits(Cfg.init, Cfg.ignore, "w" in Cfg.opts)
         csl = Term()
         csl.start()
         Runtime.forever()
@@ -124,7 +124,7 @@ class Scripts:
         Workdir.pidfile(Cfg.name)
         Mods.scanner(Mods.list())
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Mods.inits(Cfg, Cfg.default or "irc,mdl,rss,wsd", Cfg.ignore)
+        Mods.inits(Cfg.default or "irc,mdl,rss,wsd", Cfg.ignore)
         Runtime.forever()
 
 
@@ -169,13 +169,11 @@ class Runtime:
     def banner():
         "hello."
         tme = time.ctime(time.time()).replace("  ", " ")
-        print("%s %s since %s (%s/%s/%s)" % (
+        print("%s %s since %s (%s)" % (
             Cfg.name.upper(),
             Cfg.version,
             tme,
-            (Cfg.commands and "COMMAND") or (not Cfg.commands and 'NOCOMMAND'),
             Cfg.level.upper(),
-            (Disk.cached() and 'CACHED') or (not Disk.cached() and 'DIRECT')
         ))
         sys.stdout.flush()
 
