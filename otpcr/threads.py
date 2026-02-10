@@ -12,6 +12,9 @@ import time
 import _thread
 
 
+"defines"
+
+
 lock = threading.RLock()
 
 
@@ -62,6 +65,9 @@ class Task(threading.Thread):
                 self.event.ready()
             logging.exception(ex)
             _thread.interrupt_main()
+
+
+"thread"
 
 
 class Thread:

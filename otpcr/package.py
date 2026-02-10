@@ -87,12 +87,12 @@ class Mods:
         return obj.__module__.split(".")[0]
 
     @staticmethod
-    def inits(cfg, modlist, ignore="", wait=False):
+    def inits(modlist, ignore="", wait=False):
         "scan named modules for commands."
         thrs = []
         for name, mod in Mods.get(modlist, ignore):
             if "init" in dir(mod):
-                thrs.append((name, Thread.launch(mod.init, cfg)))
+                thrs.append((name, Thread.launch(mod.init)))
         if wait:
             for name, thr in thrs:
                 thr.join()

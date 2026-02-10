@@ -18,7 +18,7 @@ from otpcr.utility import Repeater, Time
 "init"
 
 
-def init(cfg):
+def init():
     for key in Dict.keys(oorzaken):
         if "Psych" not in key:
             continue

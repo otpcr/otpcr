@@ -22,6 +22,7 @@ from urllib.parse import quote_plus, urlencode
 
 
 from otpcr.brokers import Broker
+from otpcr.command import Cfg
 from otpcr.objects import Config, Default, Dict, Object, Methods
 from otpcr.persist import Disk, Locate
 from otpcr.threads import Thread
@@ -31,8 +32,7 @@ from otpcr.utility import Repeater, Time, Utils
 "init"
 
 
-def init(cfg):
-    Dict.update(Cfg, cfg)
+def init():
     RunnerPool.init(1, Runner)
     fetcher = Fetcher()
     fetcher.start()
@@ -54,9 +54,6 @@ seenlock = threading.RLock()
 errors = {}
 seenfn = ""
 skipped = []
-
-
-Cfg = Config()
 
 
 "classes"

@@ -10,12 +10,12 @@ import time
 
 
 from otpcr.brokers import Broker
+from otpcr.command import Cfg
 from otpcr.objects import Dict, Object
 from otpcr.threads import Thread
 
 
-def init(cfg):
-    Dict.update(Cfg, cfg)
+def init():
     udp = UDP()
     udp.start()
     logging.warning("http://%s:%s", Config.host, Config.port)
@@ -28,8 +28,6 @@ class Config(Object):
     host = "localhost"
     port = 5500
 
-
-Cfg = Config()
 
 
 class UDP(Object):

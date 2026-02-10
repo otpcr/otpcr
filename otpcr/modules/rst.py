@@ -18,8 +18,7 @@ from otpcr.threads import Thread
 "init"
 
 
-def init(cfg):
-    Dict.update(Cfg, cfg)
+def init():
     try:
         rest = REST((Config.hostname, int(Config.port)), RESTHandler)
         rest.start()
@@ -37,9 +36,6 @@ class Config:
     debug = False
     hostname = "localhost"
     port     = 10102
-
-
-Cfg = Config()
 
 
 "rest"

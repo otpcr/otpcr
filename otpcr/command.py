@@ -9,7 +9,18 @@ import inspect
 
 from .brokers import Broker
 from .message import Message
-from .objects import Methods
+from .objects import Default, Methods
+
+
+"config"
+
+
+class Config(Default):
+
+    pass
+
+
+Cfg = Config()
 
 
 "commands"

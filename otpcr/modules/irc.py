@@ -13,7 +13,7 @@ import time
 
 from otpcr.brokers import Broker
 from otpcr.clients import Output
-from otpcr.command import Commands
+from otpcr.command import Cfg, Commands
 from otpcr.message import Message
 from otpcr.objects import Default, Dict, Object, Methods
 from otpcr.package import Mods
@@ -27,8 +27,7 @@ NAME = Mods.pkgname(Broker)
 lock = threading.RLock()
 
 
-def init(cfg):
-    Dict.update(Cfg, cfg)
+def init():
     irc = IRC()
     irc.start()
     irc.events.joined.wait(30.0)
@@ -45,19 +44,19 @@ class Config(Default):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.name = self.name or NAME
-        self.channel = f"#{self.name or NAME}"
-        self.commands = self.commands or False
+        self.name = Cfg.name or NAME
+        self.channel = f"#{self.name}"
+        self.commands = Cfg.commands or False
         self.control = "!"
-        self.nick = self.name or NAME
+        self.nick = Cfg.name or NAME
         self.word = ""
         self.port = 6667
-        self.realname = self.name or NAME
+        self.realname = Cfg.name or NAME
         self.sasl = False
         self.server = "localhost"
         self.servermodes = ""
         self.sleep = 60
-        self.username = self.name or NAME
+        self.username = Cfg.name or NAME
         self.users = False
         self.version = 1
 
@@ -65,9 +64,6 @@ class Config(Default):
         if name not in self:
             return ""
         return self.__getattribute__(name)
-
-
-Cfg = Config()
 
 
 class Event(Message):

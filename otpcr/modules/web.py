@@ -10,13 +10,13 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
+from otpcr.command import Cfg
 from otpcr.objects import Dict, Object
 from otpcr.threads import Thread
 from otpcr.utility import Utils
 
 
-def init(cfg):
-    Dict.update(Cfg, cfg)
+def init():
     Config.path = os.path.join(Utils.where(Object), "nucleus")
     if not os.path.exists(os.path.join(Config.path, 'index.html')):
         logging.warning("no index.html")
@@ -36,9 +36,6 @@ class Config:
     hostname = "localhost"
     path = ""
     port = 8000
-
-
-Cfg = Config()
 
 
 class HTTP(HTTPServer, Object):
