@@ -23,7 +23,7 @@ from urllib.parse import quote_plus, urlencode
 
 from otpcr.brokers import Broker
 from otpcr.command import Cfg
-from otpcr.objects import Config, Default, Dict, Object, Methods
+from otpcr.objects import Default, Dict, Object, Methods
 from otpcr.persist import Disk, Locate
 from otpcr.threads import Thread
 from otpcr.utility import Repeater, Time, Utils

@@ -11,7 +11,7 @@ import time
 
 from otpcr.brokers import Broker
 from otpcr.command import Cfg
-from otpcr.objects import Dict, Object
+from otpcr.objects import Object
 from otpcr.threads import Thread
 
 

@@ -18,54 +18,17 @@ from .utility import Time
 lock = threading.RLock()
 
 
-"cache"
-
-
-class Cache:
-
-    enable = False
-    paths = {}
-
-    @staticmethod
-    def add(path, obj):
-        "put object into cache."
-        if Cache.enable:
-            Cache.paths[path] = obj
-
-    @staticmethod
-    def get(path):
-        "get object from cache."
-        if Cache.enable:
-            return Cache.paths.get(path, None)
-
-    @staticmethod
-    def sync(path, obj):
-        "update cached object."
-        if Cache.enable:
-            try:
-                Dict.update(Cache.paths[path], obj)
-            except KeyError:
-                Cache.add(path, obj)
-
-
 "disk"
 
 
 class Disk:
 
     @staticmethod
-    def cache():
-        Cache.enable = True
-
-    @staticmethod
-    def cached():
-        return Cache.enable
-
-    @staticmethod
     def cdir(path):
         "create directory."
         pth = pathlib.Path(path)
-        pth.parent.mkdir(parents=True, exist_ok=True)
+        if not os.path.exists(pth.parent):
+            pth.parent.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def read(obj, path):
@@ -89,7 +52,6 @@ class Disk:
             Disk.cdir(pth)
             with open(pth, "w", encoding="utf-8") as fpt:
                 Json.dump(obj, fpt, indent=4)
-            Cache.sync(path, obj)
             return path
 
 
@@ -116,11 +78,8 @@ class Locate:
         nrs = 0
         res = []
         for pth in Locate.fns(Workdir.long(kind)):
-            obj = Cache.get(pth)
-            if not obj:
-                obj = Default()
-                Disk.read(obj, pth)
-                Cache.add(pth, obj)
+            obj = Default()
+            Disk.read(obj, pth)
             if not removed and Methods.deleted(obj):
                 continue
             if selector and not Methods.search(obj, selector, matching):
@@ -227,7 +186,6 @@ class Workdir:
 
 def __dir__():
     return (
-        'Cache',
         'Disk',
         'Locate',
         'Workdir'

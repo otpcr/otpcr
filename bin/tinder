@@ -16,9 +16,9 @@ sys.path.insert(0, os.getcwd())
 from otpcr.clients import Client
 from otpcr.command import Cfg, Commands
 from otpcr.message import Message
-from otpcr.objects import Config, Methods
+from otpcr.objects import Methods
 from otpcr.package import Mods
-from otpcr.persist import Workdir
+from otpcr.persist import Disk, Workdir
 from otpcr.threads import Thread
 from otpcr.utility import Time, Utils
 
@@ -152,6 +152,8 @@ def wrap(func):
 def main():
     if "p" not in Cfg.opts and os.path.exists(Cfg.wdr):
         shutil.rmtree(Cfg.wdr)
+    if "b" in Cfg.opts:
+        Disk.cache()
     Methods.parse(Cfg, " ".join(sys.argv[1:]))
     Workdir.setwd(Cfg.wdr)
     Mods.init("modules", MODS.__path__[0])

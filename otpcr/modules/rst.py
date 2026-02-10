@@ -10,7 +10,8 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from otpcr.objects import Dict, Object
+from otpcr.command import Cfg
+from otpcr.objects import Object
 from otpcr.persist import Workdir
 from otpcr.threads import Thread
 

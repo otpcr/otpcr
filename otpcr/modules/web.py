@@ -11,7 +11,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
 from otpcr.command import Cfg
-from otpcr.objects import Dict, Object
+from otpcr.objects import Object
 from otpcr.threads import Thread
 from otpcr.utility import Utils
 
