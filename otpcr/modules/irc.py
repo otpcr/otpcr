@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"internet relay chat"
+
+
 import base64
 import logging
 import os
@@ -21,10 +24,16 @@ from otpcr.persist import Disk, Locate
 from otpcr.threads import Thread
 
 
+"defines"
+
+
 NAME = Mods.pkgname(Broker)
 
 
 lock = threading.RLock()
+
+
+"init"
 
 
 def init():
@@ -36,6 +45,9 @@ def init():
     else:
         irc.stop()
     return irc
+
+
+"config"
 
 
 class Config(Default):
@@ -66,6 +78,9 @@ class Config(Default):
         return self.__getattribute__(name)
 
 
+"event"
+
+
 class Event(Message):
 
     def __init__(self):
@@ -87,6 +102,9 @@ class Event(Message):
         bot.dosay(self.channel, txt)
 
 
+"wraper"
+
+
 class TextWrap(textwrap.TextWrapper):
 
     def __init__(self):
@@ -100,6 +118,9 @@ class TextWrap(textwrap.TextWrapper):
 
 
 wrapper = TextWrap()
+
+
+"irc"
 
 
 class IRC(Output):

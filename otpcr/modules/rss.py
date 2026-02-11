@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"rich site syndicate"
+
+
 import html
 import html.parser
 import http.client
@@ -57,42 +60,6 @@ skipped = []
 
 
 "classes"
-
-
-class RunnerPool:
-
-    runners = []
-    lock = threading.RLock()
-    nrcpu = 1
-    nrlast = 0
-
-    @staticmethod
-    def add(client):
-        RunnerPool.runners.append(client)
-
-    @staticmethod
-    def init(nrcpu, cls):
-        RunnerPool.nrcpu = nrcpu
-        for _x in range(RunnerPool.nrcpu):
-            clt = cls()
-            clt.start()
-            RunnerPool.add(clt)
-
-    @staticmethod
-    def put(*args):
-        if not RunnerPool.runners:
-            RunnerPool.init(1, Runner)
-        with RunnerPool.lock:
-            if RunnerPool.nrlast >= RunnerPool.nrcpu-1:
-                RunnerPool.nrlast = 0
-            clt = RunnerPool.runners[RunnerPool.nrlast]
-            clt.put(*args)
-            RunnerPool.nrlast += 1
-
-
-class Etags(Default):
-
-    pass
 
 
 class Feed(Default):
@@ -237,6 +204,40 @@ class Runner:
     
     def stop(self):
         self.stopped.set()
+
+
+"pool"
+
+
+class RunnerPool:
+
+    runners = []
+    lock = threading.RLock()
+    nrcpu = 1
+    nrlast = 0
+
+    @staticmethod
+    def add(client):
+        RunnerPool.runners.append(client)
+
+    @staticmethod
+    def init(nrcpu, cls):
+        RunnerPool.nrcpu = nrcpu
+        for _x in range(RunnerPool.nrcpu):
+            clt = cls()
+            clt.start()
+            RunnerPool.add(clt)
+
+    @staticmethod
+    def put(*args):
+        if not RunnerPool.runners:
+            RunnerPool.init(1, Runner)
+        with RunnerPool.lock:
+            if RunnerPool.nrlast >= RunnerPool.nrcpu-1:
+                RunnerPool.nrlast = 0
+            clt = RunnerPool.runners[RunnerPool.nrlast]
+            clt.put(*args)
+            RunnerPool.nrlast += 1
 
 
 "utilities"
@@ -426,7 +427,7 @@ class Parser:
             yield obj
 
 
-"OPML"
+"opml"
 
 
 class OPML:
@@ -674,6 +675,9 @@ def syn(event):
     fetcher.start(False)
     nrs = fetcher.run(True)
     event.reply(f"{nrs} feeds synced")
+
+
+"data"
 
 
 TEMPLATE = """<opml version="1.0">
