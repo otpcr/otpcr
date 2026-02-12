@@ -18,6 +18,32 @@ from .utility import Time
 lock = threading.RLock()
 
 
+"cache"
+
+
+class Cache:
+
+    paths = {}
+
+    @staticmethod
+    def add(path, obj):
+        "put object into cache."
+        Cache.paths[path] = obj
+
+    @staticmethod
+    def get(path):
+        "get object from cache."
+        return Cache.paths.get(path, None)
+
+    @staticmethod
+    def sync(path, obj):
+        "update cached object."
+        try:
+            Dict.update(Cache.paths[path], obj)
+        except KeyError:
+            Cache.add(path, obj)
+
+
 "disk"
 
 
@@ -52,6 +78,7 @@ class Disk:
             Disk.cdir(pth)
             with open(pth, "w", encoding="utf-8") as fpt:
                 Json.dump(obj, fpt, indent=4)
+            Cache.sync(path, obj)
             return path
 
 
@@ -78,8 +105,11 @@ class Locate:
         nrs = 0
         res = []
         for pth in Locate.fns(Workdir.long(kind)):
-            obj = Default()
-            Disk.read(obj, pth)
+            obj = Cache.get(pth)
+            if not obj:
+                obj = Default()
+                Disk.read(obj, pth)
+                Cache.add(pth, obj)
             if not removed and Methods.deleted(obj):
                 continue
             if selector and not Methods.search(obj, selector, matching):
