@@ -102,7 +102,7 @@ class Scripts:
         Mods.scanner(Mods.list(), Cfg.ignore)
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
         Commands.cmd(Cfg.txt)
-        Mods.inits(Cfg.modules, Cfg.ignore, "w" in Cfg.opts)
+        Mods.inits(Cfg.modules, Cfg.ignore, Cfg.wait)
         csl = Term()
         csl.start()
         Runtime.forever()
@@ -189,7 +189,6 @@ class Runtime:
         Cfg.mods = args.mods
         Cfg.port = args.port
         Cfg.room = args.room
-        Cfg.wait = args.wait
         Cfg.verbose = args.verbose
         Cfg.wait = args.wait
         Cfg.wdr = args.wdr or os.path.expanduser(f"~/.{Utils.pkgname(Cfg)}")
@@ -232,6 +231,23 @@ class Runtime:
                 time.sleep(0.1)
             except (KeyboardInterrupt, EOFError):
                 break
+
+    @staticmethod
+    def getargs():
+        "parse commandline arguments."
+        parser = argparse.ArgumentParser(description="OTP-CR-117/19")
+        parser.add_argument("-a", "--all", action="store_true", help="load all modules")
+        parser.add_argument("-c", "--console", action="store_true", help="start console")
+        parser.add_argument("-d", "--daemon", action="store_true", help="start background daemon")
+        parser.add_argument("-l", "--level", default="info", help='set loglevel')
+        parser.add_argument("-m", "--mods", default="", help='modules to load')
+        parser.add_argument("-p", "--port", default=6667, help='set port to connect to')
+        parser.add_argument("-r", "--room", help='set room/channel to joinl')
+        parser.add_argument("-s", "--service", action="store_true", help="start service")
+        parser.add_argument("-v", "--verbose", action='store_true',help='enable verbose')
+        parser.add_argument("-w", "--wait", action='store_true',help='wait for services to start')
+        parser.add_argument("--wdr", help='set working directory')
+        return parser.parse_known_args()
 
     @staticmethod
     def privileges():
@@ -283,19 +299,7 @@ WantedBy=multi-user.target"""
 
 def main():
     "main"
-    parser = argparse.ArgumentParser(description="OTP-CR-117/19")
-    parser.add_argument("-a", "--all", action="store_true", help="load all modules")
-    parser.add_argument("-c", "--console", action="store_true", help="start console")
-    parser.add_argument("-d", "--daemon", action="store_true", help="start background daemon")
-    parser.add_argument("-l", "--level", default="info", help='set loglevel')
-    parser.add_argument("-m", "--mods", default="", help='modules to load')
-    parser.add_argument("-p", "--port", default=6667, help='set port to connect to')
-    parser.add_argument("-r", "--room", help='set room/channel to joinl')
-    parser.add_argument("-s", "--service", action="store_true", help="start service")
-    parser.add_argument("-v", "--verbose", action='store_true',help='enable verbose')
-    parser.add_argument("-w", "--wait", action='store_true',help='wait for services to start')
-    parser.add_argument("--wdr", help='set working directory')
-    args = parser.parse_args()
+    args, rest = Runtime.getargs()
     if args.daemon:
         Scripts.background(args)
     elif args.console:
