@@ -103,7 +103,6 @@ class Locate:
     def find(kind, selector={}, removed=False, matching=False, nritems=None):
         "locate objects by matching atributes."
         nrs = 0
-        res = []
         for pth in Locate.fns(Workdir.long(kind)):
             obj = Cache.get(pth)
             if not obj:
@@ -117,8 +116,7 @@ class Locate:
             if nritems and nrs >= nritems:
                 break
             nrs += 1
-            res.append((pth, obj))
-        return res
+            yield pth, obj
 
     @staticmethod
     def fns(kind):
