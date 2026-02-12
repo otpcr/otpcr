@@ -57,14 +57,14 @@ class Config(Default):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = Cfg.name or NAME
-        self.channel = f"#{self.name}"
+        self.channel = Cfg.room or f"#{self.name}"
         self.commands = Cfg.commands or False
         self.control = "!"
         self.nick = Cfg.name or NAME
         self.word = ""
-        self.port = 6667
+        self.port = Cfg.port or 6667
         self.realname = Cfg.name or NAME
-        self.sasl = False
+        self.sasl = (self.port == 6697 and True) or False
         self.server = "localhost"
         self.servermodes = ""
         self.sleep = 60

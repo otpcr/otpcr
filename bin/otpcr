@@ -5,6 +5,7 @@
 "main program"
 
 
+import argparse
 import logging
 import os
 import sys
@@ -27,17 +28,38 @@ from otpcr.utility import Log
 from otpcr import modules as MODS
 
 
+"options"
+
+
+parser = argparse.ArgumentParser(description="OTP-CR-117/19")
+parser.add_argument("-a", "--all", action="store_true", help="load all modules")
+parser.add_argument("-c", "--console", action="store_true", help="start console")
+parser.add_argument("-d", "--daemon", action="store_true", help="start background daemon")
+parser.add_argument("-l", "--level", default="info", help='set loglevel')
+parser.add_argument("-m", "--modules", default="", help='modules to load')
+parser.add_argument("-p", "--port", default=6667, help='set port to connect to')
+parser.add_argument("-r", "--room", help='set room/channel to joinl')
+parser.add_argument("-s", "--service", action="store_true", help="start service")
+parser.add_argument("-v", "--verbose", action='store_true',help='enable verbose')
+parser.add_argument("-w", "--wait", action='store_true',help='wait for services to start')
+parser.add_argument("--wdr", help='set working directory')
+args = parser.parse_args()
+
+
 "config"
 
 
 Cfg.commands = True
 Cfg.ignore = "rst,udp,web"
-Cfg.level = "info"
+Cfg.level = args.level
+Cfg.modules = args.modules or ""
 Cfg.name = Utils.pkgname(Commands)
 Cfg.poll = 300
+Cfg.port = args.port or 6667
+Cfg.room = f"#{args.room}" or f"#{Cfg.name}"
 Cfg.txt = " ".join(sys.argv[1:])
 Cfg.version = 100
-Cfg.wdr = os.path.expanduser(f"~/.{Cfg.name}")
+Cfg.wdr = args.wdr or os.path.expanduser(f"~/.{Cfg.name}")
 
 
 "clients"
@@ -98,7 +120,7 @@ class Scripts:
         Mods.scanner(Mods.list(), Cfg.ignore)
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
         Commands.cmd(Cfg.txt)
-        Mods.inits(Cfg.init, Cfg.ignore, "w" in Cfg.opts)
+        Mods.inits(Cfg.modules, Cfg.ignore, "w" in Cfg.opts)
         csl = Term()
         csl.start()
         Runtime.forever()
@@ -200,21 +222,8 @@ class Runtime:
             Mods.init("mods", "mods")
         if "v" in Cfg.opts:
             Runtime.banner()
-        if 'a' in Cfg.opts:
-            Cfg.init = Mods.list(Cfg.ignore)
-        if 'x' in Cfg.opts:
-            Cfg.commands = True
-
-    @staticmethod
-    def check(text):
-        "check for options."
-        for arg in Cfg.txt.split():
-            if not arg.startswith("-"):
-                continue
-            for char in text:
-               if char in arg:
-                   return True
-            return False
+        if args.all:
+            Cfg.modules = Mods.list(Cfg.ignore)
 
     @staticmethod
     def daemon(verbose=False, nochdir=False):
@@ -295,14 +304,11 @@ WantedBy=multi-user.target"""
 
 def main():
     "main"
-    check = Runtime.check
-    if check('b'):
-        Disk.cache()
-    if check("d"):
+    if args.daemon:
         Scripts.background()
-    elif check("c"):
+    elif args.console:
         Runtime.wrap(Scripts.console)
-    elif check("s"):
+    elif args.service:
         Runtime.wrap(Scripts.service)
     else:
         Runtime.wrap(Scripts.control)
