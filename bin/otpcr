@@ -18,10 +18,9 @@ sys.path.insert(0, os.getcwd())
 from otpcr.command import Cfg, Commands
 from otpcr.clients import Console
 from otpcr.message import Message
-from otpcr.objects import Methods
 from otpcr.package import Mods
 from otpcr.utility import Utils
-from otpcr.persist import Disk, Workdir
+from otpcr.persist import Workdir
 from otpcr.utility import Log
 
 
