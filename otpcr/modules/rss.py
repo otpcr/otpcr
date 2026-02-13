@@ -46,6 +46,7 @@ def init():
 
 
 def shutdown():
+    print('shut')
     fetcher.stop()
 
 
@@ -126,6 +127,7 @@ class Fetcher:
             repeater.start()
 
     def stop(self):
+        logging.debug("stopped fetcher")
         Disk.write(modified, modifiedfn)
         self.stopped.set()
 

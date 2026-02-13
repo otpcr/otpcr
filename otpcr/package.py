@@ -10,6 +10,7 @@ import os
 
 
 from .command import Commands
+from .objects import Dict
 from .threads import Thread
 from .utility import Utils
 
@@ -109,9 +110,13 @@ class Mods:
     @staticmethod
     def shutdown():
         "call shutdown on modules."
-        for mod in Mods.modules:
+        logging.debug("shutdown")
+        for mod in Dict.values(Mods.modules):
             if "shutdown" in dir(mod):
-                mod.shutdown()
+                try:
+                    mod.shutdown()
+                except Exception as ex:
+                    logging.exception(ex)
 
 
 "interface"
