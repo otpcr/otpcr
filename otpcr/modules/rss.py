@@ -37,13 +37,16 @@ from otpcr.utility import Repeater, Time, Utils
 
 def init():
     RunnerPool.init(1, Runner)
-    fetcher = Fetcher()
     fetcher.start()
     if seenfn:
         logging.warning("%s feeds since %s", Locate.count("rss"), Time.elapsed(time.time()-Time.fntime(seenfn)))
     else:
         logging.warning("%s feeds since %s", Locate.count('rss'), time.ctime(time.time()).replace("  ", " "))
     return fetcher
+
+
+def shutdown():
+    fetcher.stop()
 
 
 "defines"
@@ -55,6 +58,7 @@ seenlock = threading.RLock()
 
 
 errors = {}
+modifiedfn = ""
 seenfn = ""
 skipped = []
 
@@ -87,6 +91,7 @@ class Urls(Object):
     pass
 
 
+modified = Modified()
 seen = Urls()
 
 
@@ -113,13 +118,18 @@ class Fetcher:
 
     def start(self, repeat=True):
         global seenfn
+        global modifiedfn
         seenfn = Locate.last(seen) or Methods.ident(seen)
+        modifiedfn = Locate.last(modified) or Methods.ident(modified)
         if repeat:
             repeater = Repeater(Cfg.poll or 600, self.run)
             repeater.start()
 
     def stop(self):
+        Disk.write(modified, modifiedfn)
         self.stopped.set()
+
+
 
 
 "runner"
@@ -240,12 +250,14 @@ class RunnerPool:
             RunnerPool.nrlast += 1
 
 
+fetcher = Fetcher()
+
+
 "utilities"
 
 
 class Helpers:
 
-    modified = {}
     skip = [
         '403',
         '404',
@@ -340,14 +352,14 @@ class Helpers:
         url = urllib.parse.urlunparse(urllib.parse.urlparse(url))
         req = urllib.request.Request(str(url))
         req.add_header("User-Agent", Helpers.useragent("RSS Fetcher"))
-        since = Helpers.modified.get(url, "")
+        since = getattr(modified, url, "")
         if since:
             req.add_header('If-Modified-Since', since)
         logging.debug(f"fetching {url} {req.headers}")
         with urllib.request.urlopen(req, timeout=5.0) as response:  # nosec
-            modified = response.headers.get('Last-Modified', "")
-            if modified:
-                Helpers.modified[url] = modified
+            modi = response.headers.get('Last-Modified', "")
+            if modi:
+                setattr(modified, url, modi)
             response.data = response.read()
             return response
 

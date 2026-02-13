@@ -106,6 +106,13 @@ class Mods:
             res.append((name, mod))
         return res
 
+    @staticmethod
+    def shutdown():
+        "call shutdown on modules."
+        for mod in Mods.modules:
+            if "shutdown" in dir(mod):
+                mod.shutdown()
+
 
 "interface"
 

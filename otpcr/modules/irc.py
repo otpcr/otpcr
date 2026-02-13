@@ -65,7 +65,7 @@ class Config(Default):
         self.port = Cfg.port or 6667
         self.realname = Cfg.name or NAME
         self.sasl = (self.port == 6697 and True) or False
-        self.server = "localhost"
+        self.server = Cfg.server or "localhost"
         self.servermodes = ""
         self.sleep = 60
         self.username = Cfg.name or NAME
@@ -253,7 +253,7 @@ class IRC(Output):
                         self.events.joined.set()
                         continue
                     break
-            except (socket.timeout, ssl.SSLError, OSError, ConnectionResetError) as ex:
+            except (socket.error, socket.timeout, ssl.SSLError, OSError, ConnectionResetError) as ex:
                 self.events.joined.set()
                 self.state.error = str(ex)
                 logging.debug("%s", str(type(ex)) + " " + str(ex))
@@ -460,6 +460,7 @@ class IRC(Output):
         self.doconnect(self.cfg.server, self.cfg.nick, int(self.cfg.port))
 
     def restart(self):
+        logging.debug("restart")
         self.events.joined.set()
         self.state.pongcheck = False
         self.state.keeprunning = False
@@ -509,6 +510,7 @@ class IRC(Output):
         )
 
     def stop(self):
+        logging.warn("stopping")
         self.state.stopkeep = True
         Output.stop(self)
 

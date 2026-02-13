@@ -97,7 +97,7 @@ class Locate:
 
     @staticmethod
     def count(kind):
-        return len(Locate.find(kind))
+        return len(list(Locate.find(kind)))
 
     @staticmethod
     def find(kind, selector={}, removed=False, matching=False, nritems=None):
