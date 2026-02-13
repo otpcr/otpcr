@@ -39,7 +39,7 @@ def popen(txt):
 
 def main():
     popen("rm -fR DEAD* build dist MANIFEST *.egg-info *.whl")
-    popen("rm -fR .pytest_cache .test __pycache__ .ruff_cache")
+    popen("rm -fR .pytest_cache .test __pycache__ .ruff_cache uv.lock")
     if "-f" not in sys.argv:
         popen("rm -fR env html")
     popen('rm -f docs/otpcr.*.rst')
