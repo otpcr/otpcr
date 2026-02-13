@@ -46,7 +46,6 @@ def init():
 
 
 def shutdown():
-    print('shut')
     fetcher.stop()
 
 
