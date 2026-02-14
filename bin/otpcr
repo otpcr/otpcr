@@ -57,7 +57,7 @@ class Line(Console):
         print(text.encode('utf-8', 'replace').decode("utf-8"))
 
 
-class Term(Line):
+class Csl(Line):
 
     def callback(self, event):
         "wait for callback result."
@@ -102,7 +102,7 @@ class Scripts:
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
         Commands.cmd(Cfg.txt)
         Mods.inits(Cfg.modules, Cfg.ignore, Cfg.wait)
-        csl = Term()
+        csl = Csl()
         csl.start()
         Runtime.forever()
 

@@ -19,7 +19,8 @@ attrs1 = [
     'Default',
     'Dict',
     'Methods',
-    'Object'
+    'Object',
+    'State'
 ]
 
 

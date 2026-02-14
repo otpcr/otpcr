@@ -36,47 +36,31 @@ from otpcr.utility import Repeater, Time, Utils
 
 
 def init():
+    "initializer."
     RunnerPool.init(1, Runner)
-    fetcher.start()
-    if seenfn:
-        logging.warning("%s feeds since %s", Locate.count("rss"), Time.elapsed(time.time()-Time.fntime(seenfn)))
-    else:
-        logging.warning("%s feeds since %s", Locate.count('rss'), time.ctime(time.time()).replace("  ", " "))
-    return fetcher
+    Run.fetcher.start()
+    logging.warning("%s feeds", Locate.count("rss"))
 
 
 def shutdown():
-    fetcher.stop()
+    "shutdown."
+    Run.fetcher.stop()
 
 
-"defines"
+"persist"
 
 
-fetchlock = _thread.allocate_lock()
-importlock = _thread.allocate_lock()
-seenlock = threading.RLock()
-
-
-errors = {}
-modifiedfn = ""
-seenfn = ""
-skipped = []
-
-
-"classes"
-
-
-class Feed(Default):
+class Feed:
 
     pass
 
 
-class Modified(Default):
+class Modified:
 
     pass
 
 
-class Rss(Default):
+class Rss:
 
     def __init__(self):
         super().__init__()
@@ -86,13 +70,9 @@ class Rss(Default):
         self.rss = ""
 
 
-class Urls(Object):
+class Urls:
 
     pass
-
-
-modified = Modified()
-seen = Urls()
 
 
 "fetcher"
@@ -107,7 +87,6 @@ class Fetcher:
         self.todo = queue.Queue()
 
     def run(self, silent=False):
-        global seenfn
         nrs = 0
         for fnm, feed in Locate.find(Methods.fqn(Rss)):
             if feed.skip:
@@ -117,20 +96,16 @@ class Fetcher:
         return nrs
 
     def start(self, repeat=True):
-        global seenfn
-        global modifiedfn
-        seenfn = Locate.last(seen) or Methods.ident(seen)
-        modifiedfn = Locate.last(modified) or Methods.ident(modified)
+        State.seenfn = Locate.last(State.seen) or Methods.ident(State.seen)
+        State.modifiedfn = Locate.last(State.modified) or Methods.ident(State.modified)
         if repeat:
             repeater = Repeater(Cfg.poll or 600, self.run)
             repeater.start()
 
     def stop(self):
         logging.debug("stopped fetcher")
-        Disk.write(modified, modifiedfn)
+        Disk.write(State.modified, State.modifiedfn)
         self.stopped.set()
-
-
 
 
 "runner"
@@ -168,10 +143,9 @@ class Runner:
             self.fetch(*job)                                    
 
     def fetch(self, fnm, feed, silent=False):
-        global seenfn
-        with self.fetchlock:
+        with Run.fetchlock:
             result = []
-            see = getattr(seen, feed.rss, [])
+            see = getattr(State.seen, feed.rss, [])
             urls = []
             counter = 0
             for obj in Helpers.getfeed(fnm, feed, feed.display_list):
@@ -193,12 +167,12 @@ class Runner:
                     Disk.write(fed)
                 result.append(fed)
             if urls:
-                setattr(seen, feed.rss, urls)
+                setattr(State.seen, feed.rss, urls)
             if silent:
                 return counter
-            if not seenfn:
-                seenfn = Methods.ident(seen)
-            Disk.write(seen, seenfn)
+            if not State.seenfn:
+                State.seenfn = Methods.ident(State.seen)
+            Disk.write(State.seen, State.seenfn)
         txt = ""
         feedname = getattr(feed, "name", None)
         if feedname:
@@ -249,146 +223,6 @@ class RunnerPool:
             clt = RunnerPool.runners[RunnerPool.nrlast]
             clt.put(*args)
             RunnerPool.nrlast += 1
-
-
-fetcher = Fetcher()
-
-
-"utilities"
-
-
-class Helpers:
-
-    skip = [
-        '403',
-        '404',
-        '410',
-        '500',
-        '503',
-        'not valid',
-        'not known',
-        'failed'
-    ]
-
-    @staticmethod
-    def attrs(obj, txt):
-        "parse attribute into an object."
-        Dict.update(obj, *list(OPML.parse(txt)))
-
-    @staticmethod
-    def cdata(line):
-        "scrape CDATA block."
-        if "CDATA" in line:
-            lne = line.replace("![CDATA[", "")
-            lne = lne.replace("]]", "")
-            lne = lne[1:-1]
-            return lne
-        return line
-
-    @staticmethod
-    def doskip(error):
-        for err in Helpers.skip:
-            if err in error:
-                return True
-        return False
-
-    @staticmethod
-    def getfeed(fnm, feed, items):
-        "fetch a feed."
-        result = [None,]
-        try:
-            response = Helpers.geturl(feed.rss)
-            if not response.data:
-               return result
-            if "link" not in items:
-                items += ",link"
-            if feed.rss.endswith("atom"):
-                yield from Parser.parse(str(response.data, "utf-8"), "entry", items) or []
-            else:
-                yield from Parser.parse(str(response.data, "utf-8"), "item", items) or []
-        except TimeoutError:
-            return result
-        except (
-                urllib.error.URLError,
-                http.client.HTTPException,
-                ValueError,
-                HTTPError,
-                URLError,
-                UnicodeDecodeError,
-                ConnectionResetError
-        ) as ex:
-            if '304' in str(ex):
-                return result
-            feed.error = str(ex)
-            logging.debug("%s %s", feed.rss, feed.error)
-            if Helpers.doskip(feed.error):
-                feed.skip = True
-                Disk.write(feed, fnm)
-                logging.error("removed %s %s", feed.rss, ex)
-        return result
-
-    @staticmethod
-    def gettinyurl(url):
-        "query tinyurl for a link." 
-        postarray = [
-            ("submit", "submit"),
-            ("url", url),
-        ]
-        postdata = urlencode(postarray, quote_via=quote_plus)
-        req = urllib.request.Request(
-            "http://tinyurl.com/create.php", data=bytes(postdata, "UTF-8")
-        )
-        req.add_header("User-agent", Helpers.useragent("rss fetcher"))
-        with urllib.request.urlopen(req) as htm:  # nosec
-            for txt in htm.readlines():
-                line = txt.decode("UTF-8").strip()
-                i = re.search('data-clipboard-text="(.*?)"', line, re.M)
-                if i:
-                    return i.groups()
-        return []
-
-    @staticmethod
-    def geturl(url):
-        "fetch an url."
-        url = urllib.parse.urlunparse(urllib.parse.urlparse(url))
-        req = urllib.request.Request(str(url))
-        req.add_header("User-Agent", Helpers.useragent("RSS Fetcher"))
-        since = getattr(modified, url, "")
-        if since:
-            req.add_header('If-Modified-Since', since)
-        logging.debug(f"fetching {url} {req.headers}")
-        with urllib.request.urlopen(req, timeout=5.0) as response:  # nosec
-            modi = response.headers.get('Last-Modified', "")
-            if modi:
-                setattr(modified, url, modi)
-            response.data = response.read()
-            return response
-
-    @staticmethod
-    def shortid():
-        "return a shortid."
-        return str(uuid.uuid4())[:8]
-
-    @staticmethod
-    def striphtml(text):
-        "strip html."
-        clean = re.compile("<.*?>")
-        return re.sub(clean, "", text)
-
-    @staticmethod
-    def unescape(text):
-        "unescape html."
-        txt = re.sub(r"\s+", " ", text)
-        return html.unescape(txt)
-
-    @staticmethod
-    def unquote(url):
-        return urllib.parse.unquote(url, errors='ignore')
-
-    @staticmethod
-    def useragent(txt):
-        "produce useragent string."
-        return "Mozilla/5.0 (X11; Linux x86_64) " + txt
 
 
 "parser"
@@ -495,6 +329,162 @@ class OPML:
             yield obj
 
 
+"utilities"
+
+
+class Helpers:
+
+    skip = [
+        '403',
+        '404',
+        '410',
+        '500',
+        '503',
+        'not valid',
+        'not known',
+        'failed'
+    ]
+
+    @staticmethod
+    def attrs(obj, txt):
+        "parse attribute into an object."
+        Dict.update(obj, *list(OPML.parse(txt)))
+
+    @staticmethod
+    def cdata(line):
+        "scrape CDATA block."
+        if "CDATA" in line:
+            lne = line.replace("![CDATA[", "")
+            lne = lne.replace("]]", "")
+            lne = lne[1:-1]
+            return lne
+        return line
+
+    @staticmethod
+    def doskip(error):
+        for err in Helpers.skip:
+            if err in error:
+                return True
+        return False
+
+    @staticmethod
+    def getfeed(fnm, feed, items):
+        "fetch a feed."
+        result = [None,]
+        try:
+            response = Helpers.geturl(feed.rss)
+            if not response.data:
+               return result
+            if "link" not in items:
+                items += ",link"
+            if feed.rss.endswith("atom"):
+                yield from Parser.parse(str(response.data, "utf-8"), "entry", items) or []
+            else:
+                yield from Parser.parse(str(response.data, "utf-8"), "item", items) or []
+        except TimeoutError:
+            return result
+        except (
+                urllib.error.URLError,
+                http.client.HTTPException,
+                ValueError,
+                HTTPError,
+                URLError,
+                UnicodeDecodeError,
+                ConnectionResetError
+        ) as ex:
+            if '304' in str(ex):
+                return result
+            feed.error = str(ex)
+            logging.debug("%s %s", feed.rss, feed.error)
+            if Helpers.doskip(feed.error):
+                feed.skip = True
+                Disk.write(feed, fnm)
+                logging.error("removed %s %s", feed.rss, ex)
+        return result
+
+    @staticmethod
+    def gettinyurl(url):
+        "query tinyurl for a link." 
+        postarray = [
+            ("submit", "submit"),
+            ("url", url),
+        ]
+        postdata = urlencode(postarray, quote_via=quote_plus)
+        req = urllib.request.Request(
+            "http://tinyurl.com/create.php", data=bytes(postdata, "UTF-8")
+        )
+        req.add_header("User-agent", Helpers.useragent("rss fetcher"))
+        with urllib.request.urlopen(req) as htm:  # nosec
+            for txt in htm.readlines():
+                line = txt.decode("UTF-8").strip()
+                i = re.search('data-clipboard-text="(.*?)"', line, re.M)
+                if i:
+                    return i.groups()
+        return []
+
+    @staticmethod
+    def geturl(url):
+        "fetch an url."
+        url = urllib.parse.urlunparse(urllib.parse.urlparse(url))
+        req = urllib.request.Request(str(url))
+        req.add_header("User-Agent", Helpers.useragent("RSS Fetcher"))
+        since = getattr(State.modified, url, "")
+        if since:
+            req.add_header('If-Modified-Since', since)
+        logging.debug(f"fetching {url} {req.headers}")
+        with urllib.request.urlopen(req, timeout=5.0) as response:  # nosec
+            modi = response.headers.get('Last-Modified', "")
+            if modi:
+                setattr(State.modified, url, modi)
+            response.data = response.read()
+            return response
+
+    @staticmethod
+    def shortid():
+        "return a shortid."
+        return str(uuid.uuid4())[:8]
+
+    @staticmethod
+    def striphtml(text):
+        "strip html."
+        clean = re.compile("<.*?>")
+        return re.sub(clean, "", text)
+
+    @staticmethod
+    def unescape(text):
+        "unescape html."
+        txt = re.sub(r"\s+", " ", text)
+        return html.unescape(txt)
+
+    @staticmethod
+    def unquote(url):
+        return urllib.parse.unquote(url, errors='ignore')
+
+    @staticmethod
+    def useragent(txt):
+        "produce useragent string."
+        return "Mozilla/5.0 (X11; Linux x86_64) " + txt
+
+
+"state"
+
+
+class Run:
+
+    fetcher = Fetcher()
+    fetchlock = _thread.allocate_lock()
+    importlock = _thread.allocate_lock()
+
+
+class State:
+
+    modified = Modified()
+    modifiedfn = ""
+    seenfn = ""
+    seen = Urls()
+    skipped = []
+
+
 "commands"
 
 
@@ -549,7 +539,7 @@ def err(event):
 
 
 def exp(event):
-    with importlock:
+    with Run.importlock:
         event.reply(TEMPLATE)
         nrs = 0
         for _fn, ooo in Locate.find(Methods.fqn(Rss)):
@@ -572,7 +562,7 @@ def imp(event):
     if not os.path.exists(fnm):
         event.reply(f"no {fnm} file found.")
         return
-    with importlock:
+    with Run.importlock:
         with open(fnm, "r", encoding="utf-8") as file:
             txt = file.read()
         prs = OPML()
@@ -581,13 +571,13 @@ def imp(event):
         insertid = Helpers.shortid()
         for obj in prs.parse(txt, "outline", "name,xmlUrl"):
             url = obj["xmlUrl"]
-            if url in skipped:
+            if url in State.skipped:
                 continue
             if not url.startswith("http"):
                 continue
             has = list(Locate.find(Methods.fqn(Rss), {"rss": url}, matching=True))
             if has:
-                skipped.append(url)
+                State.skipped.append(url)
                 nrskip += 1
                 continue
             feed = Rss()
