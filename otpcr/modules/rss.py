@@ -50,7 +50,7 @@ def shutdown():
 "persist"
 
 
-class Feed:
+class Feed(Default):
 
     pass
 
@@ -60,7 +60,7 @@ class Modified:
     pass
 
 
-class Rss:
+class Rss(Default):
 
     def __init__(self):
         super().__init__()
