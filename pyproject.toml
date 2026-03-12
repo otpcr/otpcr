@@ -20,6 +20,10 @@ classifiers=[
 ]
 
 
+[project.scripts]
+"otpcr" = "otpcr.runtime:main"
+
+
 [project.urls]
 "home" = "https://pypi.org/project/otpcr"
 "bugs" = "https://github.com/otpcr/otpcr/issues"
