@@ -12,16 +12,9 @@ import time
 import _thread
 
 
-"defines"
-
-
-lock = threading.RLock()
-
-
-"thread"
-
-
 class Task(threading.Thread):
+
+    last = time.time()
 
     def __init__(self, func, *args, daemon=True, **kwargs):
         super().__init__(None, self.run, None, (), daemon=daemon)
@@ -51,31 +44,84 @@ class Task(threading.Thread):
 
     def run(self):
         "run function."
+        if time.time() - Task.last < 0.01:
+            time.sleep(0.01)
+        Task.last = time.time()
         func, args = self.queue.get()
         if args and hasattr(args[0], "ready"):
             self.event = args[0]
         try:
             self.result = func(*args)
+            return self.result
         except (KeyboardInterrupt, EOFError):
-            if self.event:
-                self.event.ready()
-            _thread.interrupt_main()
+            pass
         except Exception as ex:
-            if self.event:
-                self.event.ready()
             logging.exception(ex)
-            _thread.interrupt_main()
+        if self.event:
+            self.event.ready()
+        _thread.interrupt_main()
 
 
-"thread"
+class Timy(threading.Timer):
+
+    def __init__(self, sleep, func, *args, **kwargs):
+        super().__init__(sleep, func)
+        self.name = kwargs.get("name", Thread.name(func))
+        self.sleep = sleep
+        self.state = {}
+        self.status = "none"
+        self.state["latest"] = time.time()
+        self.state["starttime"] = time.time()
+        self.starttime = time.time()
+
+
+class Timed:
+
+    def __init__(self, sleep, func, *args, thrname="", **kwargs):
+        self.args = args
+        self.func = func
+        self.kwargs = kwargs
+        self.sleep = sleep
+        self.name = thrname or kwargs.get("name", Thread.name(func))
+        self.target = time.time() + self.sleep
+        self.timer = None
+
+    def run(self):
+        "run timed function."
+        self.timer.latest = time.time()
+        self.timer.status = "wait"
+        self.func(*self.args)
+        self.timer.status = "idle"
+
+    def start(self):
+        "start timer."
+        self.kwargs["name"] = self.name
+        timer = Timy(self.sleep, self.run, *self.args, **self.kwargs)
+        timer.start()
+        self.timer = timer
+
+    def stop(self):
+        "stop timer."
+        if self.timer:
+            self.timer.cancel()
+
+
+class Repeater(Timed):
+
+    def run(self):
+        "run function and launch timer for next run."
+        Thread.launch(super().run)
+        Thread.launch(self.start)
 
 
 class Thread:
 
+    lock = threading.RLock()
+
     @staticmethod
     def launch(func, *args, **kwargs):
         "run function in a thread."
-        with lock:
+        with Thread.lock:
             try:
                 task = Task(func, *args, **kwargs)
                 task.start()
@@ -93,10 +139,9 @@ class Thread:
         return repr(obj)
 
 
-"interface"
-
-
 def __dir__():
     return (
+        'Repeater',
         'Thread',
+        'Timed'
     )

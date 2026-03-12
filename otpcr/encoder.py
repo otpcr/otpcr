@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"json"
+"encoder/decoder"
 
 
 import json
@@ -49,9 +49,6 @@ class Json:
     def loads(s, *args, **kw):
         "load object from string."
         return json.loads(s, *args, **kw)
-
-
-"interface"
 
 
 def __dir__():

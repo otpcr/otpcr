@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"timers"
+
+
 import logging
 import random
 import threading
@@ -10,7 +13,8 @@ import time
 from otpcr.brokers import Broker
 from otpcr.objects import Dict, Methods, Object
 from otpcr.persist import Disk, Locate
-from otpcr.utility import NoDate, Time, Timed
+from otpcr.threads import Thread, Timed
+from otpcr.utility import Time
 
 
 rand = random.SystemRandom()
@@ -50,7 +54,7 @@ class Timers(Object):
     path = ""
     timers = Timer()
     lock = threading.RLock()
-    
+
     @staticmethod
     def add(tme, orig, channel,  txt):
         with Timers.lock:
@@ -88,14 +92,11 @@ def tmr(event):
     if seconds:
         target = time.time() + seconds
     else:
-        try:
-            target = Time.day(event.rest)
-        except NoDate:
-            target = Time.extract(Time.today())
-        hours =  Time.hour(event.rest)
-        if hours:
-            target += hours
-    target += rand.random() 
+        target = Time.date(event.args[0])
+    if not target:
+        event.reply("can't determine time")
+        return
+    target += rand.random()
     if not target or time.time() > target:
         event.reply("already passed given time.")
         return result
@@ -104,6 +105,6 @@ def tmr(event):
     Timers.add(target, event.orig, event.channel, txt)
     Disk.write(Timers.timers, Timers.path or Methods.ident(Timers.timers))
     bot = Broker.get(event.orig)
-    timer = Timed(diff, bot.say, event.orig, event.channel, txt)
-    timer.start()
+    timer = Timed(diff, bot.say, event.channel, txt)
+    Thread.launch(timer.start).join()
     event.reply("ok " + Time.elapsed(diff))

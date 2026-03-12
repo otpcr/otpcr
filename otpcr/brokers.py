@@ -18,7 +18,6 @@ class Broker:
         "announce text on all objects with an announce method."
         for obj in Broker.objs("announce"):
             obj.announce(txt)
-        del txt
 
     @staticmethod
     def get(origin):
@@ -43,9 +42,6 @@ class Broker:
         for orig in Broker.objects:
             if txt in orig.split()[0]:
                 yield orig
-
-
-"interface"
 
 
 def __dir__():

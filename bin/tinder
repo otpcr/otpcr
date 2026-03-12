@@ -2,6 +2,9 @@
 # This file is placed in the Public Domain.
 
 
+"stress test"
+
+
 import os
 import queue
 import shutil
@@ -13,12 +16,14 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from otpcr.clients import Client
-from otpcr.command import Cfg, Commands
-from otpcr.message import Message
-from otpcr.objects import Methods
+from otpcr.command import Commands
+from otpcr.defines import Main
+from otpcr.handler import Client, Event
+from otpcr.loggers import Log
+from otpcr.objects import Data, Methods
 from otpcr.package import Mods
-from otpcr.persist import Disk, Workdir
+from otpcr.persist import Workdir
+from otpcr.runtime import Runtime
 from otpcr.threads import Thread
 from otpcr.utility import Time, Utils
 
@@ -35,18 +40,14 @@ except ModuleNotFoundError:
 events = queue.Queue()
 
 
-"config"
-
-Cfg.debug = True
-Cfg.ignore = ""
-Cfg.level = "info"
-Cfg.name = Mods.pkgname(Commands)
-Cfg.txt = " ".join(sys.argv[1:])
-Cfg.version = 100
-Cfg.wdr = ".test"
-
-
-"clients"
+Main.debug = True
+Main.ignore = ""
+Main.level = "info"
+Main.mods = ""
+Main.name = Utils.pkgname(Commands)
+Main.opts = Data()
+Main.version = 8
+Main.wdr = ".test"
 
 
 class CLI(Client):
@@ -55,59 +56,38 @@ class CLI(Client):
         Client.__init__(self)
         self.register("command", Commands.command)
 
-    def raw(self, txt):
-        if "v" in Cfg.opts:
-            print(txt)
+    def raw(self, text):
+        if "v" in Main.opts:
+            print(text)
 
 
-class ClientPool:
+class Clients:
 
     clients = []
     lock = threading.RLock()
     nrcpu = 1
-    nrlast = 0
+    last = 0
 
     @staticmethod
     def add(client):
-        ClientPool.clients.append(client)
+        Clients.clients.append(client)
 
     @staticmethod
     def init(nrcpu, cls):
-        ClientPool.nrcpu = nrcpu
-        for _x in range(ClientPool.nrcpu):
+        Clients.nrcpu = nrcpu
+        for _x in range(Clients.nrcpu):
             clt = cls()
             clt.start()
-            ClientPool.add(clt)
+            Clients.add(clt)
 
     @staticmethod
     def put(*args):
-        with ClientPool.lock:
-            if ClientPool.nrlast >= ClientPool.nrcpu-1:
-                ClientPool.nrlast = 0
-            clt = ClientPool.clients[ClientPool.nrlast]
+        with Clients.lock:
+            if Clients.last >= Clients.nrcpu-1:
+                Clients.last = 0
+            clt = Clients.clients[Clients.last]
             clt.put(*args)
-            ClientPool.nrlast += 1
-
-
-
-"utilities"
-
-
-def banner():
-    tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{Cfg.name.upper()} {Cfg.version} since {tme} ({Cfg.level})")
-    sys.stdout.flush()
-
-
-def check(text):
-    args = sys.argv[1:]
-    for arg in args:
-        if not arg.startswith("-"):
-            continue
-        for char in text:
-            if char in arg:
-                return True
-    return False
+            Clients.last += 1
 
 
 def consume():
@@ -122,52 +102,36 @@ def consume():
 
 def payload(todo):
     for cmd, example in todo.items():
+        if Main.cmd:
+            if cmd not in Utils.spl(Main.cmd):
+                continue
         for ex in example:
-            evt = Message()
+            evt = Event()
             evt.text = f"{cmd} {ex}"
             evt.kind = "command"
-            ClientPool.put(evt)
+            Clients.put(evt)
             events.put(evt)
 
 
-"runtime"
-
-
-def wrap(func):
-    "restore console."
-    import termios
-    old = None
-    try:
-        old = termios.tcgetattr(sys.stdin.fileno())
-    except termios.error:
-        pass
-    try:
-        Utils.wrapped(func)
-    finally:
-        pass
-    if old:
-        termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
-
-
 def main():
-    if "p" not in Cfg.opts and os.path.exists(Cfg.wdr):
-        shutil.rmtree(Cfg.wdr)
-    if "b" in Cfg.opts:
-        Disk.cache()
-    Methods.parse(Cfg, " ".join(sys.argv[1:]))
-    Workdir.setwd(Cfg.wdr)
-    Mods.init("modules", MODS.__path__[0])
+    if "p" not in Main.opts and os.path.exists(Main.wdr):
+        shutil.rmtree(Main.wdr)
+    Methods.parse(Main, " ".join(sys.argv[1:]))
+    Workdir.setwd(Main.wdr)
+    Log.level(Main.level)
+    Mods.add("modules", MODS.__path__[0])
     if MODS2:
-        Mods.init("mods", MODS2.__path__[0])
-    Mods.scanner(Mods.list())
-    if "v" in Cfg.opts:
-        banner()
-    if "z" in Cfg.opts:
-        ClientPool.init(os.cpu_count(), CLI)
+        Mods.add("mods", MODS2.__path__[0])
+    Main.mods = Main.mods or Mods.list()
+    Runtime.scanner(Main)
+    if "v" in Main.opts:
+        Runtime.banner()
+    if "z" in Main.opts:
+        Clients.init(os.cpu_count(), CLI)
     else:
-        ClientPool.init(1, CLI)
+        Clients.init(1, CLI)
     starttime = time.time()
-    nrs = Cfg.index or 1
+    nrs = Main.index or 1
     for _x in range(nrs):
         payload(pre)
     for _x in range(nrs):
@@ -184,13 +148,11 @@ def main():
     lap = Time.elapsed(endtime-starttime)
     percall = (endtime-starttime)/nrevents
     nrs = events.qsize()
-    if "v" in Cfg.opts:
-        print(f"{Methods.fmt(Cfg, skip='otxt,txt')}")
+    Runtime.shutdown()
+    if "v" in Main.opts:
+        print(f"{Methods.fmt(Main, skip='otxt,txt')}")
         print(f"{nrs} events left.")
         print(f"total: {lap} nrs: {nrevents} call: %.6fs" % percall)
-
-
-"date"
 
 
 examples = {
@@ -203,7 +165,7 @@ examples = {
     "flt": ["", "0"],
     "fnd": ["", "log", "rss", "config", "todo"],
     "lou": [""],
-    "man": ["", "test"],
+    "man": ["", "otpcr genocideniet@gmail.com Nixt Niet"],
     "mbx": [""],
     "mod": [""],
     "mre": [""],
@@ -225,8 +187,9 @@ examples = {
 
 pre = {
     "cfg": ["", "nick=mekker"],
-    "imp": ["",
-         "testing/feeds.opml",
+    "imp": [
+        "",
+        "testing/opml/feeds.opml",
     ],
     "log": ["", "log add"],
     "rss": ["", "http://hnrss.org/newest"],
@@ -241,8 +204,5 @@ post = {
 }
 
 
-"trampoline"
-
-
 if __name__ == "__main__":
-    wrap(main)
+    Runtime.wrap(main)

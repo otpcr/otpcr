@@ -9,17 +9,6 @@ import os
 import types
 
 
-"exceptions"
-
-
-class Reserved(Exception):
-
-    pass
-
-
-"object"
-
-
 class Object:
 
     def __contains__(self, key):
@@ -35,29 +24,10 @@ class Object:
         return str(self.__dict__)
 
 
-class Default(Object):
+class Data(Object):
 
     def __getattr__(self, key):
         return self.__dict__.get(key, "")
-
-
-class Config(Default):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-        if args:
-           Dict.update(self, args[0])
-        if kwargs:
-           Dict.update(self, kwargs)
-
-
-class State(Default):
-
-    pass
-
-
-
-"dict"
 
 
 class Dict:
@@ -66,7 +36,6 @@ class Dict:
     def clear(obj):
         "remove all items from the object."
         obj.__dict__.clear()
-
 
     @staticmethod
     def construct(obj, *args, **kwargs):
@@ -102,6 +71,8 @@ class Dict:
     @staticmethod
     def items(obj):
         "object's key,value pairs."
+        if isinstance(obj, type):
+            return [(x, getattr(obj, x)) for x in dir(obj) if not x.startswith("_")]
         if isinstance(obj, dict):
             return obj.items()
         if isinstance(obj, types.MappingProxyType):
@@ -130,7 +101,18 @@ class Dict:
     @staticmethod
     def update(obj, data, empty=True):
         "update object,"
-        if isinstance(obj, dict):
+        if isinstance(obj, type):
+            if isinstance(data, type):
+                for key in dir(data):
+                    if '_' in key:
+                        continue
+                    value = getattr(data, key, None)
+                    if value:
+                        setattr(obj, key, value)
+            else:
+                for key, value in Dict.items(data):
+                    setattr(obj, key, value)
+        elif isinstance(obj, dict):
             obj.update(data)
         elif isinstance(obj.__dict__, types.MappingProxyType):
             for key, value in data.items():
@@ -145,7 +127,7 @@ class Dict:
         "object's values."
         if isinstance(obj, dict):
             return obj.values()
-        elif isinstance(obj.__dict__, types.MappingProxyType):
+        if isinstance(obj.__dict__, types.MappingProxyType):
             res = []
             for key in obj.__dict__:
                 res.append(obj[key])
@@ -153,10 +135,12 @@ class Dict:
         return obj.__dict__.values()
 
 
-"methods"
-
-
 class Methods:
+
+    @staticmethod
+    def cls(obj):
+        "return class name of an object."
+        return Methods.fqn(obj).split(".")[-1]
 
     @staticmethod
     def deleted(obj):
@@ -176,6 +160,8 @@ class Methods:
         "format object info printable string."
         if args == []:
             args = list(obj.__dict__.keys())
+        if args == []:
+            args = [x for x in dir(obj) if not x.startswith("_")]
         txt = ""
         for key in args:
             if key.startswith("__"):
@@ -185,7 +171,7 @@ class Methods:
             value = getattr(obj, key, None)
             if value is None:
                 continue
-            if not empty and not value:
+            if not empty and value == "":
                 continue
             if plain:
                 txt += f"{value} "
@@ -194,7 +180,7 @@ class Methods:
             elif isinstance(value, str):
                 txt += f'{key}="{value}" '
             else:
-                txt += f"{key}={Methods.fqn(value)}((value))"
+                txt += f"{key}={Methods.cls(value)}({Methods.fmt(value)}) "
         if txt == "":
             txt = "{}"
         return txt.strip()
@@ -213,19 +199,26 @@ class Methods:
         return os.path.join(Methods.fqn(obj), *str(datetime.datetime.now()).split())
 
     @staticmethod
+    def merge(obj, obj2):
+        for key, value in Dict.items(obj2):
+            if not value and getattr(obj, key, False):
+                continue
+            setattr(obj, key, value)
+
+    @staticmethod
     def parse(obj, text):
         "parse text for command."
         data = {
             "args": [],
             "cmd": "",
-            "gets": Default(),
+            "gets": Data(),
             "index": None,
             "init": "",
             "opts": "",
             "otxt": text,
             "rest": "",
-            "silent": Default(),
-            "sets": Default(),
+            "silent": Data(),
+            "sets": Data(),
             "text": text
         }
         for k, v in data.items():
@@ -259,11 +252,19 @@ class Methods:
             args.append(spli)
         if args:
             obj.args = args
-            obj.text  = obj.cmd or ""
+            obj.text = obj.cmd or ""
             obj.rest = " ".join(obj.args)
-            obj.text  = obj.cmd + " " + obj.rest
+            obj.text = obj.cmd + " " + obj.rest
         else:
             obj.text = obj.cmd or ""
+
+    @staticmethod
+    def reduce(obj):
+        result = {}
+        for key, value in Dict.items(obj):
+            if value:
+                result[key] = value
+        return result
 
     @staticmethod
     def search(obj, selector={}, matching=False):
@@ -275,11 +276,11 @@ class Methods:
                 res = False
                 break
             if matching and value != val:
-               res = False
-               break
+                res = False
+                break
             if str(value).lower() not in str(val).lower():
-               res = False
-               break
+                res = False
+                break
             res = True
         return res
 
@@ -288,11 +289,11 @@ class Methods:
         "skip keys containing chars."
         res = {}
         for key, value in Dict.items(obj):
-            next = False
+            donext = False
             for char in chars:
                 if char in key:
-                    next = True
-            if next:
+                    donext = True
+            if donext:
                 continue
             res[key] = value
         return res
@@ -309,7 +310,7 @@ class Methods:
             setattr(obj, key, float(val))
             return
         except ValueError:
-           pass
+            pass
         if val in ["True", "true", True]:
             setattr(obj, key, True)
         elif val in ["False", "false", False]:
@@ -318,15 +319,10 @@ class Methods:
             setattr(obj, key, val)
 
 
-"interface"
-
-
 def __dir__():
     return (
-        'Config',
-        'Default',
+        'Data',
         'Dict',
         'Methods',
-        'Object',
-        'State'
+        'Object'
     )

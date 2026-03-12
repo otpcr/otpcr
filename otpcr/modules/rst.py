@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"rest server"
+
+
 import logging
 import os
 import sys
@@ -10,13 +13,14 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from otpcr.command import Cfg
+from otpcr.defines import Configuration, Main
 from otpcr.objects import Object
-from otpcr.persist import Workdir
+from otpcr.persist import Locate, Workdir
 from otpcr.threads import Thread
 
 
-"init"
+def configure():
+    Locate.first(Config)
 
 
 def init():
@@ -29,17 +33,10 @@ def init():
         logging.error(str(ex))
 
 
-"config"
+class Config(Configuration):
 
-
-class Config:
-
-    debug = False
     hostname = "localhost"
-    port     = 10102
-
-
-"rest"
+    port = 10102
 
 
 class REST(HTTPServer, Object):
@@ -73,9 +70,6 @@ class REST(HTTPServer, Object):
         logging.exception(exc)
 
 
-"handler"
-
-
 class RESTHandler(BaseHTTPRequestHandler):
 
     def setup(self):
@@ -94,7 +88,7 @@ class RESTHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if Cfg.debug:
+        if Main.debug:
             return
         if "favicon" in self.path:
             return
@@ -105,13 +99,17 @@ class RESTHandler(BaseHTTPRequestHandler):
                 txt += f'<a href="http://{Config.hostname}:{Config.port}/{fnm}">{fnm}</a><br>\n'
             self.send(html(txt.strip()))
             return
-        fnm = os.path.join(Workdir.workdir(), self.path)
+        if self.path.startswith("/"):
+            fnm = self.path[1:]
+        else:
+            fnm = self.path
+        fnm = os.path.join(Workdir.workdir("store"), fnm)
         fnm = os.path.abspath(fnm)
         if os.path.isdir(fnm):
             self.write_header("text/html")
             txt = ""
             for fnn in os.listdir(fnm):
-                filename = self.path  + os.sep + fnn
+                filename = self.path + os.sep + fnn
                 txt += f'<a href="http://{Config.hostname}:{Config.port}/{filename}">{filename}</a><br>\n'
             self.send(txt.strip())
             return
@@ -123,14 +121,11 @@ class RESTHandler(BaseHTTPRequestHandler):
             self.send(html(txt))
         except (TypeError, FileNotFoundError, IsADirectoryError) as ex:
             self.send_response(404)
-            logging.exception(ex)
+            logging.debug(str(ex))
             self.end_headers()
 
     def log(self, code):
         pass
-
-
-"data"
 
 
 def html(txt):

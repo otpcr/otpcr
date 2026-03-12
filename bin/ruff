@@ -1,1 +1,27 @@
-ruff check otpcr otpcr/modules bin/otpcr bin/tinder
+#!/usr/bin/env python3
+
+
+import os
+import sys
+
+
+SKIP = ["All",]
+
+
+def doskip(line):
+    for x in SKIP:
+        if x in line:
+            return True
+    return False     
+
+
+def popen(txt):
+    for line in os.popen(txt).readlines():
+        line = line.strip()
+        if not line or doskip(line):
+            continue
+        print(line.rstrip())
+        sys.stdout.flush()
+
+
+popen("ruff check otpcr bin/tinder testing")

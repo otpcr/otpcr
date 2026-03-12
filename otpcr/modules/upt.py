@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"show uptime"
+
+
 import time
 
 

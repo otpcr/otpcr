@@ -24,43 +24,45 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from otpcr.brokers import Broker
-from otpcr.command import Cfg
-from otpcr.objects import Default, Dict, Object, Methods
-from otpcr.persist import Disk, Locate
-from otpcr.threads import Thread
-from otpcr.utility import Repeater, Time, Utils
+from otpcr.defines import Configuration
+from otpcr.handler import Broker
+from otpcr.objects import Data, Dict, Methods
+from otpcr.persist import Disk, Locate, Main
+from otpcr.threads import Repeater, Thread
+from otpcr.utility import Time, Utils
 
 
-"init"
+class Config(Configuration):
+
+    polltime = 300
 
 
 def init():
-    "initializer."
-    RunnerPool.init(1, Runner)
+    Runners.init(1, Runner)
     Run.fetcher.start()
     logging.warning("%s feeds", Locate.count("rss"))
 
 
 def shutdown():
-    "shutdown."
     Run.fetcher.stop()
 
 
-"persist"
-
-
-class Feed(Default):
+class Feed(Data):
 
     pass
 
 
-class Modified:
+class Modified(Data):
 
     pass
 
 
-class Rss(Default):
+class Urls(Data):
+
+    pass
+
+
+class Rss(Data):
 
     def __init__(self):
         super().__init__()
@@ -70,12 +72,14 @@ class Rss(Default):
         self.rss = ""
 
 
-class Urls:
+class State:
 
-    pass
-
-
-"fetcher"
+    configfn = ""
+    modified = Modified()
+    modifiedfn = ""
+    seenfn = ""
+    seen = Urls()
+    skipped = []
 
 
 class Fetcher:
@@ -91,7 +95,7 @@ class Fetcher:
         for fnm, feed in Locate.find(Methods.fqn(Rss)):
             if feed.skip:
                 continue
-            RunnerPool.put((fnm, feed, silent))
+            Runners.put((fnm, feed, silent))
             nrs += 1
         return nrs
 
@@ -99,16 +103,14 @@ class Fetcher:
         State.seenfn = Locate.last(State.seen) or Methods.ident(State.seen)
         State.modifiedfn = Locate.last(State.modified) or Methods.ident(State.modified)
         if repeat:
-            repeater = Repeater(Cfg.poll or 600, self.run)
+            repeater = Repeater(Config.polltime, self.run)
             repeater.start()
 
     def stop(self):
         logging.debug("stopped fetcher")
-        Disk.write(State.modified, State.modifiedfn)
+        if State.modified:
+            Disk.write(State.modified, State.modifiedfn)
         self.stopped.set()
-
-
-"runner"
 
 
 class Runner:
@@ -140,7 +142,7 @@ class Runner:
     def loop(self):
         while True:
             job = self.queue.get()
-            self.fetch(*job)                                    
+            self.fetch(*job)
 
     def fetch(self, fnm, feed, silent=False):
         with Run.fetchlock:
@@ -186,15 +188,12 @@ class Runner:
 
     def start(self):
         Thread.launch(self.loop)
-    
+
     def stop(self):
         self.stopped.set()
 
 
-"pool"
-
-
-class RunnerPool:
+class Runners:
 
     runners = []
     lock = threading.RLock()
@@ -203,29 +202,26 @@ class RunnerPool:
 
     @staticmethod
     def add(client):
-        RunnerPool.runners.append(client)
+        Runners.runners.append(client)
 
     @staticmethod
     def init(nrcpu, cls):
-        RunnerPool.nrcpu = nrcpu
-        for _x in range(RunnerPool.nrcpu):
+        Runners.nrcpu = nrcpu
+        for _x in range(Runners.nrcpu):
             clt = cls()
             clt.start()
-            RunnerPool.add(clt)
+            Runners.add(clt)
 
     @staticmethod
     def put(*args):
-        if not RunnerPool.runners:
-            RunnerPool.init(1, Runner)
-        with RunnerPool.lock:
-            if RunnerPool.nrlast >= RunnerPool.nrcpu-1:
-                RunnerPool.nrlast = 0
-            clt = RunnerPool.runners[RunnerPool.nrlast]
+        if not Runners.runners:
+            Runners.init(Runners.nrcpu, Runner)
+        with Runners.lock:
+            if Runners.nrlast >= Runners.nrcpu-1:
+                Runners.nrlast = 0
+            clt = Runners.runners[Runners.nrlast]
             clt.put(*args)
-            RunnerPool.nrlast += 1
-
-
-"parser"
+            Runners.nrlast += 1
 
 
 class Parser:
@@ -272,9 +268,6 @@ class Parser:
                 if val:
                     obj[itm] = Helpers.striphtml(Helpers.unescape(val.strip())).replace("\n", "")
             yield obj
-
-
-"opml"
 
 
 class OPML:
@@ -329,9 +322,6 @@ class OPML:
             yield obj
 
 
-"utilities"
-
-
 class Helpers:
 
     skip = [
@@ -361,9 +351,9 @@ class Helpers:
         return line
 
     @staticmethod
-    def doskip(error):
-        for err in Helpers.skip:
-            if err in error:
+    def doskip(errors):
+        for error in Helpers.skip:
+            if error in errors:
                 return True
         return False
 
@@ -374,13 +364,13 @@ class Helpers:
         try:
             response = Helpers.geturl(feed.rss)
             if not response.data:
-               return result
+                return result
             if "link" not in items:
                 items += ",link"
             if feed.rss.endswith("atom"):
-                yield from Parser.parse(str(response.data, "utf-8"), "entry", items) or []
+                yield from Parser.parse(str(response.data, "utf-8", errors='ignore'), "entry", items) or []
             else:
-                yield from Parser.parse(str(response.data, "utf-8"), "item", items) or []
+                yield from Parser.parse(str(response.data, "utf-8", errors='ignore'), "item", items) or []
         except TimeoutError:
             return result
         except (
@@ -404,7 +394,7 @@ class Helpers:
 
     @staticmethod
     def gettinyurl(url):
-        "query tinyurl for a link." 
+        "query tinyurl for a link."
         postarray = [
             ("submit", "submit"),
             ("url", url),
@@ -431,7 +421,7 @@ class Helpers:
         since = getattr(State.modified, url, "")
         if since:
             req.add_header('If-Modified-Since', since)
-        logging.debug(f"fetching {url} {req.headers}")
+        logging.debug("fetching %s %s", url, req.headers)
         with urllib.request.urlopen(req, timeout=5.0) as response:  # nosec
             modi = response.headers.get('Last-Modified', "")
             if modi:
@@ -466,9 +456,6 @@ class Helpers:
         return "Mozilla/5.0 (X11; Linux x86_64) " + txt
 
 
-"state"
-
-
 class Run:
 
     fetcher = Fetcher()
@@ -476,33 +463,21 @@ class Run:
     importlock = _thread.allocate_lock()
 
 
-class State:
-
-    modified = Modified()
-    modifiedfn = ""
-    seenfn = ""
-    seen = Urls()
-    skipped = []
-
-
-"commands"
-
-
 def atr(event):
     if not event.rest:
         event.reply("atr <stringinurl>")
         return
-    for fnm, obj in Locate.find(Methods.fqn(Rss), {'rss': event.rest}):
+    for _fnm, obj in Locate.find(Methods.fqn(Rss), {'rss': event.rest}):
         request = Helpers.geturl(obj.rss)
         if obj.rss.endswith('atom'):
-            res = list(Parser.getitems(str(request.data, 'utf-8', errors='ignore'), 'entry', 1))
+            result = list(Parser.getitems(str(request.data, 'utf-8', errors='ignore'), 'entry', 1))
         else:
-            res = list(Parser.getitems(str(request.data, 'utf-8', errors='ignore'), 'item', 1))
-        result = []
-        for x in re.findall('<.*?>', res[0]):
-           if x[1] == '/' and len(x) > 4:
-              result.append(x[2:-1])
-        event.reply(','.join(result))
+            result = list(Parser.getitems(str(request.data, 'utf-8', errors='ignore'), 'item', 1))
+        resulting = []
+        for x in re.findall('<.*?>', result[0]):
+            if x[1] == '/' and len(x) > 4:
+                resulting.append(x[2:-1])
+        event.reply(','.join(resulting))
 
 
 def dpl(event):
@@ -534,7 +509,9 @@ def err(event):
         if not event.rest:
             nrs += 1
             event.reply(f"{nrs} {Methods.fmt(obj)}")
-    if event.rest:
+    if not nrs:
+        event.reply("no feed errors.")
+    else:
         event.reply(f'{nre} feeds reset.')
 
 
@@ -672,15 +649,12 @@ def rss(event):
 
 
 def syn(event):
-    if Cfg.debug:
+    if Main.debug:
         return
     fetcher = Fetcher()
     fetcher.start(False)
     nrs = fetcher.run(True)
     event.reply(f"{nrs} feeds synced")
-
-
-"data"
 
 
 TEMPLATE = """<opml version="1.0">

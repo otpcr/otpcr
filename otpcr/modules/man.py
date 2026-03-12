@@ -3,24 +3,19 @@
 
 """**NAME**
 
-
-|
 | ``%s`` - %s
 |
 
 
 **SYNOPSIS**
 
-
+| ``%s [-h] [-a] [-c] [-d] [-l LEVEL] [-m MODS] [-n] [-s] [-t] [-v] [-w] [--local] [--wdr WDR]``
 |
 | ``%s <cmd> [key=val] [key==val]``
-| ``%s -cvaw [init=mod1,mod2]``
-| ``%s -d`` 
-| ``%s -s``
+| ``%s -cvaw [mods=mod1,mod2]``
 |
 
 **DESCRIPTION**
-
 
 ``%s`` has all you need to program a unix cli program, such as disk
 perisistence for configuration files, event handler to handle the
@@ -44,7 +39,6 @@ text. You can run it under systemd for 24/7 presence in a IRC channel.
 
 installation is done with pipx
 
-|
 | ``$ pipx install %s``
 | ``$ pipx ensurepath``
 |
@@ -63,14 +57,33 @@ installation is done with pipx
 
 use ``%s`` to control the program, default it does nothing
 
-|
 | ``$ %s``
 | ``$``
 |
 
+the -h option will show you possible options
+
+| ``$ %s -h``
+|
+| options:
+|
+| ``-h,--help          show this help message and exit``
+| ``-a,--all           load all modules``
+| ``-c,--console       start console``
+| ``-d,--daemon        start background daemon``
+| ``-l,--level LEVEL   set loglevel``
+| ``-m,--mods MODS     modules to load``
+| ``-n,--noignore      disable ignore```
+| ``-s,--service       start service``
+| ``-t,--threaded      enable multiple workers``
+| ``-v,--verbose       enable verbose``
+| ``-w,--wait          wait for services to start``
+| ``--local            use local mods directory``
+| ``--wdr <WDR>        set working directory``
+|
+
 see list of commands
 
-|
 | ``$ %s cmd``
 | ``cfg,cmd,dne,dpl,err,exp,imp,log,mod,mre,nme,``
 | ``pwd,rem,req,res,rss,srv,syn,tdo,thr,upt``
@@ -78,19 +91,16 @@ see list of commands
 
 start console
 
-|
 | ``$ %s -c``
 |
 
 start console and run irc and rss clients
 
-|
 | ``$ %s -c init=irc,rss``
 |
 
 list available modules
 
-|
 | ``$ %s mod``
 | ``err,flt,fnd,irc,llm,log,mbx,mdl,mod,req,rss,``
 | ``rst,slg,tdo,thr,tmr,udp,upt``
@@ -98,14 +108,12 @@ list available modules
 
 start daemon
 
-|
 | ``$ %s -d``
 | ``$``
 |
 
 start service
 
-|
 | ``$ %s -s``
 | ``<runs until ctrl-c>``
 |
@@ -116,7 +124,6 @@ start service
 
 here is a list of available commands
 
-|
 | ``cfg`` - irc configuration
 | ``cmd`` - commands
 | ``dpl`` - sets display items
@@ -141,7 +148,6 @@ here is a list of available commands
 
 irc
 
-|
 | ``$ %s cfg server=<server>``
 | ``$ %s cfg channel=<channel>``
 | ``$ %s cfg nick=<nick>``
@@ -149,14 +155,12 @@ irc
 
 sasl
 
-|
 | ``$ %s pwd <nsnick> <nspass>``
 | ``$ %s cfg password=<frompwd>``
 |
 
 rss
 
-|
 | ``$ %s rss <url>``
 | ``$ %s dpl <url> <item1,item2>``
 | ``$ %s rem <url>``
@@ -165,7 +169,6 @@ rss
 
 opml
 
-|
 | ``$ %s exp``
 | ``$ %s imp <filename>``
 |
@@ -173,7 +176,6 @@ opml
 
 **PROGRAMMING**
 
-|
 | %s has it's user modules in the ~/.%s/mods directory so for a
 | hello world command you would  edit a file in ~/.%s/mods/hello.py
 | and add the following
@@ -207,13 +209,13 @@ opml
 |
 | ``~/.%s``
 | ``~/.local/bin/%s``
-| ``~/.local/pipx/venvs/%s/*``
+| ``~/.local/share/pipx/venvs/%s/*``
 |
 
 **AUTHOR**
 
 |
-| ``Bart Thate`` <``bthate@dds.nl``>
+| ``%s`` <``%s``>
 |
 
 **COPYRIGHT**
@@ -225,15 +227,19 @@ opml
 
 
 def man(event):
-    if not event.rest:
-        event.reply("man <name>")
+    args = event.args
+    try:
+        name, email, author = args[0], args[1], " ".join(args[2:])
+    except (ValueError, IndexError):
+        event.reply("man <name> <email> <author>")
         return
-    NAME = event.rest
     event.reply(__doc__ % (
-        NAME,
-        NAME.upper(),
-        *(NAME,) * 4,
-        *(NAME.upper(),) * 4,
-        *(NAME,) * 32,
-        NAME.upper()
-        ))
+        name,
+        name.upper(),
+        *(name,) * 3,
+        *(name.upper(),) * 4,
+        *(name,) * 33,
+        author,
+        email,
+        name.upper()
+    ))

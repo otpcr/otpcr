@@ -8,22 +8,7 @@ import inspect
 
 
 from .brokers import Broker
-from .message import Message
-from .objects import Default, Methods
-
-
-"config"
-
-
-class Config(Default):
-
-    pass
-
-
-Cfg = Config()
-
-
-"commands"
+from .objects import Methods
 
 
 class Commands:
@@ -38,17 +23,6 @@ class Commands:
             name = func.__name__
             Commands.cmds[name] = func
             Commands.names[name] = func.__module__.split(".")[-1]
-
-    @staticmethod
-    def cmd(text):
-        "parse text for command and run it."
-        for txt in text.split(" ! "):
-            evt = Message()
-            evt.text = txt
-            evt.type = "command"
-            Commands.command(evt)
-            evt.wait()
-        return evt
 
     @staticmethod
     def command(evt):
@@ -77,11 +51,8 @@ class Commands:
         "scan a module for functions with event as argument."
         for key, cmdz in inspect.getmembers(module, inspect.isfunction):
             if 'event' not in inspect.signature(cmdz).parameters:
-               continue
+                continue
             Commands.add(cmdz)
-
-
-"interface"
 
 
 def __dir__():

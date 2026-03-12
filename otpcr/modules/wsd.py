@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"wisdom"
+
+
 import logging
 
 
@@ -8,23 +11,57 @@ from random import SystemRandom
 
 
 from otpcr.brokers import Broker
-from otpcr.message import Message
-from otpcr.utility import Repeater
+from otpcr.handler import Event
+from otpcr.objects import Methods
+from otpcr.persist import Disk, Locate
+from otpcr.threads import Repeater
 
 
 rand = SystemRandom()
 
 
 def init():
-    event = Message()
-    repeater = Repeater(3600.0,  wsd, event)
+    state.load()
+    event = Event()
+    repeater = Repeater(3600,  wsd, event)
     repeater.start()
-    logging.warning("%s wise", len(TXT.split("\n")))
+    logging.warning("%s wise", len(TXTLIST))
+
+
+class State:
+
+    def __init__(self):
+        super().__init__()
+        self.fnm = ""
+
+    def dump(self):
+        if not self.fnm:
+            self.fnm = Locate.first(self) or Methods.ident(self)
+        Disk.write(self, self.fnm)
+
+    def load(self):
+        Locate.first(self)
+
+
+state = State()
 
 
 def wsd(event):
+    txt = ""
+    if 'seen' not in dir(state):
+        state.seen = []
+    for nrs in range(len(TXTLIST)):
+        txt = rand.choice(TXTLIST)
+        if txt in state.seen:
+            continue
+        state.seen.append(txt)
+        break
+    else:
+        state.seen = []
+        txt = "* reset"
+    state.dump()
     for bot in Broker.objs("announce"):
-        bot.announce(rand.choice(TXT.split("\n")).strip()[2:])
+        bot.announce(txt.strip()[2:])
 
 
 TXT = """| wijsheid, wijs !
@@ -208,3 +245,6 @@ TXT = """| wijsheid, wijs !
 | duiding
 | coding
 """
+
+
+TXTLIST = [x for x in TXT.split("\n") if x and '=' not in x]

@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"udp to irc relay"
+
+
 import logging
 import select
 import socket
@@ -10,24 +13,22 @@ import time
 
 
 from otpcr.brokers import Broker
-from otpcr.command import Cfg
+from otpcr.defines import Configuration, Main
 from otpcr.objects import Object
 from otpcr.threads import Thread
 
 
 def init():
-    udp = UDP()
-    udp.start()
+    relay = UDP()
+    relay.start()
     logging.warning("http://%s:%s", Config.host, Config.port)
-    return udp
+    return relay
 
 
-class Config(Object):
+class Config(Configuration):
 
-    addr = ""
     host = "localhost"
     port = 5500
-
 
 
 class UDP(Object):
@@ -76,7 +77,7 @@ class UDP(Object):
 
 
 def toudp(host, port, txt):
-    if Cfg.debug:
+    if Main.debug:
         return
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(bytes(txt.strip(), "utf-8"), (host, port))

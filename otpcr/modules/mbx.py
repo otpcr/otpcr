@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"mailbox"
+
+
 import mailbox
 import os
 import time
@@ -8,10 +11,7 @@ import time
 
 from otpcr.objects import Dict, Methods, Object
 from otpcr.persist import Disk, Locate
-from otpcr.utility import MONTH, Time
-
-
-"email"
+from otpcr.utility import Time
 
 
 class Email(Object):
@@ -19,9 +19,6 @@ class Email(Object):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.text = ""
-
-
-"utility"
 
 
 def todate(date):
@@ -60,14 +57,10 @@ def todate(date):
     return ddd
 
 
-"commands"
-
-
 def eml(event):
     nrs = -1
     args = ["From", "Subject"]
-    if len(event.args) > 1:
-        args.extend(event.args[1:])
+    args.extend(event.args)
     if event.gets:
         args.extend(Dict.keys(event.gets))
     for key in event.silent:
@@ -76,19 +69,19 @@ def eml(event):
     args = set(args)
     result = sorted(
                     Locate.find("email", event.gets),
-                    key=lambda x: Time.date(Time.todate(getattr(x[1], "Date", "")))
+                    key=lambda x: Time.date(todate(getattr(x[1], "Date", "")))
                    )
     if event.index:
         obj = result[event.index]
         if obj:
             obj = obj[-1]
             tme = getattr(obj, "Date", "")
-            event.reply(f'{event.index} {Methods.fmt(obj, args, plain=True)} {Time.elapsed(time.time() - Time.date(Time.todate(tme)))}')
+            event.reply(f'{event.index} {Methods.fmt(obj, args, plain=True)} {Time.elapsed(time.time() - Time.date(todate(tme)))}')
     else:
         for _fn, obj in result:
             nrs += 1
             tme = getattr(obj, "Date", "")
-            event.reply(f'{nrs} {Methods.fmt(obj, args, plain=True)} {Time.elapsed(time.time() - Time.date(Time.todate(tme)))}')
+            event.reply(f'{nrs} {Methods.fmt(obj, args, plain=True)} {Time.elapsed(time.time() - Time.date(todate(tme)))}')
     if not result:
         event.reply("no emails found.")
 
@@ -122,3 +115,19 @@ def mbx(event):
         nrs += 1
     if nrs:
         event.reply("ok %s" % nrs)
+
+
+MONTH = {
+    'Jan': 1,
+    'Feb': 2,
+    'Mar': 3,
+    'Apr': 4,
+    'May': 5,
+    'Jun': 6,
+    'Jul': 7,
+    'Aug': 8,
+    'Sep': 9,
+    'Oct': 10,
+    'Nov': 11,
+    'Dec': 12
+}
