@@ -41,6 +41,16 @@ class Boot:
         sys.stdout.flush()
 
     @classmethod
+    def check(cls, opts):
+        for arg in sys.argv:
+            if not arg.startswith("-"):
+                continue
+            for opt in opts:
+                if opt in arg:
+                    return True
+        return False
+
+    @classmethod
     def configure(cls, name=""):
         "in the beginning."
         if cls.configured:
@@ -55,16 +65,14 @@ class Boot:
         Workdir.skel()
         Log.size(len(Main.name))
         Log.level(Main.level or "info")
-        Mods.add(
-                 f"{Utils.pkgname(Main)}.modules",
-                 os.path.join(os.path.dirname(__spec__.loader.path), "modules")
-                ) 
+        Mods.add(f"{Utils.pkgname(Main)}.modules", Utils.moddir()) 
         if Main.user:
             Mods.add(os.path.join(Main.wdr, "mods"), "modules")
             Mods.add('mods', 'mods')
         if Main.all:
             Main.mods = Mods.list()
         cls.configured = True
+        print(Mods.dirs)
 
     @classmethod
     def daemon(cls, verbose=False, nochdir=False):

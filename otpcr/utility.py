@@ -140,6 +140,10 @@ class Utils:
             return hashlib.md5(txt, usedforsecurity=False).hexdigest()  # pylint: disable=E1123
 
     @staticmethod
+    def moddir():
+        return os.path.join(os.path.dirname(__spec__.loader.path), "modules")
+
+    @staticmethod
     def modname(obj):
         "return package name of an object."
         return obj.__module__.split(".")[-1]

@@ -21,6 +21,7 @@ from otpcr.command import Commands
 from otpcr.configs import Main
 from otpcr.handler import Event, Output
 from otpcr.objects import Methods
+from otpcr.runtime import Arguments
 from otpcr.threads import Thread
 from otpcr.utility import Time
 
@@ -100,7 +101,10 @@ def payload(cli, todo):
 def main():
     if Main.prune and os.path.exists(Main.wdr):
         shutil.rmtree(Main.wdr)
+    if Boot.check("v"):
+        Main.verbose = True
     Boot.configure()
+    Main.all = True
     Boot.scan()
     if Main.threaded:
         Clients.init(os.cpu_count(), CLI)
