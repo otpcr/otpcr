@@ -12,7 +12,12 @@
     <center><b>EVIDENCE</b></center><br>
 
 
-The website of the ECHA <European Chemical Agency> has been updated in January 2026 and no longer shows a skull and bones when visited, see :ref:`here <echa>`. Images shown are from 2019.
+.. raw:: html
+
+  <br>
+
+The website of the **ECHA** <European Chemical Agency> has been updated in January 2026 and no longer shows a skull and bones when
+:ref:`visited <echa>`. Images shown are from 2019.
 
 
 .. raw:: html

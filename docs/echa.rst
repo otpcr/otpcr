@@ -12,12 +12,19 @@
     <center><b>ECHA</b></center><br>
 
 
-The website of the ECHA is updated in January 2026 and no longer shows a
-skull and bones when visited.
+.. raw:: html
+
+  <br>
+
+The website of the **ECHA** <European Chemical Agency> has been updated in January 2026 and no longer shows a skull and bones when visited.
 
 
 .. _haldol:
 
+
+.. raw:: html
+
+  <br>
 
 **HALDOL**
 
