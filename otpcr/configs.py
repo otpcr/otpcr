@@ -4,18 +4,13 @@
 "configurations"
 
 
-from .objects import Data, Dict, Methods
+from .objects import Base, Object
 from .utility import Utils
 
 
-class Configuration(Data):
+class Configuration(Base):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-        if args:
-            Dict.update(self, args[0])
-        if kwargs:
-            Dict.update(self, kwargs)
+    pass
 
 
 class MainConfig(type):
@@ -26,12 +21,13 @@ class MainConfig(type):
         return cls.__getattribute__(key)
 
     def __str__(cls):
-        return str(Methods.skip(cls.__dict__))
+        return str(Object.skip(cls.__dict__))
 
 
 class Main(metaclass=MainConfig):
 
-    name = Utils.pkgname(Configuration)
+    level = "info"
+    name = Utils.pkgname(MainConfig)
     wdr = f".{name}"
 
 

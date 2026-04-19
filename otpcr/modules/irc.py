@@ -14,10 +14,10 @@ import time
 
 
 from otpcr.command import Commands
-from otpcr.defines import Configuration
+from otpcr.configs import Configuration, Main
 from otpcr.handler import Broker, Event, Output
-from otpcr.objects import Data, Methods
-from otpcr.persist import Locate, Main
+from otpcr.objects import Base, Methods
+from otpcr.persist import Cfg
 from otpcr.threads import Thread
 from otpcr.utility import Utils
 
@@ -44,7 +44,7 @@ class Config(Configuration):
 
     name = Main.name or Utils.pkgname(Commands)
     channel = f"#{name}"
-    commands = False
+    commands = True
     control = "!"
     ignore = ["PING", "PONG", "PRIVMSG"]
     nick = name
@@ -103,7 +103,7 @@ class IRC(Output):
         self.buffer = []
         self.cfg = Config()
         self.channels = []
-        self.events = Data()
+        self.events = Base()
         self.events.authed = threading.Event()
         self.events.connected = threading.Event()
         self.events.joined = threading.Event()
@@ -113,7 +113,7 @@ class IRC(Output):
         self.noflood = True
         self.silent = False
         self.sock = None
-        self.state = Data()
+        self.state = Base()
         self.state.error = ""
         self.state.keeprunning = False
         self.state.last = time.time()
@@ -145,7 +145,7 @@ class IRC(Output):
         self.state.nrconnect += 1
         self.events.connected.clear()
         self.events.joined.clear()
-        if self.cfg.word or self.cfg.password:
+        if self.cfg.word or self.cfg.word:
             logging.debug("using SASL")
             self.cfg.sasl = True
             self.cfg.port = "6697"
@@ -183,7 +183,7 @@ class IRC(Output):
 
     def display(self, event):
         if len(event.result) > 3:
-            self.say(event.channel, "command would flood, use cli or console")
+            self.say(event.channel, "command would flood")
             return
         for key in sorted(event.result):
             txt = event.result.get(key)
@@ -323,11 +323,11 @@ class IRC(Output):
             obj.nick, obj.origin = obj.origin.split("!")
         except ValueError:
             obj.nick = ""
-        target = ""
+        todo = ""
         if obj.arguments:
-            target = obj.arguments[0]
-        if target.startswith("#"):
-            obj.channel = target
+            todo = obj.arguments[0]
+        if todo.startswith("#"):
+            obj.channel = todo
         else:
             obj.channel = obj.nick
         if not obj.text:
@@ -436,6 +436,8 @@ class IRC(Output):
         self.state.lastline = splitted[-1]
 
     def start(self):
+        if not Cfg.load(self.cfg):
+            Cfg.save(self.cfg)
         if self.cfg.channel not in self.channels:
             self.channels.append(self.cfg.channel)
         self.events.ready.clear()
@@ -444,7 +446,6 @@ class IRC(Output):
         Output.start(self)
         if not self.state.keeprunning:
             Thread.launch(self.keep)
-        Locate.first(self.cfg)
         Thread.launch(
             self.doconnect,
             self.cfg.server or "localhost",
@@ -463,12 +464,12 @@ class IRC(Output):
 
 def cb_auth(evt):
     bot = Broker.get(evt.orig)
-    bot.docommand(f"AUTHENTICATE {bot.cfg.word or bot.cfg.password}")
+    bot.docommand(f"AUTHENTICATE {bot.cfg.word or bot.cfg.word}")
 
 
 def cb_cap(evt):
     bot = Broker.get(evt.orig)
-    if (bot.cfg.word or bot.cfg.password) and "ACK" in evt.arguments:
+    if (bot.cfg.word or bot.cfg.word and "ACK" in evt.arguments):
         bot.direct("AUTHENTICATE PLAIN")
     else:
         bot.direct("CAP REQ :sasl")
@@ -523,7 +524,7 @@ def cb_privmsg(evt):
     if not bot.cfg.commands:
         return
     if evt.text:
-        if evt.text[0] in ["!",]:
+        if evt.text[0] == bot.cfg.control:
             evt.text = evt.text[1:]
         elif evt.text.startswith(f"{bot.cfg.nick}:"):
             evt.text = evt.text[len(bot.cfg.nick) + 1:]

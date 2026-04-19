@@ -9,7 +9,7 @@
 
 **SYNOPSIS**
 
-| ``%s [-h] [-a] [-c] [-d] [-l LEVEL] [-m MODS] [-n] [-s] [-t] [-v] [-w] [--local] [--wdr WDR]``
+| ``%s [-h] [-a] [-c] [-d] [-l LEVEL] [-m MODS] [-n] [-s] [-t] [-v] [-w] [-u] [-x][--wdr WDR]``
 |
 | ``%s <cmd> [key=val] [key==val]``
 | ``%s -cvaw [mods=mod1,mod2]``
@@ -73,12 +73,14 @@ the -h option will show you possible options
 | ``-d,--daemon        start background daemon``
 | ``-l,--level LEVEL   set loglevel``
 | ``-m,--mods MODS     modules to load``
-| ``-n,--noignore      disable ignore```
+| ``-n,--noignore      disable ignore``
+| ``-r, --read         read modules on start``
 | ``-s,--service       start service``
 | ``-t,--threaded      enable multiple workers``
 | ``-v,--verbose       enable verbose``
 | ``-w,--wait          wait for services to start``
-| ``--local            use local mods directory``
+| ``-u,--user          use local mods directory``
+| ``-x,--admin         use admin mode``
 | ``--wdr <WDR>        set working directory``
 |
 
@@ -148,15 +150,15 @@ here is a list of available commands
 
 irc
 
-| ``$ %s cfg server=<server>``
-| ``$ %s cfg channel=<channel>``
-| ``$ %s cfg nick=<nick>``
+| ``$ %s cfg irc server=<server>``
+| ``$ %s cfg irc hannel=<channel>``
+| ``$ %s cfg irc nick=<nick>``
 |
 
 sasl
 
 | ``$ %s pwd <nsnick> <nspass>``
-| ``$ %s cfg password=<frompwd>``
+| ``$ %s cfg irc password=<frompwd>``
 |
 
 rss
@@ -243,3 +245,6 @@ def man(event):
         email,
         name.upper()
     ))
+
+
+man.skip = "irc"

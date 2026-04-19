@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"make it non-blocking"
+"threads"
 
 
 import inspect
@@ -37,15 +37,15 @@ class Task(threading.Thread):
         try:
             super().join(timeout or None)
             return self.result
-        except (KeyboardInterrupt, EOFError) as ex:
+        except (KeyboardInterrupt, EOFError):
             if self.event and self.event.ready:
                 self.event.ready()
-            raise ex
+            _thread.interrupt_main()
 
     def run(self):
         "run function."
         if time.time() - Task.last < 0.01:
-            time.sleep(0.01)
+            time.sleep(0.001)
         Task.last = time.time()
         func, args = self.queue.get()
         if args and hasattr(args[0], "ready"):
@@ -60,6 +60,31 @@ class Task(threading.Thread):
         if self.event:
             self.event.ready()
         _thread.interrupt_main()
+
+
+class Thread:
+
+    lock = threading.RLock()
+
+    @classmethod
+    def launch(cls, func, *args, **kwargs):
+        "run function in a thread."
+        with cls.lock:
+            try:
+                task = Task(func, *args, **kwargs)
+                task.start()
+                return task
+            except (KeyboardInterrupt, EOFError):
+                _thread.interrupt_main()
+
+    @classmethod
+    def name(cls, obj):
+        "string of function/method."
+        if inspect.ismethod(obj):
+            return f"{obj.__func__.__qualname__}"
+        if inspect.isfunction(obj):
+            return repr(obj).split()[1]
+        return repr(obj)
 
 
 class Timy(threading.Timer):
@@ -114,34 +139,7 @@ class Repeater(Timed):
         Thread.launch(self.start)
 
 
-class Thread:
-
-    lock = threading.RLock()
-
-    @staticmethod
-    def launch(func, *args, **kwargs):
-        "run function in a thread."
-        with Thread.lock:
-            try:
-                task = Task(func, *args, **kwargs)
-                task.start()
-                return task
-            except (KeyboardInterrupt, EOFError):
-                _thread.interrupt_main()
-
-    @staticmethod
-    def name(obj):
-        "string of function/method."
-        if inspect.ismethod(obj):
-            return f"{obj.__self__.__class__.__name__}.{obj.__name__}"
-        if inspect.isfunction(obj):
-            return repr(obj).split()[1]
-        return repr(obj)
-
-
 def __dir__():
     return (
-        'Repeater',
         'Thread',
-        'Timed'
     )

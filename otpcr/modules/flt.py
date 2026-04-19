@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"show bot in fleet"
+"show bots in fleet"
 
 
 from otpcr.brokers import Broker

@@ -11,41 +11,54 @@ import pathlib
 import threading
 
 
-from .defines import Main
+from .configs import Main
 from .encoder import Json
-from .objects import Data, Dict, Methods
-from .utility import Time
+from .objects import Base, Methods, Object
+from .utility import Time, Utils
 
 
 class Cache:
 
     paths = {}
 
-    @staticmethod
-    def add(path, obj):
+    @classmethod
+    def add(cls, path, obj):
         "put object into cache."
-        Cache.paths[path] = obj
+        cls.paths[path] = obj
 
-    @staticmethod
-    def get(path):
+    @classmethod
+    def get(cls, path):
         "get object from cache."
-        return Cache.paths.get(path, None)
+        return cls.paths.get(path, None)
 
-    @staticmethod
-    def sync(path, obj):
+    @classmethod
+    def sync(cls, path, obj):
         "update cached object."
         try:
-            Dict.update(Cache.paths[path], obj)
+            Object.update(cls.paths[path], obj)
         except KeyError:
-            Cache.add(path, obj)
+            cls.add(path, obj)
+
+
+class Cfg:
+
+    @classmethod
+    def load(cls, obj, name=""):
+        if not name:
+            name = Utils.modname(obj)
+        return Disk.read(obj, name, "config")
+
+    @classmethod
+    def save(cls, obj, name=""):
+        return Disk.write(obj, name, "config")
 
 
 class Disk:
 
     lock = threading.RLock()
 
-    @staticmethod
-    def cdir(path):
+    @classmethod
+    def cdir(cls, path):
         "create directory."
         if os.path.exists(path):
             return
@@ -53,27 +66,30 @@ class Disk:
         if not os.path.exists(pth.parent):
             pth.parent.mkdir(parents=True, exist_ok=True)
 
-    @staticmethod
-    def read(obj, path, base="store"):
+    @classmethod
+    def read(cls, obj, path, base="store", error=False):
         "read object from path."
-        with Disk.lock:
-            pth = os.path.join(Workdir.wdr, base, path)
+        with cls.lock:
+            pth = os.path.join(Main.wdr, base, path)
             if not os.path.exists(pth):
-                return
+                return False
             with open(pth, "r", encoding="utf-8") as fpt:
                 try:
-                    Dict.update(obj, Json.load(fpt))
+                    Object.update(obj, Json.load(fpt))
                 except json.decoder.JSONDecodeError as ex:
-                    logging.error("failed read at %s", pth)
-                    raise ex
+                    logging.error("failed read at %s: %s", pth, str(ex))
+                    if error:
+                        raise
+                    return False
+            return True
 
-    @staticmethod
-    def write(obj, path="", base="store"):
+    @classmethod
+    def write(cls, obj, path="", base="store", skip=False):
         "write object to disk."
-        with Disk.lock:
+        with cls.lock:
             if path == "":
                 path = Methods.ident(obj)
-            pth = os.path.join(Workdir.wdr, base, path)
+            pth = os.path.join(Main.wdr, base, path)
             Disk.cdir(pth)
             with open(pth, "w", encoding="utf-8") as fpt:
                 Json.dump(obj, fpt, indent=4)
@@ -83,26 +99,28 @@ class Disk:
 
 class Locate:
 
-    @staticmethod
-    def attrs(kind):
+    @classmethod
+    def attrs(cls, kind):
         "show attributes for kind of objects."
         result = []
         for pth, obj in Locate.find(kind, nritems=1):
-            result.extend(Dict.keys(obj))
+            result.extend(Object.keys(obj))
         return set(result)
 
-    @staticmethod
-    def count(kind):
+    @classmethod
+    def count(cls, kind):
+        "count kinds of objects."
         return len(list(Locate.find(kind)))
 
-    @staticmethod
-    def find(kind, selector={}, removed=False, matching=False, nritems=None):
+    @classmethod
+    def find(cls, kind, selector={}, removed=False, matching=False, nritems=None):
         "locate objects by matching atributes."
         nrs = 0
+        Workdir.skel()
         for pth in Locate.fns(Workdir.long(kind)):
             obj = Cache.get(pth)
             if obj is None:
-                obj = Data()
+                obj = Base()
                 Disk.read(obj, pth)
                 Cache.add(pth, obj)
             if not removed and Methods.deleted(obj):
@@ -116,8 +134,9 @@ class Locate:
         else:
             return None, None
 
-    @staticmethod
-    def first(obj, selector={}):
+    @classmethod
+    def first(cls, obj, selector={}):
+        "return first object of a kind."
         result = sorted(
                         Locate.find(Methods.fqn(obj), selector),
                         key=lambda x: Time.fntime(x[0])
@@ -125,58 +144,61 @@ class Locate:
         res = ""
         if result:
             inp = result[0]
-            Dict.update(obj, inp[-1])
+            Object.update(obj, inp[-1])
             res = inp[0]
         return res
 
-    @staticmethod
-    def fns(kind):
+    @classmethod
+    def fns(cls, kind):
         "file names by kind of object."
-        path = os.path.join(Workdir.wdr, "store", kind)
+        path = os.path.join(Main.wdr, "store", kind)
         for rootdir, dirs, _files in os.walk(path, topdown=True):
             for dname in dirs:
                 if dname.count("-") != 2:
                     continue
                 ddd = os.path.join(rootdir, dname)
                 for fll in os.listdir(ddd):
-                    yield Locate.strip(os.path.join(ddd, fll))
+                    yield cls.strip(os.path.join(ddd, fll))
 
-    @staticmethod
-    def last(obj, selector={}):
+    @classmethod
+    def last(cls, obj, selector={}):
         "last saved version."
         result = sorted(
-                        Locate.find(Methods.fqn(obj), selector),
+                        cls.find(Methods.fqn(obj), selector),
                         key=lambda x: Time.fntime(x[0])
                        )
         res = ""
         if result:
             inp = result[-1]
-            Dict.update(obj, inp[-1])
+            Object.update(obj, inp[-1])
             res = inp[0]
         return res
 
-    @staticmethod
-    def strip(path):
+    @classmethod
+    def strip(cls, path):
         "strip filename from path."
         return path.split('store')[-1][1:]
 
 
+class Table:
+
+    @classmethod
+    def load(cls, obj, name=""):
+        return Disk.read(obj, name or Utils.modname(obj), "tables")
+
+    @classmethod
+    def save(cls, obj, name=""):
+        return Disk.write(obj, name or Utils.modname(obj), "tables")
+
+
 class Workdir:
-
-    wdr = "." + Main.name
-
-    @staticmethod
-    def setwd(path):
-        "enable writing to disk."
-        if not path:
-            Disk.cdir(path)
-        Workdir.wdr = path
-        Workdir.skel()
 
     @staticmethod
     def kinds():
         "show kind on objects in cache."
-        return os.listdir(os.path.join(Workdir.wdr, "store"))
+        path = os.path.join(Main.wdr, "store")
+        if os.path.exists(path):
+            return os.listdir(path)
 
     @staticmethod
     def long(name):
@@ -192,42 +214,31 @@ class Workdir:
         return res
 
     @staticmethod
-    def pidfile(name):
-        "write pidfile."
-        filename = os.path.join(Workdir.wdr, f"{name}.pid")
-        if os.path.exists(filename):
-            os.unlink(filename)
-        path2 = pathlib.Path(filename)
-        path2.parent.mkdir(parents=True, exist_ok=True)
-        with open(filename, "w", encoding="utf-8") as fds:
-            fds.write(str(os.getpid()))
-
-    @staticmethod
     def skel():
         "create directories."
-        if not Workdir.wdr:
+        if not Main.wdr:
             return
-        path = os.path.abspath(Workdir.wdr)
-        workpath = os.path.join(path, "store")
-        pth = pathlib.Path(workpath)
-        pth.mkdir(parents=True, exist_ok=True)
-        modpath = os.path.join(path, "mods")
-        pth = pathlib.Path(modpath)
-        pth.mkdir(parents=True, exist_ok=True)
-        filespath = os.path.join(path, "files")
-        pth = pathlib.Path(filespath)
-        pth.mkdir(parents=True, exist_ok=True)
+        if not os.path.exists(Main.wdr):
+            Disk.cdir(Main.wdr)
+        path = os.path.abspath(Main.wdr)
+        for wpth in ["config", "mods", "store"]:
+            pth = pathlib.Path(os.path.join(path, wpth))
+            pth.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def workdir(path=""):
         "return workdir."
-        return os.path.join(Workdir.wdr, path)
+        return os.path.join(Main.wdr, path)
 
 
 def __dir__():
     return (
+        'Cfg',
         'Disk',
         'Locate',
-        'Main',
-        'Workdir'
+        'Yable',
+        'Workdir',
+        'd',
+        'e',
+        'j'
     )

@@ -12,24 +12,32 @@ import _thread
 
 
 from .brokers import Broker
+from .command import Commands
+from .objects import Base
 from .threads import Thread
 
 
-class Event:
+class Event(Base):
 
     def __init__(self):
+        Base.__init__(self)
         self._ready = threading.Event()
         self._thr = None
-        self.result = {}
         self.args = []
+        self.channel = ""
         self.index = 0
         self.kind = "event"
+        self.orig = ""
+        self.result = {}
+        self.text = ""
 
-    def __getattr__(self, key):
-        return self.__dict__.get(key, "")
+    def display(self):
+        bot = Broker.get(self.orig)
+        if bot:
+            bot.display(self)
 
-    def __str__(self):
-        return str(self.__dict__)
+    def ok(self, txt=""):
+        self.reply(f"ok {txt}".strip())
 
     def ready(self):
         "flag message as ready."
@@ -41,9 +49,9 @@ class Event:
 
     def wait(self, timeout=0.0):
         "wait for completion."
-        self._ready.wait(timeout or None)
         if self._thr:
             self._thr.join(timeout or None)
+        self._ready.wait(timeout or None)
 
 
 class Handler:
@@ -96,7 +104,7 @@ class Client(Handler):
         Handler.__init__(self)
         self.iqueue = queue.Queue()
         self.olock = threading.RLock()
-        self.silent = False
+        self.silent = True
         self.stopped = threading.Event()
         Broker.add(self)
 
@@ -141,15 +149,23 @@ class Client(Handler):
 
 class Console(Client):
 
+    def __init__(self):
+        super().__init__()
+        self.register("command", Commands.command)
+
     def loop(self):
         "input loop."
         while True:
             event = self.poll()
             if not event or self.stopped.is_set():
                 break
+            if not event.text:
+                event.ready()
+                continue
             event.orig = repr(self)
             self.callback(event)
             event.wait()
+            time.sleep(0.001)
 
     def poll(self):
         "return event."
@@ -171,6 +187,7 @@ class Output(Client):
                 break
             self.display(event)
             self.oqueue.task_done()
+            time.sleep(0.001)
 
     def start(self):
         "start output loop."

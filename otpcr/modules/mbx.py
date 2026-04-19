@@ -9,52 +9,25 @@ import os
 import time
 
 
-from otpcr.objects import Dict, Methods, Object
+from otpcr.objects import Base, Methods, Object
 from otpcr.persist import Disk, Locate
 from otpcr.utility import Time
 
 
-class Email(Object):
+class Email(Base):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.text = ""
 
 
-def todate(date):
-    date = date.replace("_", ":")
-    res = date.split()
-    ddd = ""
-    try:
-        if "+" in res[3]:
-            raise ValueError
-        if "-" in res[3]:
-            raise ValueError
-        int(res[3])
-        ddd = "{:4}-{:#02}-{:#02} {:6}".format(res[3], MONTH[res[2]], int(res[1]), res[4])
-    except (IndexError, KeyError, ValueError) as ex:
-        try:
-            if "+" in res[4]:
-                raise ValueError from ex
-            if "-" in res[4]:
-                raise ValueError from ex
-            int(res[4])
-            ddd = "{:4}-{:#02}-{:02} {:6}".format(res[4], MONTH[res[1]], int(res[2]), res[3])
-        except (IndexError, KeyError, ValueError):
-            try:
-                ddd = "{:4}-{:#02}-{:02} {:6}".format(res[2], MONTH[res[1]], int(res[0]), res[3])
-            except (IndexError, KeyError):
-                try:
-                    ddd = "{:4}-{:#02}-{:02}".format(res[2], MONTH[res[1]], int(res[0]))
-                except (IndexError, KeyError):
-                    try:
-                        ddd = "{:4}-{:#02}".format(res[2], MONTH[res[1]])
-                    except (IndexError, KeyError):
-                        try:
-                            ddd = "{:4}".format(res[2])
-                        except (IndexError, KeyError):
-                            ddd = ""
-    return ddd
+def timed(datestr):
+    if not datestr:
+        return time.time()
+    tme = Time.date(datestr)
+    if not tme:
+        tme = time.time()
+    return tme
 
 
 def eml(event):
@@ -62,28 +35,31 @@ def eml(event):
     args = ["From", "Subject"]
     args.extend(event.args)
     if event.gets:
-        args.extend(Dict.keys(event.gets))
+        args.extend(Object.keys(event.gets))
     for key in event.silent:
         if key in args:
             args.remove(key)
     args = set(args)
     result = sorted(
                     Locate.find("email", event.gets),
-                    key=lambda x: Time.date(todate(getattr(x[1], "Date", "")))
+                    key=lambda x: timed(x[1].Date)
                    )
     if event.index:
         obj = result[event.index]
         if obj:
             obj = obj[-1]
             tme = getattr(obj, "Date", "")
-            event.reply(f'{event.index} {Methods.fmt(obj, args, plain=True)} {Time.elapsed(time.time() - Time.date(todate(tme)))}')
+            event.reply(f'{event.index} {Methods.fmt(obj, args, plain=True)} {Time.elapsed(time.time() - timed(tme))}')
     else:
         for _fn, obj in result:
             nrs += 1
             tme = getattr(obj, "Date", "")
-            event.reply(f'{nrs} {Methods.fmt(obj, args, plain=True)} {Time.elapsed(time.time() - Time.date(todate(tme)))}')
+            event.reply(f'{nrs} {Methods.fmt(obj, args, plain=True)} {Time.elapsed(time.time() - timed(tme))}')
     if not result:
         event.reply("no emails found.")
+
+
+eml.skip = "irc"
 
 
 def mbx(event):
@@ -105,7 +81,7 @@ def mbx(event):
     nrs = 0
     for mail in thing:
         obj = Email()
-        Dict.update(obj, dict(mail._headers))
+        Object.update(obj, dict(mail._headers))
         obj.text = ""
         for payload in mail.walk():
             if payload.get_content_type() == 'text/plain':
@@ -117,17 +93,4 @@ def mbx(event):
         event.reply("ok %s" % nrs)
 
 
-MONTH = {
-    'Jan': 1,
-    'Feb': 2,
-    'Mar': 3,
-    'Apr': 4,
-    'May': 5,
-    'Jun': 6,
-    'Jul': 7,
-    'Aug': 8,
-    'Sep': 9,
-    'Oct': 10,
-    'Nov': 11,
-    'Dec': 12
-}
+mbx.skip = "irc"

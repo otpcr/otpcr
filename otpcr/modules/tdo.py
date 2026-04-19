@@ -4,18 +4,14 @@
 "todo"
 
 
-import time
-
-
-from otpcr.objects import Object
+from otpcr.objects import Base
 from otpcr.persist import Disk, Locate
-from otpcr.utility import Time
 
 
-class Todo(Object):
+class Todo(Base):
 
     def __init__(self):
-        Object.__init__(self)
+        Base.__init__(self)
         self.txt = ''
 
 
@@ -37,13 +33,7 @@ def dne(event):
 
 def tdo(event):
     if not event.rest:
-        nmr = 0
-        for fnm, obj in Locate.find('todo', event.gets):
-            lap = Time.elapsed(time.time()-Time.fntime(fnm))
-            event.reply(f'{nmr} {obj.txt} {lap}')
-            nmr += 1
-        if not nmr:
-            event.reply("no todo")
+        event.reply("tdo <txt>")
         return
     obj = Todo()
     obj.txt = event.rest

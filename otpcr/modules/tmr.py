@@ -11,7 +11,7 @@ import time
 
 
 from otpcr.brokers import Broker
-from otpcr.objects import Dict, Methods, Object
+from otpcr.objects import Base, Object, Methods
 from otpcr.persist import Disk, Locate
 from otpcr.threads import Thread, Timed
 from otpcr.utility import Time
@@ -23,16 +23,15 @@ rand = random.SystemRandom()
 def init():
     Timers.path = Locate.last(Timers.timers) or Methods.ident(Timers.timers)
     remove = []
-    for tme, args in Dict.items(Timers.timers):
+    for tme, args in Object.items(Timers.timers):
         if not args:
             continue
         orig, channel, txt = args
-        for origin in Broker.like(orig):
-            if not origin:
+        for origin, bot in Broker.like(orig):
+            if not origin or not bot:
                 continue
             diff = float(tme) - time.time()
             if diff > 0:
-                bot = Broker.get(origin)
                 timer = Timed(diff, bot.say, channel, txt)
                 timer.start()
             else:
@@ -44,12 +43,12 @@ def init():
     logging.warning("%s timers", len(Timers.timers))
 
 
-class Timer(Object):
+class Timer(Base):
 
     pass
 
 
-class Timers(Object):
+class Timers(Base):
 
     path = ""
     timers = Timer()
@@ -67,44 +66,25 @@ class Timers(Object):
 
 
 def tmr(event):
-    result = ""
     if not event.rest:
-        nmr = 0
-        for tme, txt in Dict.items(Timers.timers):
-            lap = float(tme) - time.time()
-            if lap > 0:
-                event.reply(f'{nmr} {" ".join(txt)} {Time.elapsed(lap)}')
-                nmr += 1
-        if not nmr:
-            event.reply("no timers.")
-        return result
-    seconds = 0
-    line = ""
-    for word in event.args:
-        if word.startswith("+"):
-            try:
-                seconds = int(word[1:])
-            except (ValueError, IndexError):
-                event.reply(f"{seconds} is not an integer")
-                return result
-        else:
-            line += word + " "
-    if seconds:
-        target = time.time() + seconds
-    else:
-        target = Time.date(event.args[0])
-    if not target:
+        event.reply("tmr <date> <txt>")
+        return
+    todo = Time.extract(event.rest)
+    if not todo:
         event.reply("can't determine time")
         return
-    target += rand.random()
-    if not target or time.time() > target:
+    todo += rand.random()
+    if not todo or time.time() > todo:
         event.reply("already passed given time.")
-        return result
-    diff = target - time.time()
+        return
+    diff = todo - time.time()
     txt = " ".join(event.args[1:])
-    Timers.add(target, event.orig, event.channel, txt)
+    Timers.add(todo, event.orig, event.channel, txt)
     Disk.write(Timers.timers, Timers.path or Methods.ident(Timers.timers))
     bot = Broker.get(event.orig)
+    if not bot:
+        event.reply("no bot")
+        return
     timer = Timed(diff, bot.say, event.channel, txt)
     Thread.launch(timer.start).join()
     event.reply("ok " + Time.elapsed(diff))

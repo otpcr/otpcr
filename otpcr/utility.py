@@ -6,8 +6,12 @@
 
 import datetime
 import inspect
+import logging
 import os
 import time
+
+
+from .objects import Base
 
 
 class NoDate(Exception):
@@ -20,13 +24,10 @@ class Time:
     @staticmethod
     def date(daystr):
         "date from string."
-        daystring = daystr.encode('utf-8', 'replace').decode("utf-8")
-        if "-" not in daystring:
-            date = datetime.date.fromtimestamp(time.time())
-            daystring = f"{date.year}-{date.month}-{date.day}" + " " + daystring
+        daystr = daystr.encode('utf-8', 'replace').decode("utf-8")
         for fmat in TIMES:
             try:
-                return time.mktime(time.strptime(daystring, fmat))
+                return time.mktime(time.strptime(daystr, fmat))
             except ValueError:
                 pass
 
@@ -74,19 +75,21 @@ class Time:
     @staticmethod
     def extract(daystr):
         "extract date/time from string."
-        previous = ""
-        line = ""
-        daystring = str(daystr)
+        daystr = str(daystr)
         res = None
-        for word in daystring.split():
-            line = previous + " " + word
-            previous = word
-            try:
-                res = Time.date(line.strip())
+        for word in daystr.split():
+            if word.startswith("+"):
+                try:
+                    return int(word[1:]) + time.time()
+                except (ValueError, IndexError):
+                    continue
+            res = Time.date(word.strip())
+            if not res:
+                date = datetime.date.fromtimestamp(time.time())
+                word = f"{date.year}-{date.month}-{date.day}" + " " + word
+                res = Time.date(word.strip())
+            if res:
                 break
-            except ValueError:
-                res = None
-            line = ""
         return res
 
     @staticmethod
@@ -112,12 +115,34 @@ class Time:
 class Utils:
 
     @staticmethod
+    def clsname(obj):
+        return obj.__class__.__name__
+
+    @staticmethod
+    def md5dir(path):
+        md5s = {}
+        for fnm in os.listdir(path):
+            if not fnm.endswith(".py"):
+                continue
+            name = fnm[:-3]
+            mpath = os.path.join(path, fnm)
+            md5s[name] = Utils.md5sum(mpath)
+        return md5s
+
+    @staticmethod
     def md5sum(path):
         "return md5 of a file."
         import hashlib
+        if not os.path.exists(path):
+            return ""
         with open(path, "r", encoding="utf-8") as file:
             txt = file.read().encode("utf-8")
-            return hashlib.md5(txt).hexdigest()
+            return hashlib.md5(txt, usedforsecurity=False).hexdigest()  # pylint: disable=E1123
+
+    @staticmethod
+    def modname(obj):
+        "return package name of an object."
+        return obj.__module__.split(".")[-1]
 
     @staticmethod
     def pkgname(obj):
@@ -152,21 +177,62 @@ class Utils:
             pass
 
 
-SYSTEMD = """[Unit]
-Description=%s
-After=multi-user.target
+class Format(logging.Formatter):
 
-[Service]
-Type=simple
-User=%s
-Group=%s
-ExecStart=/home/%s/.local/bin/%s -s
+    disable = False
+    size = 3
 
-[Install]
-WantedBy=multi-user.target"""
+    def format(self, record):
+        if not Format.disable:
+            record.module = record.module.upper()
+            record.module = record.module[:Format.size]
+        return logging.Formatter.format(self, record)
+
+
+class Log:
+
+    datefmt = "%H:%M:%S"
+    format = "%(module)-3s %(message)s"
+
+    @staticmethod
+    def size(nr):
+        "set text size."
+        index = Log.format.find("-")+1
+        newformat = Log.format[:index]
+        newformat += str(nr)
+        newformat += Log.format[index+1:]
+        Log.format = newformat
+        Format.size = nr
+
+    @staticmethod
+    def level(loglevel):
+        "set log level."
+        formatter = Format(Log.format, Log.datefmt)
+        stream = logging.StreamHandler()
+        stream.setFormatter(formatter)
+        logging.basicConfig(
+            level=loglevel.upper(),
+            handlers=[stream,],
+            force=True
+        )
+
+
+LEVELS = Base({
+    "notset": logging.NOTSET,
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "warning": logging.WARNING,
+    "error": logging.ERROR,
+    "critical": logging.CRITICAL,
+    "fatal": logging.FATAL
+})
 
 
 TIMES = [
+    "%a, %d %b %Y %H:%M:%S %z",
+    "%a, %d %b %Y %H:%M:%S",
+    "%a, %d %b %Y %T %z",
+    "%a, %d %b %Y %T",
     "%Y-%m-%d %H:%M:%S",
     "%Y-%m-%d %H:%M",
     "%Y-%m-%d %H:%M:%S",
@@ -179,9 +245,10 @@ TIMES = [
 
 def __dir__():
     return (
-        'SYSTEMD',
+        'COLORS',
+        'LEVELS',
+        'TIMES',
         'Log',
-        'NoDate',
         'Time',
         'Utils'
     )

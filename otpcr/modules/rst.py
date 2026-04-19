@@ -13,8 +13,8 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from otpcr.defines import Configuration, Main
-from otpcr.objects import Object
+from otpcr.configs import Configuration, Main
+from otpcr.objects import Base
 from otpcr.persist import Locate, Workdir
 from otpcr.threads import Thread
 
@@ -39,14 +39,14 @@ class Config(Configuration):
     port = 10102
 
 
-class REST(HTTPServer, Object):
+class REST(HTTPServer, Base):
 
     allow_reuse_address = True
     daemon_thread = True
 
     def __init__(self, *args, **kwargs):
         HTTPServer.__init__(self, *args, **kwargs)
-        Object.__init__(self)
+        Base.__init__(self)
         self.host = args[0]
         self._last = time.time()
         self._starttime = time.time()

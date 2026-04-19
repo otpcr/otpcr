@@ -4,15 +4,11 @@
 "log text"
 
 
-import time
+from otpcr.objects import Base
+from otpcr.persist import Disk
 
 
-from otpcr.objects import Object
-from otpcr.persist import Disk, Locate
-from otpcr.utility import Time
-
-
-class Log(Object):
+class Log(Base):
 
     def __init__(self):
         super().__init__()
@@ -21,13 +17,7 @@ class Log(Object):
 
 def log(event):
     if not event.rest:
-        nmr = 0
-        for fnm, obj in Locate.find('log', event.gets):
-            lap = Time.elapsed(time.time() - Time.fntime(fnm))
-            event.reply(f'{nmr} {obj.txt} {lap}')
-            nmr += 1
-        if not nmr:
-            event.reply('no log')
+        event.reply("log <txt>")
         return
     obj = Log()
     obj.txt = event.rest

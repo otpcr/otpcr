@@ -13,9 +13,14 @@ import time
 
 
 from otpcr.brokers import Broker
-from otpcr.defines import Configuration, Main
-from otpcr.objects import Object
+from otpcr.configs import Configuration, Main
+from otpcr.objects import Base
+from otpcr.persist import Cfg
 from otpcr.threads import Thread
+
+
+def configure():
+    Cfg.load(Config)
 
 
 def init():
@@ -31,10 +36,10 @@ class Config(Configuration):
     port = 5500
 
 
-class UDP(Object):
+class UDP(Base):
 
     def __init__(self):
-        Object.__init__(self)
+        Base.__init__(self)
         self.stopped = False
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -46,8 +51,7 @@ class UDP(Object):
     def output(self, txt, addr=None):
         if addr:
             Config.addr = addr
-        for bot in Broker.objs("announce"):
-            bot.announce(txt.replace("\00", ""))
+        Broker.announce(txt.replace("\00", ""))
 
     def loop(self):
         try:
@@ -117,3 +121,6 @@ def udp(event):
             toudp(Config.host, Config.port, txt)
         if stop:
             break
+
+
+udp.skip = "irc"

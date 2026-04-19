@@ -12,6 +12,21 @@ from otpcr.persist import Locate, Workdir
 from otpcr.utility import Time
 
 
+def fie(event):
+    if not event.rest:
+        res = sorted({x.split('.')[-1].lower() for x in Workdir.kinds()})
+        if res:
+            event.reply(",".join(res))
+        else:
+            event.reply("no types")
+        return
+    itms = Locate.attrs(event.args[0])
+    if not itms:
+        event.reply("no attributes")
+    else:
+        event.reply(",".join(itms))
+
+
 def fnd(event):
     if not event.rest:
         res = sorted([x.split('.')[-1].lower() for x in Workdir.kinds()])
@@ -27,3 +42,6 @@ def fnd(event):
         nmr += 1
     if not nmr:
         event.reply("no result")
+
+
+fnd.skip = "irc"

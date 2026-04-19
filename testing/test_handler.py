@@ -7,7 +7,7 @@
 import unittest
 
 
-from otpcr.handler import Event, Client, Handler
+from otpcr.handler import Client, Event, Handler
 
 
 buffer = []
@@ -20,6 +20,7 @@ class MyClient(Client):
 
 
 def hello(event):
+    print("hello")
     event.reply(event.text)
     event.ready()
 
@@ -50,9 +51,18 @@ class TestHandler(unittest.TestCase):
     def test_loop(self):
         evt = Event()
         evt.kind = "hello"
+        evt.text = "hello"
         self.hdl.put(evt)
         evt.wait()
         self.assertTrue(evt._ready.is_set())
+
+    def test_loop2(self):
+        evt = Event()
+        evt.kind = "hello"
+        evt.text = "hello bot"
+        self.hdl.put(evt)
+        evt.wait()
+        self.assertTrue("hello bot" in evt.result.values())
 
     def test_put(self):
         hdl = Handler()
@@ -104,14 +114,6 @@ class TestClient(unittest.TestCase):
         self.clt.dosay("#channel", "yo!")
         self.assertTrue("yo!" in buffer)
 
-    def test_loop(self):
-        evt = Event()
-        evt.kind = "hello"
-        evt.text = "hello bot"
-        self.clt.put(evt)
-        evt.wait()
-        self.assertTrue("hello bot" in evt.result.values())
-
     def test_poll(self):
         clt = Client()
         evt = Event()
@@ -130,7 +132,7 @@ class TestMessage(unittest.TestCase):
 
     def test_ready(self):
         msg = Event()
-        msg.ready()
+        msg.ready()  # pylint: disable=E1102
         self.assertTrue(msg._ready.is_set())
 
     def test_reply(self):
@@ -140,6 +142,6 @@ class TestMessage(unittest.TestCase):
 
     def test_wait(self):
         msg = Event()
-        msg.ready()
+        msg.ready()  # pylint: disable=E1102
         msg.wait()
         self.assertTrue(msg._ready.is_set())

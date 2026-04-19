@@ -1,1 +1,1 @@
-python3 -m otpcr.runtime $* ;
+python3 -c "import otpcr.runtime as run ; run.main()" $* ;

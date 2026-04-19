@@ -13,16 +13,16 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from otpcr.defines import Configuration
-from otpcr.objects import Object
+from otpcr.configs import Configuration
+from otpcr.objects import Base
 from otpcr.persist import Main
 from otpcr.threads import Thread
 from otpcr.utility import Utils
 
 
 def init():
-    Config.path = os.path.join(Utils.where(Object), "network")
-    if not os.path.exists(os.path.join(Config.path, 'index.html')):
+    path = Utils.pkgname(Base)
+    if not os.path.exists(os.path.join(path, "network", 'index.html')):
         logging.warning("no index.html")
         return
     try:
@@ -41,14 +41,14 @@ class Config(Configuration):
     port = 8000
 
 
-class HTTP(HTTPServer, Object):
+class HTTP(HTTPServer, Base):
 
     daemon_thread = True
     allow_reuse_address = True
 
     def __init__(self, *args, **kwargs):
         HTTPServer.__init__(self, *args, **kwargs)
-        Object.__init__(self)
+        Base.__init__(self)
         self.host = args[0]
         self._starttime = time.time()
         self._last = time.time()
@@ -76,6 +76,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
 
     def setup(self):
         BaseHTTPRequestHandler.setup(self)
+        self._path = os.path.join(Utils.where(Base), "network")
         self._size = 0
         self._ip = self.client_address[0]
 
@@ -88,7 +89,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
 
     def write_header(self, htype='text/plain', size=None):
         self.send_response(200)
-        self.send_header('Content-type', '%s; charset=%s ' % (htype, "utf-8"))
+        self.send_header('Content-type: ', '%s' % htype)
         if size is not None:
             self.send_header('Content-length', size)
         self.send_header('Server', "1")
@@ -104,18 +105,18 @@ class HTTPHandler(BaseHTTPRequestHandler):
             return
         if self.path == "/":
             self.path = "index.html"
-        self.path = Config.path + os.sep + self.path
-        if not os.path.exists(self.path):
+        path = self._path + os.sep + self.path
+        ext = path[-3]
+        if not os.path.exists(path):
             self.write_header("text/html")
             self.send_response(404)
             self.end_headers()
             return
-        if "_images" in self.path:
+        if "_images" in path:
             try:
-                with open(self.path, "rb") as file:
+                with open(path, "rb") as file:
                     img = file.read()
                     file.close()
-                ext = self.path[-3]
                 self.write_header(f"image/{ext}", len(img))
                 self.raw(img)
             except (TypeError, FileNotFoundError, IsADirectoryError):
@@ -123,10 +124,13 @@ class HTTPHandler(BaseHTTPRequestHandler):
                 self.end_headers()
             return
         try:
-            with open(self.path, "r", encoding="utf-8", errors="ignore") as file:
+            with open(path, "r", encoding="utf-8", errors="ignore") as file:
                 txt = file.read()
                 file.close()
-            self.write_header("text/html")
+            if ext == "css":
+                self.write_header("text/css")
+            else:
+                self.write_header("text/html")
             self.send(txt)
         except (TypeError, FileNotFoundError, IsADirectoryError):
             self.send_response(404)

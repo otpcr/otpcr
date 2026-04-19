@@ -60,8 +60,7 @@ def wsd(event):
         state.seen = []
         txt = "* reset"
     state.dump()
-    for bot in Broker.objs("announce"):
-        bot.announce(txt.strip()[2:])
+    Broker.announce(txt.strip()[2:])
 
 
 TXT = """| wijsheid, wijs !
