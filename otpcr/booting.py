@@ -72,7 +72,6 @@ class Boot:
         if Main.all:
             Main.mods = Mods.list()
         cls.configured = True
-        print(Mods.dirs)
 
     @classmethod
     def daemon(cls, verbose=False, nochdir=False):
