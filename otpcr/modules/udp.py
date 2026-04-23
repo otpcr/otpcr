@@ -15,12 +15,12 @@ import time
 from otpcr.brokers import Broker
 from otpcr.configs import Configuration, Main
 from otpcr.objects import Base
-from otpcr.persist import Cfg
+from otpcr.persist import Disk
 from otpcr.threads import Thread
 
 
 def configure():
-    Cfg.load(Config)
+    Disk.read(Config, "udp", "config")
 
 
 def init():
@@ -121,6 +121,3 @@ def udp(event):
             toudp(Config.host, Config.port, txt)
         if stop:
             break
-
-
-udp.skip = "irc"

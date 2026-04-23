@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"in the beginning"
+"runtime"
 
 
 import logging
@@ -23,7 +23,6 @@ from .utility import Log, Utils
 
 class Boot:
 
-    configured = False
     inits = []
     md5s = {}
     path = os.path.dirname(__spec__.loader.path)
@@ -42,6 +41,7 @@ class Boot:
 
     @classmethod
     def check(cls, opts):
+        "check for command line options."
         for arg in sys.argv:
             if not arg.startswith("-"):
                 continue
@@ -51,27 +51,18 @@ class Boot:
         return False
 
     @classmethod
-    def configure(cls, name=""):
+    def configure(cls, cfg):
         "in the beginning."
-        if cls.configured:
-            logging.warning("already configured")
-            return
-        Main.name = name or Main.name or Utils.pkgname(Boot)
-        if Main.read:
+        Main.name = cfg.name or Main.name or Utils.pkgname(Boot)
+        if cfg.read:
             Disk.read(Main, "main", "config")
-        if Main.wdr == f".{Main.name}":
-            Main.wdr = os.path.expanduser(f"~/.{Main.name}")
-        cls.md5s.update(Utils.md5dir(cls.path))
-        Workdir.skel()
-        Log.size(len(Main.name))
-        Log.level(Main.level or "info")
-        Mods.add(f"{Utils.pkgname(Main)}.modules", Utils.moddir()) 
-        if Main.user:
-            Mods.add(os.path.join(Main.wdr, "mods"), "modules")
-            Mods.add('mods', 'mods')
+        Workdir.configure(cfg)
+        Log.configure(cfg)
+        Mods.configure(cfg)
         if Main.all:
             Main.mods = Mods.list()
-        cls.configured = True
+        if Main.noignore:
+            Main.ignore = ""
 
     @classmethod
     def daemon(cls, verbose=False, nochdir=False):
@@ -102,24 +93,24 @@ class Boot:
             try:
                 time.sleep(0.1)
             except (KeyboardInterrupt, EOFError):
-                _thread.interrupt_main()
+                break
 
     @classmethod
-    def init(cls):
+    def init(cls, cfg):
         "scan named modules for commands."
         thrs = []
-        for name, mod in Mods.iter():
+        for name, mod in Mods.iter(cfg.mods, cfg.ignore):
             if "init" in dir(mod):
                 thrs.append((name, Thread.launch(mod.init)))
                 cls.inits.append(name)
-        if Main.wait:
+        if cfg.wait:
             for name, thr in thrs:
                 thr.join()
 
     @staticmethod
     def pidfile(name):
         "write pidfile."
-        filename = os.path.join(Main.wdr, f"{name}.pid")
+        filename = os.path.join(Workdir.wdr, f"{name}.pid")
         if os.path.exists(filename):
             os.unlink(filename)
         path2 = pathlib.Path(filename)
@@ -137,20 +128,21 @@ class Boot:
         os.setuid(pwnam2.pw_uid)
 
     @classmethod
-    def scan(cls):
-        if Main.read:
-            cls.scanner()
+    def scan(cls, cfg):
+        "load tables or scan directories."
+        if cfg.read:
+            cls.scanner(cfg)
         else:
             Commands.table()
             Mods.sums()
         if not Commands.names:
-            cls.scanner()
+            cls.scanner(cfg)
 
     @classmethod
-    def scanner(cls):
+    def scanner(cls, cfg):
         "scan named modules for commands."
         res = []
-        for name, mod in Mods.iter():
+        for name, mod in Mods.iter(cfg.mods, cfg.ignore):
             Commands.scan(mod)
             if "configure" in dir(mod):
                 mod.configure()
@@ -158,16 +150,34 @@ class Boot:
         return res
 
     @classmethod
+    def setmd5s(cls):
+        "set md5 sums."
+        cls.md5s.update(Utils.md5dir(cls.path))
+
+    @classmethod
     def shutdown(cls):
         "call shutdown on modules."
         for name in cls.inits:
             mod = Mods.get(name)
             if "shutdown" in dir(mod):
+                logging.info("shutdown %s", name)
                 try:
                     mod.shutdown()
+                except (KeyboardInterrupt, EOFError):
+                    _thread.interrupt_main()
                 except Exception as ex:
                     logging.exception(ex)
-        Broker.stop()
+                    return
+        for obj in Broker.objs("stop"):
+            if "wait" in dir(obj):
+                try:
+                    obj.wait()
+                    obj.stop()
+                except (KeyboardInterrupt, EOFError):
+                    _thread.interrupt_main()
+                except Exception as ex:
+                    logging.exception(ex)
+                    return
 
     @classmethod
     def wrap(cls, func, *args):
@@ -180,8 +190,9 @@ class Boot:
             pass
         try:
             func(*args)
+            cls.shutdown()
         except (KeyboardInterrupt, EOFError):
-            pass
+            os._exit(0)
         except Exception as ex:
             logging.exception(ex)
         if old:

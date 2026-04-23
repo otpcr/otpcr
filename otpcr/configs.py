@@ -28,7 +28,7 @@ class Main(metaclass=MainConfig):
 
     level = "info"
     name = Utils.pkgname(MainConfig)
-    wdr = f".{name}"
+    wdr = ""
 
 
 def __dir__():

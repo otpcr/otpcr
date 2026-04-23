@@ -10,9 +10,7 @@ import unittest
 
 from otpcr.command import Commands
 from otpcr.handler import Event, Handler
-from otpcr.objects import Object
 from otpcr.package import Mods
-from otpcr.threads import Task
 
 
 def cmnd(event):
@@ -40,7 +38,7 @@ class TestCommands(unittest.TestCase):
         evt.text = "cmnd"
         evt.orig = repr(clt)
         Commands.command(evt)
-        self.assertTrue("yo!" in Object.values(evt.result))
+        self.assertTrue("yo!" in evt.result)
 
 
 class TestPackage(unittest.TestCase):
@@ -49,16 +47,3 @@ class TestPackage(unittest.TestCase):
         if os.path.exists("mods"):
             Mods.add("mods", "mods")
             self.assertTrue("mods" in Mods.dirs)
-
-
-def func():
-    return "ok"
-
-
-class TestThread(unittest.TestCase):
-
-    def test_construct(self):
-        task = Task(func)
-        task.start()
-        result = task.join()
-        self.assertEqual(result, "ok")

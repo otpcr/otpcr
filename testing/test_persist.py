@@ -14,33 +14,33 @@ sys.path.insert(0, ".")
 
 from otpcr.configs import Main
 from otpcr.objects import Base
-from otpcr.persist import Cfg, Disk
+from otpcr.persist import Disk, Workdir
 
 
-Main.wdr = '.test'
+Workdir.wdr = '.test'
 
 
 class TestPersist(unittest.TestCase):
 
     def test_loadcfg(self):
         Main.a = "b"
-        Cfg.load(Main)
+        Disk.read(Main, "main", "config")
         self.assertEqual(Main.a, "b")
 
     def test_save(self):
         obj = Base()
         opath = Disk.write(obj)
         self.assertTrue(os.path.exists(os.path.join(
-                                                    Main.wdr,
+                                                    Workdir.wdr,
                                                     "store",
                                                     opath
                                                    )))
 
     def test_writecfg(self):
         Main.a = "b"
-        Cfg.save(Main, "main")
+        Disk.write(Main, "main", "config")
         self.assertTrue(os.path.exists(os.path.join(
-                                                    Main.wdr,
+                                                    Workdir.wdr,
                                                     "config",
                                                     "main"
                                                    )))

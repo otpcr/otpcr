@@ -5,6 +5,7 @@
 
 
 import json
+import threading
 import types
 
 
@@ -13,22 +14,26 @@ from .objects import Object
 
 class Encoder(json.JSONEncoder):
 
+    lock = threading.RLock()
+
     def default(self, o):
-        if isinstance(o, type):
-            return Object.skip(o)
-        if isinstance(o, dict):
-            return o.items()
-        if isinstance(o, list):
-            return iter(o)
-        if isinstance(o, types.MappingProxyType):
-            return dict(o)
-        try:
-            return json.JSONEncoder.default(self, o)
-        except TypeError:
+        "generate serializable versions."
+        with Encoder.lock:
+            if isinstance(o, type):
+                return Object.skip(o)
+            if isinstance(o, dict):
+                return o.items()
+            if isinstance(o, list):
+                return iter(o)
+            if isinstance(o, types.MappingProxyType):
+                return dict(o)
             try:
-                return vars(o)
+                return json.JSONEncoder.default(self, o)
             except TypeError:
-                return repr(o)
+                try:
+                    return vars(o)
+                except TypeError:
+                    return repr(o)
 
 
 class Json:

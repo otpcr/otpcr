@@ -21,7 +21,6 @@ from otpcr.command import Commands
 from otpcr.configs import Main
 from otpcr.handler import Event, Output
 from otpcr.objects import Methods
-from otpcr.runtime import Arguments
 from otpcr.threads import Thread
 from otpcr.utility import Time
 
@@ -62,7 +61,7 @@ class Clients:
             cls.nrcpu = nrcpu
             for _x in range(Clients.nrcpu):
                 clt = client()
-                clt.start()
+                clt.start(False)
                 cls.add(clt)
 
     @classmethod
@@ -73,66 +72,69 @@ class Clients:
             cls.clients[cls.last].put(*args)
             cls.last += 1
 
+    @classmethod
+    def shutdown(cls):
+        for client in cls.clients:
+            client.stop()
+
 
 def consume():
     while True:
-        try:
-            event = events.get()
-            event.wait()
-            events.task_done()
-        except (KeyboardInterrupt, EOFError):
-            os._exit(0)
+        event = events.get()
+        event.wait()
+        events.task_done()
 
 
-def payload(cli, todo):
+def payload(todo):
     for cmd, example in todo.items():
         for ex in example:
             evt = Event()
             evt.kind = "command"
             evt.text = f"{cmd} {ex}"
-            if Main.threaded:
-                Clients.put(evt)
-            else:
-                evt.orig = repr(cli)
-                Commands.command(evt)
+            Clients.put(evt)
             events.put(evt)
 
 
 def main():
-    if Main.prune and os.path.exists(Main.wdr):
+    if not Boot.check('p') and os.path.exists(Main.wdr):
         shutil.rmtree(Main.wdr)
     if Boot.check("v"):
         Main.verbose = True
-    Boot.configure()
+    if Boot.check("t"):
+        Main.threaded = True
     Main.all = True
-    Boot.scan()
+    Methods.parse(Main, " ".join(sys.argv[1:]))
+    Boot.configure(Main)
+    Boot.scan(Main)
     if Main.threaded:
         Clients.init(os.cpu_count(), CLI)
     else:
         Clients.init(1, CLI)
-    cli = CLI()
     starttime = time.time()
     nrs = Main.index or 1
     thrs = []
     for _x in range(nrs):
-        thrs.append(Thread.launch(payload, cli, pre))
+        thrs.append(Thread.launch(payload, pre))
+    for thr in thrs:
+        thr.join()
+    thrs = []
     for _x in range(nrs):
-        thrs.append(Thread.launch(payload, cli, examples))
+        thrs.append(Thread.launch(payload, examples))
+    thrs = []
+    for thr in thrs:
+        thr.join()
     for _x in range(nrs):
-        thrs.append(Thread.launch(payload, cli, post))
+        thrs.append(Thread.launch(payload, post))
     for thr in thrs:
         thr.join()
     nrevents = events.qsize()
     Thread.launch(consume)
-    try:
-        events.join()
-    except (KeyboardInterrupt, EOFError):
-        pass
+    events.join()
+    Clients.shutdown()
     endtime = time.time()
     lap = Time.elapsed(endtime-starttime)
     percall = (endtime-starttime)/nrevents
     nrs = events.qsize()
-    Boot.shutdown()
     if Main.verbose:
         print(f"{Methods.fmt(Main, skip='otxt,txt')}")
         print(f"cores: {Clients.nrcpu} events: {nrs}")
@@ -147,7 +149,7 @@ examples = {
     "eml": ["", "root@localhost"],
     "fie": ["", "log", "todo"],
     "flt": ["", "0"],
-    "fnd": ["", "log", "rss", "config", "todo"],
+    "fnd": ["", "log", "rss", "config", "todo", 'timers'],
     "lou": [""],
     "man": ["", "otpcr nixtniet@gmail.com Nixt Niet"],
     "mbx": [""],
@@ -162,22 +164,36 @@ examples = {
     "sil": [""],
     "slg": [""],
     "srv": [""],
-    "syn": [""],
     "thr": [""],
-    "tmr": ["", "22:00 test"],
     "upt": [""],
     "wsd": [""]
 }
 
+
 pre = {
-    "cfg": ["", "nick=mekker"],
+    "cfg": [
+        '',
+        'main',
+        'irc',
+        'rss',
+        'rst',
+        'udp',
+        'web',
+        'main nick=mekker',
+        'irc nick=mekker',
+        'rss nick=mekker',
+        'rst nick=mekker',
+        'udp nick=mekker',
+        'web nick=mekker'
+    ],
     "imp": [
         "",
         "testing/opml/feeds.opml",
     ],
-    "log": ["", "log test"],
+    "log": ["", "test"],
     "rss": ["", "http://hnrss.org/newest"],
-    "tdo": ["", "test"]
+    "tdo": ["", "test"],
+    "tmr": ["", "22:00 test"],
 }
 
 post = {

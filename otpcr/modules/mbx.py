@@ -59,9 +59,6 @@ def eml(event):
         event.reply("no emails found.")
 
 
-eml.skip = "irc"
-
-
 def mbx(event):
     if not event.args:
         event.reply("mbx <path>")
@@ -91,6 +88,3 @@ def mbx(event):
         nrs += 1
     if nrs:
         event.reply("ok %s" % nrs)
-
-
-mbx.skip = "irc"

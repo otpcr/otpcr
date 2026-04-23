@@ -12,14 +12,7 @@
     <center><b>ECHA</b></center><br>
 
 
-.. raw:: html
-
-  <br>
-
-The website of the **ECHA** <European Chemical Agency> has been updated in January 2026 and no longer shows a skull and bones when visited.
-
-
-.. _haldol:
+.. _haldol2:
 
 
 .. raw:: html
@@ -42,7 +35,7 @@ The website of the **ECHA** <European Chemical Agency> has been updated in Janua
   <br><br>
 
 
-.. _clozapine:
+.. _clozapine2:
 
 
 **CLOZAPINE**
@@ -60,7 +53,7 @@ The website of the **ECHA** <European Chemical Agency> has been updated in Janua
 
   <br><br>
 
-.. _zyprexa:
+.. _zyprexa2:
 
 
 **ZYPREXA**
@@ -77,7 +70,7 @@ The website of the **ECHA** <European Chemical Agency> has been updated in Janua
 
   <br><br>
 
-.. _abilify:
+.. _abilify2:
 
 
 **ABILIFY**
@@ -93,3 +86,7 @@ The website of the **ECHA** <European Chemical Agency> has been updated in Janua
 
 .. image:: abilifynew2.png
      :width: 100%
+
+.. raw:: html
+
+    <br><br>

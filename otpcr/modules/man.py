@@ -64,25 +64,31 @@ use ``%s`` to control the program, default it does nothing
 the -h option will show you possible options
 
 | ``$ %s -h``
+| usage: otpcr [-h] [-a] [-c] [-d] [-i IGNORE] [-l LEVEL] [-m MODS] [-n INDEX]
+|             [-p] [-r] [-s] [-t] [-v] [-w] [-u] [-x] [--wdr WDR] [--nochdir]
+|
+| NIXT
 |
 | options:
-|
-| ``-h,--help          show this help message and exit``
-| ``-a,--all           load all modules``
-| ``-c,--console       start console``
-| ``-d,--daemon        start background daemon``
-| ``-l,--level LEVEL   set loglevel``
-| ``-m,--mods MODS     modules to load``
-| ``-n,--noignore      disable ignore``
-| ``-r, --read         read modules on start``
-| ``-s,--service       start service``
-| ``-t,--threaded      enable multiple workers``
-| ``-v,--verbose       enable verbose``
-| ``-w,--wait          wait for services to start``
-| ``-u,--user          use local mods directory``
-| ``-x,--admin         use admin mode``
-| ``--wdr <WDR>        set working directory``
-|
+|   -h, --help           show this help message and exit
+|   -a, --all            load all modules.
+|   -c, --console        start console.
+|   -d, --daemon         start background daemon.
+|   -i, --ignore IGNORE  modules to ignore.
+|   -l, --level LEVEL    set loglevel.
+|   -m, --mods MODS      modules to load.
+|   -n, --index INDEX    set index to use.
+|   -p, --prune          prune directories.
+|   -r, --read           read modules on start.
+|   -s, --service        start service.
+|   -t, --threaded       use threads.
+|   -v, --verbose        enable verbose.
+|   -w, --wait           wait for services to start.
+|   -u, --user           use local mods directory.
+|   -x, --admin          enable admin mode.
+|   --wdr WDR            set working directory.
+|   --nochdir            set working directory.
+
 
 see list of commands
 
@@ -247,4 +253,4 @@ def man(event):
     ))
 
 
-man.skip = "irc"
+man.allow = "admin"

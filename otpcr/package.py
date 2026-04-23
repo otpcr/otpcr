@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"write your own commands"
+"module mamagement"
 
 
 import importlib.util as imp
@@ -9,16 +9,14 @@ import logging
 import os
 
 
-from .configs import Main
-from .objects import Base
+from .objects import Base, Object
+from .persist import Workdir
 from .utility import Utils
 
 
 class Mods:
 
-    dirs = {
-            f"{Utils.pkgname(Base)}.modules": os.path.join(os.path.dirname(__spec__.loader.path), "modules")
-           }
+    dirs = {}
     md5s = {}
     modules = {}
 
@@ -38,7 +36,16 @@ class Mods:
         return cls.iter(cls.list())
 
     @classmethod
+    def configure(cls, cfg):
+        "configure module directories."
+        if cfg.user:
+            cls.add(os.path.join(Workdir.wdr, "mods"), "modules")
+            cls.add('mods', 'mods')
+        cls.add(Utils.moddir(), f"{Utils.pkgname(Mods)}.modules")
+
+    @classmethod
     def get(cls, name):
+        "return module from cache or import module."
         for pkgname, path in cls.dirs.items():
             fnm = os.path.join(path, name + ".py")
             if not os.path.exists(fnm):
@@ -59,15 +66,11 @@ class Mods:
         return ",".join(result)
 
     @classmethod
-    def iter(cls, mods=None):
+    def iter(cls, mods="", ignore=""):
         "loop over modules."
         has = []
-        if Main.all:
-            mods = Mods.list()
-        else:
-            mods = mods or Main.mods
         for name in Utils.spl(mods):
-            if name in Utils.spl(Main.ignore):
+            if name in Utils.spl(ignore):
                 continue
             if name in has:
                 continue
@@ -77,7 +80,7 @@ class Mods:
                 yield name, mod
 
     @classmethod
-    def list(cls):
+    def list(cls, ignore=""):
         "comma seperated list of available modules."
         mods = []
         for pkgname, path in cls.dirs.items():
@@ -85,7 +88,7 @@ class Mods:
                 x[:-3] for x in os.listdir(path)
                 if x.endswith(".py") and
                 not x.startswith("__") and
-                x[:-3] not in Utils.spl(Main.ignore)
+                x[:-3] not in Utils.spl(ignore)
             ])
         return ",".join(sorted(set(mods)))
 
@@ -103,8 +106,6 @@ class Mods:
         md5sum = Utils.md5sum(spec.loader.path)
         if md5 and md5sum != md5:
             logging.info("mismatch %s", spec.loader.path)
-        if "tbl" not in name:
-            cls.md5s[name] = md5sum
         mod = imp.module_from_spec(spec)
         if not mod:
             logging.debug("can't load %s module", name)
@@ -128,7 +129,16 @@ class Mods:
             cls.add(package.__path__[0], package.__name__)
 
     @classmethod
+    def setmd5s(cls):
+        "update md5 sums"
+        md5s = Base()
+        for path in cls.dirs.values():
+            Object.notset(md5s, Utils.md5dir(path))
+        Object.update(cls.md5s, md5s)
+
+    @classmethod
     def sums(cls):
+        "load md5 sums from table."
         mod = cls.get("tbl")
         if not mod:
             return

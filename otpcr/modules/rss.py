@@ -26,13 +26,13 @@ from urllib.parse import quote_plus, urlencode
 from otpcr.configs import Configuration, Main
 from otpcr.handler import Broker
 from otpcr.objects import Base, Methods, Object
-from otpcr.persist import Cfg, Disk, Locate
+from otpcr.persist import Disk, Locate
 from otpcr.threads import Repeater, Thread
 from otpcr.utility import Utils
 
 
 def configure():
-    Cfg.load(Config)
+    Disk.read(Config, "rss", "config")
 
 
 def init():
@@ -530,9 +530,6 @@ def err(event):
         event.reply(f'{nre} feeds reset.')
 
 
-err.skip = "irc"
-
-
 def exp(event):
     with Run.importlock:
         event.reply(TEMPLATE)
@@ -547,9 +544,6 @@ def exp(event):
         event.reply(" " * 8 + "</outline>")
         event.reply("    <body>")
         event.reply("</opml>")
-
-
-exp.skip = "irc"
 
 
 def imp(event):
@@ -594,9 +588,6 @@ def imp(event):
         event.reply(f"skipped {nrskip} urls.")
     if nrs:
         event.reply(f"added {nrs} urls.")
-
-
-imp.skip = "irc"
 
 
 def nme(event):
@@ -672,13 +663,9 @@ def syn(event):
     event.reply(f"{nrs} feeds synced")
 
 
-syn.skip = "irc"
-
-
 TEMPLATE = """<opml version="1.0">
     <head>
         <title>OPML</title>
     </head>
     <body>
         <outline title="opml" text="rss feeds">"""
-

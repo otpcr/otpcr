@@ -6,19 +6,20 @@
 
 from otpcr.objects import Base, Methods, Object
 from otpcr.package import Mods
-from otpcr.persist import Cfg
+from otpcr.persist import Disk
 
 
 def cfg(event):
+    "configure."
     if not event.args:
-        mods = f"{Mods.has('Config') + ',main'}"
-        if mods.startswith(","):
-            mods = mods[1:]
+        mods = f"{'main,' + Mods.has('Config')}"
+        if mods.endswith(","):
+            mods = mods[:-1]
         event.reply(f"cfg <{mods}>")
         return
     name = event.args[0]
     config = Base()
-    Cfg.load(config, name)
+    Disk.read(config, name, "config")
     if name != "main" and not config:
         mod = Mods.get(name)
         if not mod:
@@ -38,11 +39,11 @@ def cfg(event):
         )
         return
     Methods.edit(config, event.sets)
-    Cfg.save(config, name)
+    Disk.write(config, name, "config")
     mod = Mods.get(name)
     if mod and "configure" in dir(mod):
         mod.configure()
     event.ok()
 
 
-cfg.skip = "irc"
+cfg.allow = "admin"

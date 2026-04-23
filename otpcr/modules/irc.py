@@ -11,13 +11,14 @@ import ssl
 import textwrap
 import threading
 import time
+import _thread
 
 
 from otpcr.command import Commands
 from otpcr.configs import Configuration, Main
 from otpcr.handler import Broker, Event, Output
 from otpcr.objects import Base, Methods
-from otpcr.persist import Cfg
+from otpcr.persist import Disk
 from otpcr.threads import Thread
 from otpcr.utility import Utils
 
@@ -185,8 +186,7 @@ class IRC(Output):
         if len(event.result) > 3:
             self.say(event.channel, "command would flood")
             return
-        for key in sorted(event.result):
-            txt = event.result.get(key)
+        for txt in event.result:
             for text in wrapper.wrap(txt):
                 self.dosay(event.channel, text)
 
@@ -435,9 +435,9 @@ class IRC(Output):
             self.buffer.append(line)
         self.state.lastline = splitted[-1]
 
-    def start(self):
-        if not Cfg.load(self.cfg):
-            Cfg.save(self.cfg)
+    def start(self, daemon=True):
+        if not Disk.read(self.cfg, "irc", "config"):
+            Disk.write(self.cfg, "irc", "config")
         if self.cfg.channel not in self.channels:
             self.channels.append(self.cfg.channel)
         self.events.ready.clear()
@@ -445,12 +445,13 @@ class IRC(Output):
         self.events.joined.clear()
         Output.start(self)
         if not self.state.keeprunning:
-            Thread.launch(self.keep)
+            Thread.launch(self.keep, daemon=daemon)
         Thread.launch(
             self.doconnect,
             self.cfg.server or "localhost",
             self.cfg.nick,
             int(self.cfg.port) or 6667,
+            daemon=daemon
         )
 
     def stop(self):
@@ -459,7 +460,10 @@ class IRC(Output):
         Output.stop(self)
 
     def wait(self):
-        self.events.ready.wait()
+        try:
+            self.events.ready.wait()
+        except (KeyboardInterrupt, EOFError):
+            _thread.interrupt_main()
 
 
 def cb_auth(evt):

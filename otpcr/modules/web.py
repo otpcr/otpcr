@@ -13,9 +13,8 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from otpcr.configs import Configuration
+from otpcr.configs import Configuration, Main
 from otpcr.objects import Base
-from otpcr.persist import Main
 from otpcr.threads import Thread
 from otpcr.utility import Utils
 

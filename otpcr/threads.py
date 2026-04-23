@@ -61,6 +61,10 @@ class Task(threading.Thread):
             self.event.ready()
         _thread.interrupt_main()
 
+    def stop(self):
+        "join thread."
+        self.join()
+
 
 class Thread:
 
@@ -81,7 +85,7 @@ class Thread:
     def name(cls, obj):
         "string of function/method."
         if inspect.ismethod(obj):
-            return f"{obj.__func__.__qualname__}"
+            return f"{obj.__self__.__class__.__name__}.{obj.__name__}"
         if inspect.isfunction(obj):
             return repr(obj).split()[1]
         return repr(obj)
@@ -98,6 +102,9 @@ class Timy(threading.Timer):
         self.state["latest"] = time.time()
         self.state["starttime"] = time.time()
         self.starttime = time.time()
+
+    def stop(self):
+        self.cancel()
 
 
 class Timed:
@@ -120,6 +127,7 @@ class Timed:
 
     def start(self):
         "start timer."
+        self.kwargs["daemon"] = True
         self.kwargs["name"] = self.name
         timer = Timy(self.sleep, self.run, *self.args, **self.kwargs)
         timer.start()

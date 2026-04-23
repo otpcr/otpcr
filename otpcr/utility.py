@@ -116,10 +116,12 @@ class Utils:
 
     @staticmethod
     def clsname(obj):
+        "reutrn classname of an object."
         return obj.__class__.__name__
 
     @staticmethod
     def md5dir(path):
+        "create a md5 for a directory."
         md5s = {}
         for fnm in os.listdir(path):
             if not fnm.endswith(".py"):
@@ -141,6 +143,7 @@ class Utils:
 
     @staticmethod
     def moddir():
+        "return modules directory."
         return os.path.join(os.path.dirname(__spec__.loader.path), "modules")
 
     @staticmethod
@@ -187,6 +190,7 @@ class Format(logging.Formatter):
     size = 3
 
     def format(self, record):
+        "logging formatter."
         if not Format.disable:
             record.module = record.module.upper()
             record.module = record.module[:Format.size]
@@ -198,18 +202,23 @@ class Log:
     datefmt = "%H:%M:%S"
     format = "%(module)-3s %(message)s"
 
-    @staticmethod
-    def size(nr):
-        "set text size."
-        index = Log.format.find("-")+1
-        newformat = Log.format[:index]
-        newformat += str(nr)
-        newformat += Log.format[index+1:]
-        Log.format = newformat
-        Format.size = nr
+    @classmethod
+    def configure(cls, cfg):
+        "configure logging."
+        cls.size(len(cfg.name))
+        cls.level(cfg.level or "info")
 
-    @staticmethod
-    def level(loglevel):
+    @classmethod
+    def size(cls, nr):
+        "set text size."
+        index = cls.format.find("-")+1
+        newformat = cls.format[:index]
+        newformat += str(nr)
+        newformat += cls.format[index+1:]
+        cls.format = newformat
+
+    @classmethod
+    def level(cls, loglevel):
         "set log level."
         formatter = Format(Log.format, Log.datefmt)
         stream = logging.StreamHandler()
@@ -249,7 +258,6 @@ TIMES = [
 
 def __dir__():
     return (
-        'COLORS',
         'LEVELS',
         'TIMES',
         'Log',

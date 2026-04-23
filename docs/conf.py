@@ -8,8 +8,8 @@
 "Since 4 March 2019."
 
 
-NAME = "otpcr"
-VERSION = "81"
+NAME = "genocide"
+VERSION = "233"
 
 
 import os
@@ -65,9 +65,9 @@ extensions = [
 
 
 html_title = "Since 4 March 2019."
-html_style = 'otpcr.css'
-html_static_path = ["_static", "_static/otpcr.css", "files/sitemap.xml"]
-html_css_files = ["otpcr.css",]
+html_style = 'genocide.css'
+html_static_path = ["_static", "_static/genocide.css", "files/sitemap.xml"]
+html_css_files = ["genocide.css",]
 html_short_title = "%s %s" % (NAME, VERSION)
 html_theme = "alabaster"
 html_theme_options = {
@@ -106,7 +106,7 @@ intersphinx_cache_limit = 1
 
 rst_prolog = '''.. image:: genocide.png
     :width: 100%
-    :height: 2.4cm
+    :height: 2cm
     :target: index.html
 
 .. raw:: html
@@ -121,13 +121,12 @@ rst_epilog = '''.. raw:: html
     <center>
     <b>
 
-:ref:`reconsider <reconsider>` - :ref:`evidence <evidence>` - :ref:`guilty <guilty>` - :ref:`writings <writings>`
+:ref:`reconsider <reconsider>` - :ref:`writing <writings>` - :ref:`\\! <about>` - :ref:`evidence <evidence>` - :ref:`guilty <guilty>`
 
 .. raw:: html
 
     </b>
     </center>
-
 '''
 
 

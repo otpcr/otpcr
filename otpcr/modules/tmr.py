@@ -80,7 +80,8 @@ def tmr(event):
     diff = todo - time.time()
     txt = " ".join(event.args[1:])
     Timers.add(todo, event.orig, event.channel, txt)
-    Disk.write(Timers.timers, Timers.path or Methods.ident(Timers.timers))
+    with Timers.lock:
+        Disk.write(Timers.timers, Timers.path or Methods.ident(Timers.timers))
     bot = Broker.get(event.orig)
     if not bot:
         event.reply("no bot")
