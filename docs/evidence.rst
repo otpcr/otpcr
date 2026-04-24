@@ -17,15 +17,6 @@
   <br>
 
 
-The website of the **ECHA** <European Chemical Agency> has been updated in January 2026 and no longer shows a skull and bones when
-:ref:`visited <echa>`. Images shown here are from 2019.
-
-
-.. raw:: html
-
-  <br>
-
-
 .. _haldol:
 
 
