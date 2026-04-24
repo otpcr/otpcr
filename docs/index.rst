@@ -72,8 +72,7 @@ prosecute the king for making the commiting of the above mentioned crimes
 
 |
 
-Since January 2026 the **ECHA** <European Chemical Agency> no longer shows a skull and bones when :ref:`visited <echa>`.
-2019 versions are found :ref:`here <evidence>`.
+**(*)** Since January 2026 the **ECHA** <European Chemical Agency> no longer shows a skull and bones when :ref:`visited <echa>`. 2019 versions are :ref:`here <evidence>`.
 
 
 .. toctree::
