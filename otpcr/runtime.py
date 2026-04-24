@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"at the beginning"
+"main program"
 
 
 import argparse

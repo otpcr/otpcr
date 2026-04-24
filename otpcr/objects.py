@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"a function with the object as the first argument"
+"a clean namespace"
 
 
 import datetime

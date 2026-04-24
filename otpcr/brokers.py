@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"brokers"
+"an object for a string"
 
 
 class Broker:
