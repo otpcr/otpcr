@@ -1,11 +1,11 @@
 @import 'alabaster.css';
 
-
 div.body a:link, div.body h, div.body p, div.body dd, div.body li, div.body blockquote {
     -moz-hyphens: false;
     -ms-hyphens: false;
     -webkit-hyphens: false;
     hyphens: false;
+    padding: 0px 0px 0px 0px;
 }
 
 
@@ -15,8 +15,8 @@ body {
     font-size: 113%;
     background-color: #fff;
     color: #555;
-    margin: 30px;
-    padding: 0px 50px 0px 100px;
+    margin: 40px !important ;
+    padding: 0px 30px 10px 30px !important ;
 }
 
 
@@ -26,7 +26,7 @@ i {
     font-size: 100%;
     background-color: #fff;
     color: #555;
-    margin: 30px;
+    margin: 0px;
     padding: 0px;
 }
 

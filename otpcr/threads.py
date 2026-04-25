@@ -127,7 +127,7 @@ class Timed:
 
     def start(self):
         "start timer."
-        self.kwargs["daemon"] = True
+        #self.kwargs["daemon"] = False
         self.kwargs["name"] = self.name
         timer = Timy(self.sleep, self.run, *self.args, **self.kwargs)
         timer.start()
@@ -137,6 +137,7 @@ class Timed:
         "stop timer."
         if self.timer:
             self.timer.cancel()
+            self.timer = None
 
 
 class Repeater(Timed):

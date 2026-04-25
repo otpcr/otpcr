@@ -91,7 +91,7 @@ class Handler:
         "register callback."
         self.cbs[kind] = callback
 
-    def start(self, daemon=True):
+    def start(self, daemon=False):
         "start event handler loop."
         self.running.set()
         Thread.launch(self.loop, daemon=daemon)
@@ -152,6 +152,7 @@ class Client(Handler):
 
     def stop(self):
         "stop client."
+        super().stop()
         self.running.clear()
         self.iqueue.put(None)
 
@@ -173,6 +174,9 @@ class Polled(Client):
     def poll(self):
         "return event."
         return self.iqueue.get()
+
+    def start(self, daemon=True):
+        super().start(daemon=daemon)
 
 
 class Console(Polled):
@@ -211,9 +215,9 @@ class Output(Polled):
             self.display(event)
             self.oqueue.task_done()
 
-    def start(self, daemon=True):
+    def start(self, daemon=False):
         "start output loop."
-        super().start()
+        super().start(daemon=daemon)
         Thread.launch(self.output, daemon=daemon)
 
     def stop(self):

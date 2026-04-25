@@ -42,7 +42,7 @@ def init():
     txt = f"{nrs} feeds"
     if nrs == 1:
         txt = txt[:-1]
-    logging.info(txt)
+    logging.warning(txt)
 
 
 def shutdown():
@@ -127,7 +127,7 @@ class Runner:
         self.dosave = False
         self.fetchlock = threading.RLock()
         self.queue = queue.Queue()
-        self.stopped = threading.Event()
+        self.running = threading.Event()
         self.todo = queue.Queue()
 
     def display(self, obj):
@@ -148,8 +148,10 @@ class Runner:
         return result[:-2].rstrip()
 
     def loop(self):
-        while True:
+        while self.running.is_set():
             job = self.queue.get()
+            if job is None:
+                break
             self.fetch(*job)
 
     def fetch(self, fnm, feed, silent=False):
@@ -194,11 +196,12 @@ class Runner:
     def put(self, args):
         self.queue.put(args)
 
-    def start(self):
-        Thread.launch(self.loop)
+    def start(self, daemon=True):
+        Thread.launch(self.loop, daemon=daemon)
 
     def stop(self):
-        self.stopped.set()
+        self.running.clear()
+        self.queue.put(None)
 
 
 class Runners:

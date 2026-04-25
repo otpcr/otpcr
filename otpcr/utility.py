@@ -187,7 +187,7 @@ class Utils:
 class Format(logging.Formatter):
 
     disable = False
-    size = 3
+    size = 4
 
     def format(self, record):
         "logging formatter."

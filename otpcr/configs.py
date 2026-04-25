@@ -26,7 +26,7 @@ class MainConfig(type):
 
 class Main(metaclass=MainConfig):
 
-    level = "info"
+    level = "warning"
     name = Utils.pkgname(MainConfig)
     wdr = ""
 

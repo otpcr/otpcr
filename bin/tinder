@@ -26,8 +26,11 @@ from otpcr.utility import Time
 
 
 Main.debug = True
-Main.wdr = ".test"
+Main.all = True
+Main.ignore = "tmr"
+Main.read  = True
 Main.user = True
+Main.wdr = ".test"
 
 
 events = queue.Queue()
@@ -75,6 +78,7 @@ class Clients:
     @classmethod
     def shutdown(cls):
         for client in cls.clients:
+            client.wait()
             client.stop()
 
 
@@ -102,9 +106,9 @@ def main():
         Main.verbose = True
     if Boot.check("t"):
         Main.threaded = True
-    Main.all = True
     Methods.parse(Main, " ".join(sys.argv[1:]))
     Boot.configure(Main)
+    Main.mods.replace("tmr","")
     Boot.scan(Main)
     if Main.threaded:
         Clients.init(os.cpu_count(), CLI)
@@ -114,23 +118,26 @@ def main():
     nrs = Main.index or 1
     thrs = []
     for _x in range(nrs):
-        thrs.append(Thread.launch(payload, pre))
+        thrs.append(Thread.launch(payload, pre, daemon=False))
     for thr in thrs:
         thr.join()
     thrs = []
     for _x in range(nrs):
-        thrs.append(Thread.launch(payload, examples))
+        thrs.append(Thread.launch(payload, examples, daemon=False))
     thrs = []
     for thr in thrs:
         thr.join()
     for _x in range(nrs):
-        thrs.append(Thread.launch(payload, post))
+        thrs.append(Thread.launch(payload, post, daemon=False))
     for thr in thrs:
         thr.join()
     nrevents = events.qsize()
-    Thread.launch(consume)
-    events.join()
-    Clients.shutdown()
+    Thread.launch(consume, daemon=True)
+    try:
+        events.join()
+    except Exception as ex:
+        pass
+    Boot.shutdown()
     endtime = time.time()
     lap = Time.elapsed(endtime-starttime)
     percall = (endtime-starttime)/nrevents

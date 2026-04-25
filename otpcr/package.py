@@ -105,7 +105,7 @@ class Mods:
         md5 = cls.md5s.get(name)
         md5sum = Utils.md5sum(spec.loader.path)
         if md5 and md5sum != md5:
-            logging.info("mismatch %s", spec.loader.path)
+            logging.warn("mismatch %s", spec.loader.path)
         mod = imp.module_from_spec(spec)
         if not mod:
             logging.debug("can't load %s module", name)

@@ -8,6 +8,7 @@ import logging
 import os
 import pathlib
 import sys
+import threading
 import time
 import _thread
 
@@ -34,7 +35,7 @@ class Boot:
         print("%s since %s %s (%s)" % (
             Main.name.upper(),
             tme,
-            Main.level.upper() or "INFO",
+            Main.level.upper() or "warning",
             Utils.md5sum(Mods.path("tbl") or "")[:7],
         ))
         sys.stdout.flush()
@@ -168,16 +169,6 @@ class Boot:
                 except Exception as ex:
                     logging.exception(ex)
                     return
-        for obj in Broker.objs("stop"):
-            if "wait" in dir(obj):
-                try:
-                    obj.wait()
-                    obj.stop()
-                except (KeyboardInterrupt, EOFError):
-                    _thread.interrupt_main()
-                except Exception as ex:
-                    logging.exception(ex)
-                    return
 
     @classmethod
     def wrap(cls, func, *args):
@@ -192,7 +183,7 @@ class Boot:
             func(*args)
             cls.shutdown()
         except (KeyboardInterrupt, EOFError):
-            os._exit(0)
+            return
         except Exception as ex:
             logging.exception(ex)
         if old:

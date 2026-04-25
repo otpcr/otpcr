@@ -43,6 +43,11 @@ def init():
     logging.warning("%s timers", len(Timers.timers))
 
 
+def shutdown():
+    for timer in Timers.timers:
+        timer.stop()
+
+
 class Timer(Base):
 
     pass
@@ -87,5 +92,5 @@ def tmr(event):
         event.reply("no bot")
         return
     timer = Timed(diff, bot.say, event.channel, txt)
-    Thread.launch(timer.start).join()
+    timer.start()
     event.reply("ok " + Time.elapsed(diff))

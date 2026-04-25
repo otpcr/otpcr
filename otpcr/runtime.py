@@ -97,7 +97,7 @@ class Scripts:
         Boot.scan(Main)
         Boot.init(Main)
         csl = CSL()
-        csl.start()
+        csl.start(daemon=True)
         Boot.forever()
 
     @staticmethod
@@ -125,7 +125,7 @@ class Scripts:
 def main():
     "main"
     Arguments.getargs()
-    Main.ignore = "mbx,rst,udp,web,wsd"
+    Main.ignore = "mbx,rst,tmr,udp,web,wsd"
     if Main.daemon:
         Boot.wrap(Scripts.background)
     elif Main.console:
