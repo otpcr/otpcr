@@ -21,18 +21,18 @@ def srv(event):
 
 def tbl(event):
     "create table."
-    Boot.md5s = {}
+    Boot.md5 = {}
     Commands.names = {}
-    Mods.md5s = {}
+    Mods.md5 = {}
     for name, module in Mods.all():
         Commands.scan(module)
-    Boot.setmd5s()
-    Mods.setmd5s()
+    Boot.md5s()
+    Mods.md5s()
     event.reply("# This file is placed in the Pubic Domain.\n\n")
     event.reply('"tables"\n\n')
-    event.reply(f"CORE = {Json.dumps(Boot.md5s, indent=4, sort_keys=True)}\n\n")
+    event.reply(f"CORE = {Json.dumps(Boot.md5, indent=4, sort_keys=True)}\n\n")
     event.reply(f"NAMES = {Json.dumps(Commands.names, indent=4, sort_keys=True)}\n\n")
-    event.reply(f"MD5 = {Json.dumps(Mods.md5s, indent=4, sort_keys=True)}")
+    event.reply(f"MD5 = {Json.dumps(Mods.md5, indent=4, sort_keys=True)}")
 
 
 def wdr(event):

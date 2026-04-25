@@ -25,7 +25,7 @@ from .utility import Log, Utils
 class Boot:
 
     inits = []
-    md5s = {}
+    md5 = {}
     path = os.path.dirname(__spec__.loader.path)
 
     @classmethod
@@ -108,6 +108,11 @@ class Boot:
             for name, thr in thrs:
                 thr.join()
 
+    @classmethod
+    def md5s(cls):
+        "set md5 sums."
+        cls.md5.update(Utils.md5dir(cls.path))
+
     @staticmethod
     def pidfile(name):
         "write pidfile."
@@ -150,10 +155,6 @@ class Boot:
             res.append((name, mod))
         return res
 
-    @classmethod
-    def setmd5s(cls):
-        "set md5 sums."
-        cls.md5s.update(Utils.md5dir(cls.path))
 
     @classmethod
     def shutdown(cls):

@@ -11,7 +11,7 @@ from .booting import Boot
 from .command import Commands
 from .configs import Main
 from .handler import Console, Event
-from .objects import Object
+from .objects import Base, Methods, Object
 
 
 class Arguments:
@@ -42,6 +42,9 @@ class Arguments:
         cls.args, arguments = parser.parse_known_args()
         cls.txt = " ".join(arguments)
         Object.merge(Main, cls.args)
+        parsed = Base()
+        Methods.parse(parsed, cls.txt)
+        Object.merge(Main, parsed)
 
 
 class Line(Console):

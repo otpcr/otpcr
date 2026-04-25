@@ -17,7 +17,7 @@ from .utility import Utils
 class Mods:
 
     dirs = {}
-    md5s = {}
+    md5 = {}
     modules = {}
 
     @classmethod
@@ -102,10 +102,11 @@ class Mods:
         if not spec or not spec.loader:
             logging.debug("%s is missing spec or loader", name)
             return None
-        md5 = cls.md5s.get(name)
+        modname = name.split(".")[-1]
+        md5 = cls.md5.get(modname)
         md5sum = Utils.md5sum(spec.loader.path)
         if md5 and md5sum != md5:
-            logging.warn("mismatch %s", spec.loader.path)
+            logging.error("mismatch %s", spec.loader.path)
         mod = imp.module_from_spec(spec)
         if not mod:
             logging.debug("can't load %s module", name)
@@ -129,12 +130,12 @@ class Mods:
             cls.add(package.__path__[0], package.__name__)
 
     @classmethod
-    def setmd5s(cls):
+    def md5s(cls):
         "update md5 sums"
-        md5s = Base()
+        md5 = Base()
         for path in cls.dirs.values():
-            Object.notset(md5s, Utils.md5dir(path))
-        Object.update(cls.md5s, md5s)
+            Object.notset(md5, Utils.md5dir(path))
+        Object.update(cls.md5, md5)
 
     @classmethod
     def sums(cls):
@@ -145,7 +146,7 @@ class Mods:
         md5s = getattr(mod, "MD5", {})
         if not md5s:
             return
-        cls.md5s.update(md5s)
+        cls.md5.update(md5s)
 
 
 def __dir__():
