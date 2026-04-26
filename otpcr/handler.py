@@ -123,8 +123,8 @@ class Client(Handler):
     def display(self, event):
         "display event results."
         with self.olock:
-            while event.result.qsize():
-                self.dosay(event.channel, event.result.get())
+            for txt in event.result:
+                self.dosay(event.channel, txt)
 
     def dosay(self, channel, text):
         "say called by display."
