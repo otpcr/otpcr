@@ -28,7 +28,7 @@ class Event(Base):
         self.index = 0
         self.kind = "event"
         self.orig = ""
-        self.result = queue.Queue()
+        self.result = []
         self.text = ""
 
     def display(self):
@@ -49,7 +49,7 @@ class Event(Base):
 
     def reply(self, text):
         "add text to result."
-        self.result.put(text)
+        self.result.append(text)
 
     def wait(self, timeout=0.0):
         "wait for completion."
