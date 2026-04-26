@@ -4,7 +4,6 @@
 "event handling"
 
 
-import collections
 import logging
 import queue
 import threading

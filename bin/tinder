@@ -147,6 +147,7 @@ def main():
         print(f"cores: {Clients.nrcpu} events: {nrs}")
         print(f"total: {lap} nrs: {nrevents} call: %.6fs" % percall)
 
+
 examples = {
     "cmd": [""],
     "dis": [""],

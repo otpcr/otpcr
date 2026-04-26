@@ -114,7 +114,7 @@ class Locate:
                 if not removed and Methods.deleted(obj):
                     continue
                 if selector and not Methods.search(obj, selector, matching):
-                   continue
+                    continue
                 if nritems and nrs >= nritems:
                     break
                 nrs += 1
