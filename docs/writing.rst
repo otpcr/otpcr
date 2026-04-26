@@ -1,4 +1,4 @@
-.. _writings:
+.. _writing:
 
 
 .. raw:: html
@@ -7,12 +7,12 @@
   <br><br>
 
 
-.. title:: Writings
+.. title:: Writing
 
 
 .. raw:: html
 
-    <center><b>WRITINGS</b></center><br>
+    <center><b>WRITING</b></center><br>
 
 
 **ACK**
@@ -37,7 +37,7 @@
 |
 |
 
-.. include:: reconsider.rst
+.. include:: reconsider2.rst
 
 
 .. raw:: html

@@ -33,13 +33,13 @@
     and Psychiatric patients.
 
     ``GENOCIDE`` contains :ref:`correspondence
-    <writings>` with the International Criminal
+    <writing>` with the International Criminal
     Court, asking for arrest of the king of the
     netherlands, for the genocide he is committing
     with his new treatment laws.
 
     Current status is a :ref:`"no basis to proceed"
-    <writings>` judgement of the prosecutor which
+    <writing>` judgement of the prosecutor which
     requires a :ref:`"basis to prosecute" <reconsider>`
     to have the king actually arrested.
 
