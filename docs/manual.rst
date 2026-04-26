@@ -67,7 +67,7 @@
     |
     | <new terminal>
     |
-    | ``$ genocide srv > genocide.service``
+    | ``$ genocide -x srv > genocide.service``
     | ``$ sudo mv genocide.service /etc/systemd/system/``
     | ``$ sudo systemctl enable genocide --now``
     |
@@ -135,7 +135,7 @@
     | ``$ genocide cmd``
     | ``atr,cfg,cmd,dis,dne,dpl,err,exp,fie,flt,fnd,imp,``
     | ``log,lou,man,mod,nme,now,pth,pwd,rem,req,res,rss,``
-    | ``sil,slg,srv,syn,tbl,tdo,thr,tmr,upt,ver,wdr``
+    | ``sil,slg,syn,tdo,thr,tmr,upt,ver,wdr``
     |
 
     * start console
@@ -199,6 +199,7 @@
     | ``res`` - restore objects
     | ``rss`` - add a feed
     | ``sil`` - enable silent mode
+    | ``srv`` - create service file
     | ``syn`` - sync rss feeds
     | ``tbl`` - create table module
     | ``tdo`` - add todo item

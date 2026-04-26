@@ -59,7 +59,7 @@ class Boot:
         Log.configure(cfg)
         Mods.configure(cfg)
         if Main.all:
-            Main.mods = Mods.list()
+            Main.mods = Mods.list(Main.ignore)
         if Main.noignore:
             Main.ignore = ""
 

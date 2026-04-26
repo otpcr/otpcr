@@ -18,7 +18,7 @@ STARTTIME = time.time()
 
 def cmd(event):
     "list available commands."
-    event.reply(",".join(sorted(Commands.commands(event.orig))))
+    event.reply(",".join(sorted(Commands.commands(Main.ignore))))
 
 
 def mod(event):

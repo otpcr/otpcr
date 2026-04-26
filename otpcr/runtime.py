@@ -129,6 +129,8 @@ def main():
     "main"
     Arguments.getargs()
     Main.ignore = "mbx,rst,tmr,udp,web,wsd"
+    if not Main.admin:
+        Main.ignore += ",adm"
     if Main.daemon:
         Boot.wrap(Scripts.background)
     elif Main.console:

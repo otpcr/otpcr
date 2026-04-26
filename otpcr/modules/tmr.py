@@ -45,7 +45,6 @@ def init():
 
 def shutdown():
     for timer in Timers.timers:
-        print(timer)
         timer.stop()
 
 
