@@ -127,7 +127,7 @@ class Timed:
 
     def start(self):
         "start timer."
-        #self.kwargs["daemon"] = False
+        self.kwargs["daemon"] = True
         self.kwargs["name"] = self.name
         timer = Timy(self.sleep, self.run, *self.args, **self.kwargs)
         timer.start()

@@ -13,7 +13,7 @@ import time
 from otpcr.brokers import Broker
 from otpcr.objects import Base, Object, Methods
 from otpcr.persist import Disk, Locate
-from otpcr.threads import Thread, Timed
+from otpcr.threads import Timed
 from otpcr.utility import Time
 
 
@@ -45,6 +45,7 @@ def init():
 
 def shutdown():
     for timer in Timers.timers:
+        print(timer)
         timer.stop()
 
 

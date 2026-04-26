@@ -28,7 +28,7 @@ class Event(Base):
         self.index = 0
         self.kind = "event"
         self.orig = ""
-        self.result = collections.deque()
+        self.result = queue.Queue()
         self.text = ""
 
     def display(self):
@@ -49,7 +49,7 @@ class Event(Base):
 
     def reply(self, text):
         "add text to result."
-        self.result.append(text)
+        self.result.put(text)
 
     def wait(self, timeout=0.0):
         "wait for completion."
@@ -91,7 +91,7 @@ class Handler:
         "register callback."
         self.cbs[kind] = callback
 
-    def start(self, daemon=False):
+    def start(self, daemon=True):
         "start event handler loop."
         self.running.set()
         Thread.launch(self.loop, daemon=daemon)
@@ -123,8 +123,8 @@ class Client(Handler):
     def display(self, event):
         "display event results."
         with self.olock:
-            for txt in event.result:
-                self.dosay(event.channel, txt)
+            while event.result.qsize():
+                self.dosay(event.channel, event.result.get())
 
     def dosay(self, channel, text):
         "say called by display."
@@ -215,9 +215,9 @@ class Output(Polled):
             self.display(event)
             self.oqueue.task_done()
 
-    def start(self, daemon=False):
+    def start(self, daemon=True):
         "start output loop."
-        super().start(daemon=daemon)
+        super().start()
         Thread.launch(self.output, daemon=daemon)
 
     def stop(self):

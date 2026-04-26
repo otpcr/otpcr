@@ -85,6 +85,8 @@ class Disk:
 
 class Locate:
 
+    lock = threading.RLock()
+
     @classmethod
     def attrs(cls, kind):
         "show attributes for kind of objects."
@@ -101,23 +103,24 @@ class Locate:
     @classmethod
     def find(cls, kind, selector={}, removed=False, matching=False, nritems=None):
         "locate objects by matching atributes."
-        nrs = 0
-        for pth in Locate.fns(Workdir.long(kind)):
-            obj = Cache.get(pth)
-            if obj is None:
-                obj = Base()
-                Disk.read(obj, pth)
-                Cache.add(pth, obj)
-            if not removed and Methods.deleted(obj):
-                continue
-            if selector and not Methods.search(obj, selector, matching):
-                continue
-            if nritems and nrs >= nritems:
-                break
-            nrs += 1
-            yield pth, obj
-        else:
-            return None, None
+        with cls.lock:
+            nrs = 0
+            for pth in Locate.fns(Workdir.long(kind)):
+                obj = Cache.get(pth)
+                if obj is None:
+                    obj = Base()
+                    Disk.read(obj, pth)
+                    Cache.add(pth, obj)
+                if not removed and Methods.deleted(obj):
+                    continue
+                if selector and not Methods.search(obj, selector, matching):
+                   continue
+                if nritems and nrs >= nritems:
+                    break
+                nrs += 1
+                yield pth, obj
+            else:
+                return None, None
 
     @classmethod
     def first(cls, obj, selector={}):
@@ -169,47 +172,47 @@ class Workdir:
 
     wdr = f".{Utils.pkgname(Disk)}"
 
-    @staticmethod
-    def configure(cfg):
-        Workdir.wdr = cfg.wdr or os.path.expanduser(f"~/.{cfg.name}")
-        Workdir.skel()
+    @classmethod
+    def configure(cls, cfg):
+        cls.wdr = cfg.wdr or os.path.expanduser(f"~/.{cfg.name}")
+        cls.skel()
 
-    @staticmethod
-    def kinds():
+    @classmethod
+    def kinds(cls):
         "show kind on objects in cache."
-        path = os.path.join(Workdir.wdr, "store")
+        path = os.path.join(cls.wdr, "store")
         if os.path.exists(path):
             return os.listdir(path)
 
-    @staticmethod
-    def long(name):
+    @classmethod
+    def long(cls, name):
         "expand to fqn."
         if "." in name:
             return name
         split = name.split(".")[-1].lower()
         res = name
-        for names in Workdir.kinds():
+        for names in cls.kinds():
             if split == names.split(".")[-1].lower():
                 res = names
                 break
         return res
 
-    @staticmethod
-    def skel():
+    @classmethod
+    def skel(cls):
         "create directories."
-        if not Workdir.wdr:
+        if not cls.wdr:
             return
-        if not os.path.exists(Workdir.wdr):
-            Disk.cdir(Workdir.wdr)
-        path = os.path.abspath(Workdir.wdr)
+        if not os.path.exists(cls.wdr):
+            Disk.cdir(cls.wdr)
+        path = os.path.abspath(cls.wdr)
         for wpth in ["config", "mods", "store"]:
             pth = pathlib.Path(os.path.join(path, wpth))
             pth.mkdir(parents=True, exist_ok=True)
 
-    @staticmethod
-    def workdir(path=""):
+    @classmethod
+    def workdir(cls, path=""):
         "return workdir."
-        return os.path.join(Workdir.wdr, path)
+        return os.path.join(cls.wdr, path)
 
 
 def __dir__():
@@ -218,5 +221,5 @@ def __dir__():
         'Disk',
         'Locate',
         'Yable',
-        'Workdir',
+        'Workdir'
     )

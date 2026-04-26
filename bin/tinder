@@ -28,7 +28,7 @@ from otpcr.utility import Time
 Main.debug = True
 Main.all = True
 Main.ignore = "tmr"
-Main.read  = True
+Main.read = True
 Main.user = True
 Main.wdr = ".test"
 
@@ -64,7 +64,7 @@ class Clients:
             cls.nrcpu = nrcpu
             for _x in range(Clients.nrcpu):
                 clt = client()
-                clt.start(False)
+                clt.start(True)
                 cls.add(clt)
 
     @classmethod
@@ -108,7 +108,7 @@ def main():
         Main.threaded = True
     Methods.parse(Main, " ".join(sys.argv[1:]))
     Boot.configure(Main)
-    Main.mods.replace("tmr","")
+    Main.mods.replace("tmr", "")
     Boot.scan(Main)
     if Main.threaded:
         Clients.init(os.cpu_count(), CLI)
@@ -118,26 +118,26 @@ def main():
     nrs = Main.index or 1
     thrs = []
     for _x in range(nrs):
-        thrs.append(Thread.launch(payload, pre, daemon=False))
+        thrs.append(Thread.launch(payload, pre, daemon=True))
     for thr in thrs:
         thr.join()
     thrs = []
     for _x in range(nrs):
-        thrs.append(Thread.launch(payload, examples, daemon=False))
+        thrs.append(Thread.launch(payload, examples, daemon=True))
     thrs = []
     for thr in thrs:
         thr.join()
     for _x in range(nrs):
-        thrs.append(Thread.launch(payload, post, daemon=False))
+        thrs.append(Thread.launch(payload, post, daemon=True))
     for thr in thrs:
         thr.join()
     nrevents = events.qsize()
     Thread.launch(consume, daemon=True)
     try:
         events.join()
-    except Exception as ex:
+    except Exception:
         pass
-    Boot.shutdown()
+    # Boot.shutdown()
     endtime = time.time()
     lap = Time.elapsed(endtime-starttime)
     percall = (endtime-starttime)/nrevents
@@ -146,7 +146,7 @@ def main():
         print(f"{Methods.fmt(Main, skip='otxt,txt')}")
         print(f"cores: {Clients.nrcpu} events: {nrs}")
         print(f"total: {lap} nrs: {nrevents} call: %.6fs" % percall)
-
+    print(threading.enumerate())
 
 examples = {
     "cmd": [""],
@@ -199,7 +199,7 @@ pre = {
     ],
     "log": ["", "test"],
     "rss": ["", "http://hnrss.org/newest"],
-    "tdo": ["", "test"],
+    "tdo": ["", "test2"],
     "tmr": ["", "22:00 test"],
 }
 
@@ -212,4 +212,4 @@ post = {
 
 
 if __name__ == "__main__":
-    main()
+    Boot.wrap(main)
