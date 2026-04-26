@@ -15,16 +15,12 @@
 .. _haldol2:
 
 
-.. raw:: html
-
-  <br>
-
 **HALDOL**
 
-
 .. raw:: html
 
   <br>
+
 
 .. image:: haloperidolnew2.png
     :width: 100%

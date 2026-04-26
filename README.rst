@@ -58,5 +58,5 @@ prosecute the king for making the commiting of the above mentioned crimes
 
 |
 
-Since January 2026 the **ECHA** <European Chemical Agency> no longer shows a skull and bones when visited.
+* Since January 2026 the **ECHA** <European Chemical Agency> no longer shows a skull and bones when visited.
 

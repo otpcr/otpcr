@@ -1,4 +1,4 @@
-.. _writing:
+.. _writings:
 
 
 .. raw:: html
@@ -37,7 +37,7 @@
 |
 |
 
-.. include:: reconsider2.rst
+.. include:: reconsider.rst
 
 
 .. raw:: html
