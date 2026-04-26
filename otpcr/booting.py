@@ -58,10 +58,10 @@ class Boot:
         Workdir.configure(cfg)
         Log.configure(cfg)
         Mods.configure(cfg)
-        if Main.all:
-            Main.mods = Mods.list(Main.ignore)
         if Main.noignore:
             Main.ignore = ""
+        if Main.all:
+            Main.mods = Mods.list(Main.ignore)
 
     @classmethod
     def daemon(cls, verbose=False, nochdir=False):
