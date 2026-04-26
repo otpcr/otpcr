@@ -1,4 +1,17 @@
-|
+.. _manual:
+
+
+.. raw:: html
+
+    <br><br>
+
+.. title:: Manual
+
+
+.. raw:: html
+
+    <center><b>MANUAL</b></center><br>
+
 
 **NAME**
 

@@ -197,6 +197,7 @@ class Runner:
         self.queue.put(args)
 
     def start(self, daemon=True):
+        self.running.set()
         Thread.launch(self.loop, daemon=daemon)
 
     def stop(self):
