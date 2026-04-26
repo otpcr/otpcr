@@ -12,11 +12,6 @@
     <center><b>EVIDENCE</b></center><br>
 
 
-.. raw:: html
-
-  <br>
-
-
 .. _haldol:
 
 

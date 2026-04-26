@@ -9,7 +9,7 @@
 
 .. raw:: html
 
-    <center><b>RECONSIDER</b></center><br><br>
+    <center><b>RECONSIDER</b></center><br>
 
 
 | **Information and Evidence Unit**
