@@ -85,6 +85,7 @@ prosecute the king for making the commiting of the above mentioned crimes
     manual
     pubchem
     guilty
+    reconsider
     request
-    writings
     skull
+    writings
