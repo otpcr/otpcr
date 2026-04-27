@@ -128,7 +128,7 @@ class Scripts:
 def main():
     "main"
     Arguments.getargs()
-    Main.ignore = "mbx,rst,tmr,udp,web,wsd"
+    Main.ignore = "man,mbx,rst,tmr,udp,web,wsd"
     if not Main.admin:
         Main.ignore += ",adm"
     if Main.daemon:

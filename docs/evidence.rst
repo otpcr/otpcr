@@ -81,5 +81,3 @@
 
 .. image:: ECHAabilify.png
      :width: 100%
-
-

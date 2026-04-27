@@ -48,7 +48,6 @@ class Commands:
     @classmethod
     def commands(cls, ignore=""):
         "list cpmmands available."
-        print(ignore)
         return [x for x in cls.names if cls.names.get(x) not in ignore]
 
     @classmethod
