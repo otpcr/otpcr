@@ -117,14 +117,6 @@ rst_prolog = '''.. image:: genocide.png
 
 rst_epilog = '''.. raw:: html
 
-    <br><br>
-
-* Since January 2026 the ECHA <European Chemical Agency> no longer shows a skull and bones when :ref:`visited <echa>`. **2019** versions are :ref:`here
-  <evidence>`.
-
-
-.. raw:: html
-
     <br>
     <center>
     <b>
