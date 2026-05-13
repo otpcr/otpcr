@@ -33,6 +33,7 @@ classifiers=[
 [tool.setuptools]
 packages = [
     'otpcr',
+    'otpcr.mirrors',
     'otpcr.modules',
     'otpcr.network',
     'otpcr.network._static',
