@@ -1,0 +1,116 @@
+# This file is placed in the Public Domain.
+
+
+"udp to irc relay"
+
+
+import logging
+import select
+import socket
+import sys
+import threading
+import time
+
+
+from otpcr.defines import Base, Broker, Disk, Main, Thread
+
+
+def init():
+    relay = UDP()
+    relay.start()
+    logging.warning("http://%s:%s", Config.host, Config.port)
+    return relay
+
+
+class Config(Base):
+
+    host = "localhost"
+    port = 5500
+
+
+class UDP(Base):
+
+    def __init__(self):
+        super().__init__()
+        self.stopped = False
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        self._sock.setblocking(1)
+        self._starttime = time.time()
+        self.ready = threading.Event()
+
+    def output(self, txt, addr=None):
+        if addr:
+            Config.addr = addr
+        Broker.announce(txt.replace("\00", ""))
+
+    def loop(self):
+        try:
+            self._sock.bind((Config.host, Config.port))
+        except socket.gaierror:
+            return
+        self.ready.set()
+        while not self.stopped:
+            (txt, addr) = self._sock.recvfrom(64000)
+            if self.stopped:
+                break
+            data = str(txt.rstrip(), "utf-8")
+            if not data:
+                break
+            self.output(data, addr)
+
+    def exit(self):
+        self.stopped = True
+        self._sock.settimeout(0.01)
+        self._sock.sendto(
+                          bytes("exit", "utf-8"),
+                          (Config.host, Config.port)
+                         )
+
+    def start(self):
+        Disk.read(Config, "udp", "config")
+        Thread.launch(self.loop)
+
+
+def toudp(host, port, txt):
+    if Main.debug:
+        return
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto(bytes(txt.strip(), "utf-8"), (host, port))
+
+
+def udp(event):
+    if event.rest:
+        toudp(Config.host, Config.port, event.rest)
+        return
+    if not select.select(
+                         [sys.stdin, ],
+                         [],
+                         [],
+                         0.0
+                        )[0]:
+        event.reply("udp <text>")
+        return
+    size = 0
+    while 1:
+        try:
+            (inp, _out, err) = select.select(
+                                             [sys.stdin,],
+                                             [],
+                                             [sys.stderr,]
+                                            )
+        except KeyboardInterrupt:
+            return
+        if err:
+            break
+        stop = False
+        for sock in inp:
+            txt = sock.readline()
+            if not txt:
+                stop = True
+                break
+            size += len(txt)
+            toudp(Config.host, Config.port, txt)
+        if stop:
+            break
