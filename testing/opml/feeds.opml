@@ -1,0 +1,10 @@
+<opml version="1.0">
+    <head>
+        <title>OPML</title>
+    </head>
+    <body>
+        <outline title="opml" text="rss feeds">
+            <outline name="url1" display_list="title,link,author" xmlUrl="https://www.icc-cpi.int/rss/records/all"/>
+        </outline>
+    <body>
+</opml>
