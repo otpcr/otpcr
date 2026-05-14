@@ -9,7 +9,7 @@ import logging
 import time
 
 
-from otpcr.defines import Base, Broker, Message, Object, Object, Repeater, Time
+from otpcr.defines import Base, Broker, Message, Object, Repeater, Time
 
 
 def init():

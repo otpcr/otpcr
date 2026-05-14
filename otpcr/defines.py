@@ -33,7 +33,6 @@ def __dir__():
        'Console',
        'Disk',
        'Handler',
-       'Input',
        'Json',
        'Locate',
        'Log',

@@ -10,7 +10,7 @@ import logging
 from random import SystemRandom
 
 
-from otpcr.defines   import Broker, Disk, Locate, Message, Object, Repeater
+from otpcr.defines import Broker, Disk, Locate, Message, Object, Repeater
 
 
 rand = SystemRandom()
